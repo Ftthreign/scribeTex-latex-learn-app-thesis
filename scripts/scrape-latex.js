@@ -250,9 +250,7 @@ async function processCombinedLesson(num) {
   );
 
   if (!mainMd) {
-    console.warn(
-      `   ⚠️  No main content for ${lessonId} — skipping entirely.\n`,
-    );
+    console.warn(`   No main content for ${lessonId} — skipping entirely.\n`);
     results.skipped.push(lessonId);
     return;
   }
@@ -280,9 +278,7 @@ async function processCombinedLesson(num) {
         `   ↳ ⚠️  Overleaf content unavailable — continuing without it`,
       );
   } else {
-    console.log(
-      `   ↳ ℹ️  Overleaf mapping is null for lesson ${num} — skipped`,
-    );
+    console.log(`   ↳  Overleaf mapping is null for lesson ${num} — skipped`);
   }
 
   // ── 4. Save file (always, even if only main content exists) ──
