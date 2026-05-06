@@ -1,9 +1,6 @@
 // This is your Prisma schema file,
 // learn more about it in the docs: https://pris.ly/d/prisma-schema
 
-// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
-// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
-
 generator client {
   provider = "prisma-client-js"
   output   = "../app/generated/prisma"
@@ -11,5 +8,115 @@ generator client {
 
 datasource db {
   provider = "postgresql"
-  url      = env("DATABASE_URL")
+}
+
+enum UserRole {
+  ADMIN
+  STUDENT
+}
+
+model User {
+  id              String           @id @default(uuid())
+  email           String           @unique
+  name            String?
+  role            UserRole         @default(STUDENT)
+  createdAt       DateTime         @default(now())
+  updatedAt       DateTime         @updatedAt
+  exerciseResults ExerciseResult[]
+  userProgress    UserProgress[]
+  aiChatHistory   AIChatHistory[]
+
+  @@map("users")
+}
+
+model Module {
+  id           String         @id @default(uuid())
+  title        String
+  description  String?
+  order        Int            @default(0)
+  lessons      Lesson[]
+  userProgress UserProgress[]
+  createdAt    DateTime       @default(now())
+  updatedAt    DateTime       @updatedAt
+
+  @@map("modules")
+}
+
+model Lesson {
+  id        String     @id @default(uuid())
+  moduleId  String
+  module    Module     @relation(fields: [moduleId], references: [id], onDelete: Cascade)
+  title     String
+  content   String?    @db.Text
+  order     Int        @default(0)
+  exercises Exercise[]
+  createdAt DateTime   @default(now())
+  updatedAt DateTime   @updatedAt
+
+  @@map("lessons")
+}
+
+model Exercise {
+  id              String           @id @default(uuid())
+  lessonId        String
+  lesson          Lesson           @relation(fields: [lessonId], references: [id], onDelete: Cascade)
+  title           String
+  description     String?
+  initialCode     String?          @db.Text
+  solutionCode    String?          @db.Text
+  exerciseResults ExerciseResult[]
+  createdAt       DateTime         @default(now())
+  updatedAt       DateTime         @updatedAt
+
+  @@map("exercises")
+}
+
+model ExerciseResult {
+  id         String   @id @default(uuid())
+  userId     String
+  user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  exerciseId String
+  exercise   Exercise @relation(fields: [exerciseId], references: [id], onDelete: Cascade)
+  code       String   @db.Text
+  isSuccess  Boolean  @default(false)
+  pdfUrl     String?
+  createdAt  DateTime @default(now())
+
+  @@map("exercise_results")
+}
+
+model UserProgress {
+  id         String   @id @default(uuid())
+  userId     String
+  user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  moduleId   String
+  module     Module   @relation(fields: [moduleId], references: [id], onDelete: Cascade)
+  isFinished Boolean  @default(false)
+  lastLesson Int      @default(0)
+  updatedAt  DateTime @updatedAt
+
+  @@map("user_progress")
+}
+
+model AIChatHistory {
+  id        String   @id @default(uuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  message   String   @db.Text
+  response  String   @db.Text
+  context   String?
+  createdAt DateTime @default(now())
+
+  @@map("ai_chat_history")
+}
+
+model Article {
+  id        String   @id @default(uuid())
+  title     String
+  content   String   @db.Text
+  category  String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("articles")
 }
