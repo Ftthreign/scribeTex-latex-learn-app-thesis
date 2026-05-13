@@ -1,49 +1,168 @@
 <template>
-  <footer class="bg-secondary/30 pt-20 pb-10 border-t border-border">
+  <footer class="bg-surface border-t border-border pt-20 pb-12">
     <div class="container mx-auto px-6">
-      <div class="grid grid-cols-1 md:grid-cols-4 gap-12 mb-16">
-        <div class="col-span-1 md:col-span-2 space-y-6">
-          <div class="flex items-center gap-2">
-            <div class="size-8 bg-primary rounded-lg flex items-center justify-center text-primary-foreground">
-              <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg>
+      <div
+        class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-12 lg:gap-8 mb-16"
+      >
+        <div class="lg:col-span-2 space-y-6">
+          <a
+            href="#"
+            class="flex items-center gap-2.5 group cursor-pointer w-fit"
+          >
+            <div
+              class="size-9 bg-primary rounded-xl flex items-center justify-center text-white shadow-sm group-hover:rotate-6 transition-transform duration-300"
+            >
+              <IconMathIntegrals class="size-5" stroke-width="2.5" />
             </div>
-            <span class="text-xl font-display font-bold">ScribeTex</span>
-          </div>
-          <p class="text-muted-foreground max-w-sm">
-            Platform pembelajaran LaTeX terpadu untuk mendukung penulisan artikel ilmiah berkualitas tinggi bagi mahasiswa dan peneliti.
+            <span class="text-2xl font-display font-bold tracking-tight">
+              <span class="text-text-primary">Scribe</span
+              ><span class="text-primary">Tex</span>
+            </span>
+          </a>
+
+          <p
+            class="text-text-secondary text-base leading-relaxed font-sans max-w-sm"
+          >
+            Platform pembelajaran LaTeX terpadu untuk mendukung penulisan
+            artikel ilmiah dan naskah akademis berkualitas tinggi bagi mahasiswa
+            dan peneliti.
           </p>
-          <div class="flex gap-4">
-            <div v-for="i in 3" :key="i" class="size-10 rounded-full bg-accent flex items-center justify-center hover:bg-primary hover:text-white transition-colors cursor-pointer">
-              <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="20" height="20" x="2" y="2" rx="5" ry="5"/><path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"/><line x1="17.5" x2="17.51" y1="6.5" y2="6.5"/></svg>
-            </div>
+
+          <div class="flex gap-3 pt-2">
+            <a
+              v-for="(social, i) in socials"
+              :key="i"
+              href="#"
+              class="size-10 rounded-xl bg-surface-alt border border-border flex items-center justify-center text-text-secondary hover:bg-primary hover:text-white hover:border-primary hover:-translate-y-1 transition-all duration-300 shadow-xs cursor-pointer"
+              :aria-label="social.label"
+            >
+              <component :is="social.icon" class="size-5" />
+            </a>
           </div>
         </div>
 
         <div>
-          <h4 class="font-bold mb-6">Navigasi</h4>
-          <ul class="space-y-4 text-muted-foreground">
-            <li><a href="#" class="hover:text-primary transition-colors">Modul Belajar</a></li>
-            <li><a href="#" class="hover:text-primary transition-colors">Latihan Interaktif</a></li>
-            <li><a href="#" class="hover:text-primary transition-colors">AI Chatbot</a></li>
-            <li><a href="#" class="hover:text-primary transition-colors">Pricing</a></li>
+          <h4
+            class="text-base font-sans font-bold text-text-primary mb-6 tracking-wide"
+          >
+            Kurikulum
+          </h4>
+          <ul class="space-y-3.5 font-sans">
+            <li v-for="link in curriculumLinks" :key="link.label">
+              <a
+                :href="link.href"
+                class="text-sm text-text-secondary hover:text-primary transition-colors inline-flex items-center gap-2 group"
+              >
+                <span
+                  class="size-1 rounded-full bg-border group-hover:bg-primary transition-colors"
+                ></span>
+                <span>{{ link.label }}</span>
+              </a>
+            </li>
           </ul>
         </div>
 
         <div>
-          <h4 class="font-bold mb-6">Bantuan</h4>
-          <ul class="space-y-4 text-muted-foreground">
-            <li><a href="#" class="hover:text-primary transition-colors">Dokumentasi</a></li>
-            <li><a href="#" class="hover:text-primary transition-colors">Kontak Kami</a></li>
-            <li><a href="#" class="hover:text-primary transition-colors">FAQ</a></li>
-            <li><a href="#" class="hover:text-primary transition-colors">Kebijakan Privasi</a></li>
+          <h4
+            class="text-base font-sans font-bold text-text-primary mb-6 tracking-wide"
+          >
+            Layanan
+          </h4>
+          <ul class="space-y-3.5 font-sans">
+            <li v-for="link in serviceLinks" :key="link.label">
+              <a
+                :href="link.href"
+                class="text-sm text-text-secondary hover:text-primary transition-colors inline-flex items-center gap-2 group"
+              >
+                <span
+                  class="size-1 rounded-full bg-border group-hover:bg-primary transition-colors"
+                ></span>
+                <span>{{ link.label }}</span>
+              </a>
+            </li>
+          </ul>
+        </div>
+
+        <div>
+          <h4
+            class="text-base font-sans font-bold text-text-primary mb-6 tracking-wide"
+          >
+            Dukungan
+          </h4>
+          <ul class="space-y-3.5 font-sans">
+            <li v-for="link in supportLinks" :key="link.label">
+              <a
+                :href="link.href"
+                class="text-sm text-text-secondary hover:text-primary transition-colors inline-flex items-center gap-2 group"
+              >
+                <span
+                  class="size-1 rounded-full bg-border group-hover:bg-primary transition-colors"
+                ></span>
+                <span>{{ link.label }}</span>
+              </a>
+            </li>
           </ul>
         </div>
       </div>
 
-      <div class="pt-8 border-t border-border flex flex-col md:row items-center justify-between gap-4 text-sm text-muted-foreground text-center md:text-left">
-        <p>© 2024 ScribeTex. All rights reserved.</p>
-        <p>Built with ❤️ using Nuxt 3 & Gemini AI</p>
+      <div
+        class="pt-8 border-t border-border/60 flex flex-col sm:flex-row items-center justify-between gap-4 text-xs text-text-muted font-sans"
+      >
+        <div
+          class="flex flex-wrap items-center justify-center sm:justify-start gap-4 sm:gap-6"
+        >
+          <p>© 2026 ScribeTex. Hak cipta dilindungi undang-undang.</p>
+          <div class="flex items-center gap-4">
+            <a href="#" class="hover:text-primary transition-colors">Privasi</a>
+            <a href="#" class="hover:text-primary transition-colors"
+              >Ketentuan</a
+            >
+          </div>
+        </div>
+        <div class="flex items-center gap-1.5 font-medium">
+          <span>Dirancang dengan</span>
+          <IconHeartFilled class="size-3.5 text-error animate-pulse" />
+          <span>menggunakan Nuxt 3 & Gemini AI</span>
+        </div>
       </div>
     </div>
   </footer>
 </template>
+
+<script setup lang="ts">
+import {
+  IconMathIntegrals,
+  IconBrandInstagram,
+  IconBrandGithub,
+  IconBrandTwitter,
+  IconHeartFilled,
+} from "@tabler/icons-vue";
+
+const socials = [
+  { icon: IconBrandInstagram, label: "Instagram" },
+  { icon: IconBrandTwitter, label: "Twitter" },
+  { icon: IconBrandGithub, label: "GitHub" },
+];
+
+const curriculumLinks = [
+  { label: "Sintaks Dasar", href: "#" },
+  { label: "Format Paragraf", href: "#" },
+  { label: "Persamaan Matematika", href: "#" },
+  { label: "Tabel & Figur", href: "#" },
+  { label: "Manajemen Sitasi", href: "#" },
+];
+
+const serviceLinks = [
+  { label: "Live Preview KaTeX", href: "#" },
+  { label: "Kompilasi TeXLive", href: "#" },
+  { label: "AI Explainer Buddy", href: "#" },
+  { label: "Pelacakan Progres", href: "#" },
+];
+
+const supportLinks = [
+  { label: "Dokumentasi", href: "#" },
+  { label: "Pertanyaan Umum", href: "#faq" },
+  { label: "Kontak Tim", href: "#" },
+  { label: "Lisensi Platform", href: "#" },
+];
+</script>

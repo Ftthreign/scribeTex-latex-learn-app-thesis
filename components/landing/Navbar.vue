@@ -1,36 +1,162 @@
 <template>
-  <nav 
-    class="fixed top-0 left-0 right-0 z-50 transition-all duration-300"
-    :class="[isScrolled ? 'glass py-3' : 'bg-transparent py-5']"
+  <header
+    ref="navbarRef"
+    class="fixed top-0 left-0 right-0 z-50 transition-all duration-300 h-[60px] bg-surface border-b border-border flex items-center"
+    :class="{ 'shadow-sm bg-surface/95 backdrop-blur-md': isScrolled }"
   >
-    <div class="container mx-auto px-6 flex items-center justify-between">
-      <div class="flex items-center gap-2">
-        <div class="size-10 bg-primary rounded-xl flex items-center justify-center text-primary-foreground shadow-lg">
-          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-book-open-text"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/><path d="M6 8h2"/><path d="M6 12h2"/><path d="M16 8h2"/><path d="M16 12h2"/></svg>
+    <div
+      class="container mx-auto px-6 h-full flex items-center justify-between"
+    >
+      <!-- Logo -->
+      <a href="#" class="flex items-center gap-2.5 group cursor-pointer">
+        <div
+          class="size-8 bg-primary rounded-lg flex items-center justify-center text-white shadow-sm group-hover:rotate-6 transition-transform duration-300"
+        >
+          <IconMathIntegrals class="size-5" stroke-width="2.5" />
         </div>
-        <span class="text-xl font-display font-bold tracking-tight">ScribeTex</span>
+        <span class="text-xl font-display font-bold tracking-tight">
+          <span class="text-text-primary">Scribe</span
+          ><span class="text-primary">Tex</span>
+        </span>
+      </a>
+
+      <!-- Desktop Links -->
+      <nav class="hidden lg:flex items-center gap-8 font-medium">
+        <a
+          v-for="link in navLinks"
+          :key="link.href"
+          :href="link.href"
+          class="text-text-secondary hover:text-primary transition-colors text-[14px] font-sans relative py-1 group"
+        >
+          {{ link.label }}
+          <span
+            class="absolute bottom-0 left-0 w-0 h-0.5 bg-primary transition-all duration-200 group-hover:w-full"
+          ></span>
+        </a>
+      </nav>
+
+      <!-- Desktop Actions -->
+      <div class="hidden lg:flex items-center gap-4">
+        <!-- Notification Bell Placeholder -->
+        <button
+          class="p-2 rounded-lg text-text-secondary hover:text-primary hover:bg-surface-alt transition-colors relative cursor-pointer"
+          aria-label="Notifikasi"
+        >
+          <IconBell class="size-5" />
+          <span
+            class="absolute top-1.5 right-1.5 size-2 bg-warning rounded-full border border-surface"
+          ></span>
+        </button>
+
+        <div class="h-4 w-px bg-border"></div>
+        <NuxtLink to="/login" class="btn-ghost btn-sm">Masuk</NuxtLink>
+        <NuxtLink
+          to="/register"
+          class="btn-primary btn-sm shadow-sm shadow-primary/20"
+        >
+          Mulai Belajar
+        </NuxtLink>
       </div>
 
-      <div class="hidden md:flex items-center gap-8 font-medium">
-        <a href="#features" class="hover:text-primary transition-colors">Fitur</a>
-        <a href="#how-it-works" class="hover:text-primary transition-colors">Cara Kerja</a>
-        <a href="#about" class="hover:text-primary transition-colors">Tentang</a>
-      </div>
-
-      <div class="flex items-center gap-4">
-        <button class="px-5 py-2 rounded-full font-semibold hover:bg-accent transition-colors">Masuk</button>
-        <button class="px-6 py-2 bg-primary text-primary-foreground rounded-full font-semibold shadow-md hover:shadow-xl hover:scale-105 transition-all">Mulai Belajar</button>
-      </div>
+      <button
+        @click="isMobileMenuOpen = !isMobileMenuOpen"
+        class="lg:hidden p-1.5 rounded-md hover:bg-surface-alt transition-colors text-text-secondary cursor-pointer"
+        aria-label="Menu"
+      >
+        <IconMenu2 v-if="!isMobileMenuOpen" class="size-6" />
+        <IconX v-else class="size-6" />
+      </button>
     </div>
-  </nav>
+
+    <Transition
+      enter-active-class="transition duration-200 ease-out"
+      enter-from-class="opacity-0 -translate-y-2"
+      enter-to-class="opacity-100 translate-y-0"
+      leave-active-class="transition duration-150 ease-in"
+      leave-from-class="opacity-100 translate-y-0"
+      leave-to-class="opacity-0 -translate-y-2"
+    >
+      <div
+        v-if="isMobileMenuOpen"
+        class="lg:hidden absolute top-full left-0 right-0 bg-surface border-b border-border shadow-lg"
+      >
+        <div class="p-4 space-y-4">
+          <div class="flex flex-col gap-2">
+            <a
+              v-for="link in navLinks"
+              :key="link.href"
+              :href="link.href"
+              @click="isMobileMenuOpen = false"
+              class="px-4 py-2.5 rounded-md text-[15px] font-medium text-text-secondary hover:bg-surface-alt hover:text-primary transition-colors block"
+            >
+              {{ link.label }}
+            </a>
+          </div>
+          <div class="h-px bg-border w-full"></div>
+          <div class="flex flex-col gap-2 p-2">
+            <NuxtLink
+              to="/login"
+              class="btn-ghost btn-md w-full justify-center"
+              @click="isMobileMenuOpen = false"
+            >
+              Masuk
+            </NuxtLink>
+            <NuxtLink
+              to="/register"
+              class="btn-primary btn-md w-full justify-center"
+              @click="isMobileMenuOpen = false"
+            >
+              Mulai Belajar
+            </NuxtLink>
+          </div>
+        </div>
+      </div>
+    </Transition>
+  </header>
 </template>
 
 <script setup lang="ts">
-const isScrolled = ref(false)
+import {
+  IconMathIntegrals,
+  IconBell,
+  IconMenu2,
+  IconX,
+} from "@tabler/icons-vue";
+import { ref, onMounted, onUnmounted } from "vue";
+import gsap from "gsap";
+
+const isScrolled = ref(false);
+const isMobileMenuOpen = ref(false);
+const navbarRef = ref<HTMLElement | null>(null);
+
+const navLinks = [
+  { label: "Fitur", href: "#features" },
+  { label: "Keunggulan", href: "#comparison" },
+  { label: "Cara Kerja", href: "#how-it-works" },
+  { label: "FAQ", href: "#faq" },
+];
+
+const handleScroll = () => {
+  isScrolled.value = window.scrollY > 20;
+};
 
 onMounted(() => {
-  window.addEventListener('scroll', () => {
-    isScrolled.value = window.scrollY > 20
-  })
-})
+  window.addEventListener("scroll", handleScroll);
+
+  gsap.fromTo(
+    navbarRef.value!,
+    { y: -60, opacity: 0 },
+    {
+      y: 0,
+      opacity: 1,
+      duration: 1,
+      ease: "power3.out",
+      delay: 0.1,
+    },
+  );
+});
+
+onUnmounted(() => {
+  window.removeEventListener("scroll", handleScroll);
+});
 </script>

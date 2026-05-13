@@ -1,84 +1,68 @@
+<script setup lang="ts">
+import { ref, onMounted } from "vue";
+import gsap from "gsap";
+import HeroGrid from "./hero/HeroGrid.vue";
+import HeroContent from "./hero/HeroContent.vue";
+import HeroMockup from "./hero/HeroMockup.vue";
+
+function playEntryAnimations() {
+  const prefersReducedMotion = window.matchMedia(
+    "(prefers-reduced-motion: reduce)",
+  ).matches;
+  if (prefersReducedMotion) {
+    gsap.set(".hero-el", { opacity: 1, y: 0 });
+    gsap.set(".hero-mockup", { opacity: 1, scale: 1 });
+    gsap.set(".floating-badge", { opacity: 1 });
+    return;
+  }
+
+  const tl = gsap.timeline({ defaults: { ease: "power3.out" } });
+
+  tl.fromTo(
+    ".hero-el",
+    { opacity: 0, y: 16 },
+    { opacity: 1, y: 0, stagger: 0.1, duration: 0.5 },
+  )
+    .fromTo(
+      ".hero-mockup",
+      { opacity: 0, scale: 0.95 },
+      { opacity: 1, scale: 1, duration: 0.6 },
+      0.2,
+    )
+    .fromTo(
+      ".floating-badge",
+      { opacity: 0 },
+      { opacity: 1, stagger: 0.15, duration: 0.4 },
+      0.6,
+    );
+}
+
+onMounted(() => {
+  playEntryAnimations();
+});
+</script>
+
 <template>
-  <section class="relative min-h-screen flex items-center pt-20 overflow-hidden">
-    <!-- Background Decor -->
-    <div class="absolute top-0 right-0 -z-10 w-1/2 h-full bg-gradient-to-l from-primary/5 to-transparent blur-3xl"></div>
-    <div class="absolute -top-24 -left-24 -z-10 size-96 bg-primary/10 rounded-full blur-3xl"></div>
+  <section
+    ref="heroRef"
+    class="hero-section relative min-h-screen flex items-center pt-28 pb-20 overflow-hidden"
+    aria-label="Hero section ScribeTex"
+  >
+    <HeroGrid />
 
-    <div class="container mx-auto px-6 grid md:grid-cols-2 gap-12 items-center">
-      <div class="space-y-8">
-        <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-primary/5 border border-primary/10 text-primary text-sm font-semibold">
-          <span class="flex h-2 w-2 rounded-full bg-primary animate-pulse"></span>
-          AI-Powered LaTeX Learning
-        </div>
-        
-        <h1 class="text-5xl lg:text-7xl font-bold leading-[1.1]">
-          Kuasai <span class="text-gradient">LaTeX</span> untuk Artikel Ilmiah Anda.
-        </h1>
-        
-        <p class="text-lg text-muted-foreground max-w-lg leading-relaxed">
-          Platform edukasi interaktif yang menggabungkan kecerdasan AI (Gemini) dan kompilasi TeXLive untuk membantu Anda menulis dokumen ilmiah berkualitas tinggi.
-        </p>
+    <div
+      class="absolute top-0 right-0 z-0 w-2/3 h-full bg-linear-to-l from-primary/6 to-transparent blur-[140px] opacity-50 pointer-events-none"
+    />
+    <div
+      class="absolute -top-40 -left-40 z-0 size-[400px] md:size-[600px] bg-primary/4 rounded-full blur-[120px] pointer-events-none"
+    />
 
-        <div class="flex flex-wrap gap-4">
-          <button class="px-8 py-4 bg-primary text-primary-foreground rounded-2xl font-bold text-lg shadow-xl hover:shadow-primary/20 hover:-translate-y-1 transition-all">
-            Mulai Secara Gratis
-          </button>
-          <button class="px-8 py-4 border border-border rounded-2xl font-bold text-lg hover:bg-accent transition-all flex items-center gap-2">
-            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-play-circle"><circle cx="12" cy="12" r="10"/><polygon points="10 8 16 12 10 16 10 8"/></svg>
-            Lihat Demo
-          </button>
+    <div class="container mx-auto px-6 relative z-10">
+      <div class="grid lg:grid-cols-12 gap-12 lg:gap-16 items-center">
+        <div class="lg:col-span-6 order-2 lg:order-1">
+          <HeroContent />
         </div>
-
-        <div class="flex items-center gap-6 pt-4">
-          <div class="flex -space-x-3">
-            <div v-for="i in 4" :key="i" class="size-10 rounded-full border-2 border-background bg-accent flex items-center justify-center text-xs font-bold">
-              U{{ i }}
-            </div>
-          </div>
-          <div class="text-sm">
-            <p class="font-bold">500+ Mahasiswa</p>
-            <p class="text-muted-foreground">Telah bergabung untuk belajar</p>
-          </div>
-        </div>
-      </div>
-
-      <div class="relative">
-        <div class="absolute inset-0 bg-primary/20 rounded-full blur-[100px] -z-10 animate-pulse"></div>
-        <div class="glass p-4 rounded-[2rem] shadow-2xl animate-float">
-          <div class="bg-[#1e1e1e] rounded-xl overflow-hidden shadow-inner">
-            <div class="flex items-center gap-2 px-4 py-2 border-b border-white/5 bg-white/5">
-              <div class="flex gap-1.5">
-                <div class="size-3 rounded-full bg-red-500"></div>
-                <div class="size-3 rounded-full bg-yellow-500"></div>
-                <div class="size-3 rounded-full bg-green-500"></div>
-              </div>
-              <span class="text-[10px] text-white/40 font-mono uppercase tracking-widest ml-4">latex_editor.tex</span>
-            </div>
-            <div class="p-6 font-mono text-sm">
-              <p class="text-blue-400">\documentclass<span class="text-white">{article}</span></p>
-              <p class="text-blue-400">\usepackage<span class="text-white">{amsmath}</span></p>
-              <p class="text-gray-500 mt-2">% Mulai menulis artikel Anda</p>
-              <p class="text-blue-400">\begin<span class="text-white">{document}</span></p>
-              <p class="text-green-400 pl-4">\section<span class="text-white">{Pendahuluan}</span></p>
-              <p class="text-white pl-4">Aplikasi ini mempermudah belajar LaTeX...</p>
-              <p class="text-blue-400">\end<span class="text-white">{document}</span></p>
-              <div class="mt-4 flex items-center gap-2 text-primary font-bold">
-                <span class="animate-pulse">|</span>
-              </div>
-            </div>
-          </div>
-        </div>
-        
-        <!-- Badge -->
-        <div class="absolute -bottom-6 -left-6 glass p-4 rounded-2xl shadow-xl flex items-center gap-3">
-          <div class="size-10 bg-green-500/20 text-green-600 rounded-lg flex items-center justify-center">
-            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-check-circle-2"><path d="M12 22c5.523 0 10-4.477 10-10S17.523 2 12 2 2 6.477 2 12s4.477 10 10 10z"/><path d="m9 12 2 2 4-4"/></svg>
-          </div>
-          <div>
-            <p class="text-xs text-muted-foreground">Kompilasi PDF</p>
-            <p class="text-sm font-bold">Berhasil Diselesaikan</p>
-          </div>
-        </div>
+        <HeroMockup class="lg:col-span-6" />
       </div>
     </div>
   </section>
