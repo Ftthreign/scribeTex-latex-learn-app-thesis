@@ -7,7 +7,6 @@
     <div
       class="container mx-auto px-6 h-full flex items-center justify-between"
     >
-      <!-- Logo -->
       <a href="#" class="flex items-center gap-2.5 group cursor-pointer">
         <div
           class="size-8 bg-primary rounded-lg flex items-center justify-center text-white shadow-sm group-hover:rotate-6 transition-transform duration-300"
@@ -20,7 +19,6 @@
         </span>
       </a>
 
-      <!-- Desktop Links -->
       <nav class="hidden lg:flex items-center gap-8 font-medium">
         <a
           v-for="link in navLinks"
@@ -35,10 +33,9 @@
         </a>
       </nav>
 
-      <!-- Desktop Actions -->
       <div class="hidden lg:flex items-center gap-4">
-        <!-- Notification Bell Placeholder -->
         <button
+          v-if="user"
           class="p-2 rounded-lg text-text-secondary hover:text-primary hover:bg-surface-alt transition-colors relative cursor-pointer"
           aria-label="Notifikasi"
         >
@@ -48,14 +45,31 @@
           ></span>
         </button>
 
-        <div class="h-4 w-px bg-border"></div>
-        <NuxtLink to="/login" class="btn-ghost btn-sm">Masuk</NuxtLink>
-        <NuxtLink
-          to="/register"
-          class="btn-primary btn-sm shadow-sm shadow-primary/20"
-        >
-          Mulai Belajar
-        </NuxtLink>
+        <div v-if="user" class="h-4 w-px bg-border"></div>
+
+        <template v-if="user">
+          <span class="text-[13px] font-medium text-text-secondary mr-1">
+            Halo,
+            <strong class="text-text-primary font-bold">{{
+              userProfile?.name || user.email?.split("@")[0]
+            }}</strong>
+          </span>
+          <NuxtLink
+            :to="role === 'ADMIN' ? '/admin/dashboard' : '/student/dashboard'"
+            class="btn-primary btn-sm shadow-sm shadow-primary/20"
+          >
+            Ke Dashboard
+          </NuxtLink>
+        </template>
+        <template v-else>
+          <NuxtLink to="/login" class="btn-ghost btn-sm">Masuk</NuxtLink>
+          <NuxtLink
+            to="/register"
+            class="btn-primary btn-sm shadow-sm shadow-primary/20"
+          >
+            Mulai Belajar
+          </NuxtLink>
+        </template>
       </div>
 
       <button
@@ -94,20 +108,33 @@
           </div>
           <div class="h-px bg-border w-full"></div>
           <div class="flex flex-col gap-2 p-2">
-            <NuxtLink
-              to="/login"
-              class="btn-ghost btn-md w-full justify-center"
-              @click="isMobileMenuOpen = false"
-            >
-              Masuk
-            </NuxtLink>
-            <NuxtLink
-              to="/register"
-              class="btn-primary btn-md w-full justify-center"
-              @click="isMobileMenuOpen = false"
-            >
-              Mulai Belajar
-            </NuxtLink>
+            <template v-if="user">
+              <NuxtLink
+                :to="
+                  role === 'ADMIN' ? '/admin/dashboard' : '/student/dashboard'
+                "
+                class="btn-primary btn-md w-full justify-center"
+                @click="isMobileMenuOpen = false"
+              >
+                Ke Dashboard
+              </NuxtLink>
+            </template>
+            <template v-else>
+              <NuxtLink
+                to="/login"
+                class="btn-ghost btn-md w-full justify-center"
+                @click="isMobileMenuOpen = false"
+              >
+                Masuk
+              </NuxtLink>
+              <NuxtLink
+                to="/register"
+                class="btn-primary btn-md w-full justify-center"
+                @click="isMobileMenuOpen = false"
+              >
+                Mulai Belajar
+              </NuxtLink>
+            </template>
           </div>
         </div>
       </div>
@@ -128,6 +155,8 @@ import gsap from "gsap";
 const isScrolled = ref(false);
 const isMobileMenuOpen = ref(false);
 const navbarRef = ref<HTMLElement | null>(null);
+
+const { user, role, userProfile } = useAuth();
 
 const navLinks = [
   { label: "Fitur", href: "#features" },

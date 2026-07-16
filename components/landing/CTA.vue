@@ -1,10 +1,11 @@
 <template>
-  <section class="py-24 relative">
+  <section
+    class="landing-cta sticky top-0 z-10 bg-background min-h-svh flex items-center py-24"
+  >
     <div class="container mx-auto px-6">
       <div
         class="cta-card bg-text-primary rounded-[32px] p-10 md:p-20 text-center relative overflow-hidden shadow-2xl"
       >
-        <!-- Background accents -->
         <div
           class="absolute top-0 right-0 size-64 bg-primary/20 rounded-full blur-[100px]"
         ></div>
@@ -32,7 +33,10 @@
           <div
             class="flex flex-col sm:flex-row justify-center gap-4 pt-4 relative z-10"
           >
-            <NuxtLink to="/register" class="btn-primary btn-lg shadow-lg shadow-primary/30">
+            <NuxtLink
+              to="/register"
+              class="btn-primary btn-lg shadow-lg shadow-primary/30"
+            >
               Mulai Belajar Sekarang
             </NuxtLink>
             <button

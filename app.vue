@@ -3,7 +3,9 @@
     class="min-h-screen bg-background text-foreground selection:bg-primary/10 selection:text-primary"
   >
     <NuxtLoadingIndicator color="var(--color-primary)" />
-    <NuxtPage />
+    <NuxtLayout>
+      <NuxtPage />
+    </NuxtLayout>
   </div>
 </template>
 
