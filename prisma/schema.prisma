@@ -1,13 +1,10 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
+datasource db {
+  provider = "postgresql"
+}
 
 generator client {
   provider = "prisma-client-js"
   output   = "../app/generated/prisma"
-}
-
-datasource db {
-  provider = "postgresql"
 }
 
 enum UserRole {
@@ -16,107 +13,137 @@ enum UserRole {
 }
 
 model User {
-  id              String           @id @default(uuid())
-  email           String           @unique
-  name            String?
-  role            UserRole         @default(STUDENT)
-  createdAt       DateTime         @default(now())
-  updatedAt       DateTime         @updatedAt
-  exerciseResults ExerciseResult[]
-  userProgress    UserProgress[]
-  aiChatHistory   AIChatHistory[]
+  id               String            @id @default(uuid()) @db.Uuid // Integrasi Supabase UUID
+  email            String            @unique
+  name             String
+  role             UserRole          @default(STUDENT)
+  created_at       DateTime          @default(now())
+  updated_at       DateTime          @updatedAt
+
+  // Relasi
+  progress         UserProgress[]
+  exercise_results ExerciseResult[]
+  ai_chats         AiChatHistory[]
+  articles         Article[]         @relation("AuthorArticles")
 
   @@map("users")
 }
 
 model Module {
-  id           String         @id @default(uuid())
+  id           Int          @id @default(autoincrement())
   title        String
-  description  String?
-  order        Int            @default(0)
+  description  String       @db.Text
+  sort_order   Int
+  is_published Boolean      @default(false)
+  created_at   DateTime     @default(now())
+  updated_at   DateTime     @updatedAt
+
+  // Relasi
   lessons      Lesson[]
-  userProgress UserProgress[]
-  createdAt    DateTime       @default(now())
-  updatedAt    DateTime       @updatedAt
 
   @@map("modules")
 }
 
 model Lesson {
-  id        String     @id @default(uuid())
-  moduleId  String
-  module    Module     @relation(fields: [moduleId], references: [id], onDelete: Cascade)
-  title     String
-  content   String?    @db.Text
-  order     Int        @default(0)
-  exercises Exercise[]
-  createdAt DateTime   @default(now())
-  updatedAt DateTime   @updatedAt
+  id           Int            @id @default(autoincrement())
+  module_id    Int
+  title        String
+  content      String         @db.Text // Kapasitas text block LaTeX besar
+  sort_order   Int
+  is_published Boolean        @default(false)
+  created_at   DateTime       @default(now())
+  updated_at   DateTime       @updatedAt
+
+  // Relasi
+  module       Module         @relation(fields: [module_id], references: [id], onDelete: Cascade)
+  exercises    Exercise[]
+  progress     UserProgress[]
 
   @@map("lessons")
 }
 
 model Exercise {
-  id              String           @id @default(uuid())
-  lessonId        String
-  lesson          Lesson           @relation(fields: [lessonId], references: [id], onDelete: Cascade)
-  title           String
-  description     String?
-  initialCode     String?          @db.Text
-  solutionCode    String?          @db.Text
-  exerciseResults ExerciseResult[]
-  createdAt       DateTime         @default(now())
-  updatedAt       DateTime         @updatedAt
+  id           Int              @id @default(autoincrement())
+  lesson_id    Int
+  instruction  String           @db.Text
+  starter_code String           @db.Text
+  solution_code String          @db.Text
+  is_published Boolean          @default(false)
+  created_at   DateTime         @default(now())
+  updated_at   DateTime         @updatedAt
+
+  // Relasi
+  lesson       Lesson           @relation(fields: [lesson_id], references: [id], onDelete: Cascade)
+  results      ExerciseResult[]
+  ai_chats     AiChatHistory[]
 
   @@map("exercises")
 }
 
 model ExerciseResult {
-  id         String   @id @default(uuid())
-  userId     String
-  user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  exerciseId String
-  exercise   Exercise @relation(fields: [exerciseId], references: [id], onDelete: Cascade)
-  code       String   @db.Text
-  isSuccess  Boolean  @default(false)
-  pdfUrl     String?
-  createdAt  DateTime @default(now())
+  id            Int      @id @default(autoincrement())
+  user_id       String   @db.Uuid
+  exercise_id   Int
+  submitted_code String  @db.Text
+  is_success    Boolean  @default(false)
+  pdf_url       String?  @db.VarChar(255)
+  error_log     String?  @db.Text
+  created_at    DateTime @default(now())
 
+  // Relasi
+  user          User     @relation(fields: [user_id], references: [id], onDelete: Cascade)
+  exercise      Exercise @relation(fields: [exercise_id], references: [id], onDelete: Cascade)
+
+  @@index([user_id])
+  @@index([exercise_id])
   @@map("exercise_results")
 }
 
 model UserProgress {
-  id         String   @id @default(uuid())
-  userId     String
-  user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  moduleId   String
-  module     Module   @relation(fields: [moduleId], references: [id], onDelete: Cascade)
-  isFinished Boolean  @default(false)
-  lastLesson Int      @default(0)
-  updatedAt  DateTime @updatedAt
+  id           Int      @id @default(autoincrement())
+  user_id      String   @db.Uuid
+  lesson_id    Int
+  is_completed Boolean  @default(false)
+  updated_at   DateTime @updatedAt
 
+  // Relasi
+  user         User     @relation(fields: [user_id], references: [id], onDelete: Cascade)
+  lesson       Lesson   @relation(fields: [lesson_id], references: [id], onDelete: Cascade)
+
+  // Composite Unique Index untuk mengatasi Double Progress Bug
+  @@unique([user_id, lesson_id])
   @@map("user_progress")
 }
 
-model AIChatHistory {
-  id        String   @id @default(uuid())
-  userId    String
-  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  message   String   @db.Text
-  response  String   @db.Text
-  context   String?
-  createdAt DateTime @default(now())
+model AiChatHistory {
+  id          Int       @id @default(autoincrement())
+  user_id     String    @db.Uuid
+  exercise_id Int?      // Opsional untuk context-aware exercise error
+  session_id  String    @db.VarChar(255) // Pengelompokan sesi obrolan
+  message     String    @db.Text
+  response    String    @db.Text
+  created_at  DateTime  @default(now())
 
+  // Relasi
+  user        User      @relation(fields: [user_id], references: [id], onDelete: Cascade)
+  exercise    Exercise? @relation(fields: [exercise_id], references: [id], onDelete: SetNull)
+
+  @@index([user_id])
+  @@index([session_id])
   @@map("ai_chat_history")
 }
 
 model Article {
-  id        String   @id @default(uuid())
-  title     String
-  content   String   @db.Text
-  category  String?
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  id           Int      @id @default(autoincrement())
+  title        String
+  content      String   @db.Text
+  author_id    String   @db.Uuid
+  is_published Boolean  @default(false)
+  created_at   DateTime @default(now())
+  updated_at   DateTime @updatedAt
+
+  // Relasi
+  author       User     @relation("AuthorArticles", fields: [author_id], references: [id])
 
   @@map("articles")
 }
