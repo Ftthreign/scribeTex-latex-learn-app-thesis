@@ -1,14 +1,13 @@
+<script setup lang="ts">
+import { ROUTES } from "~/constants/route";
+
+const { user, role } = useAuth();
+</script>
+
 <template>
   <div
     class="hero-content lg:col-span-7 space-y-7 relative text-center lg:text-left order-2 lg:order-1"
   >
-    <div
-      class="hero-el inline-flex items-center gap-2.5 px-4 py-[7px] rounded-full bg-primary-light border border-primary/10 text-primary text-[13px] font-bold tracking-wide mx-auto lg:mx-0 shadow-xs"
-    >
-      <span class="text-base leading-none">✦</span>
-      Platform Pembelajaran LaTeX
-    </div>
-
     <h1
       class="hero-el text-4xl sm:text-[42px] md:text-[52px] font-display font-bold leading-[1.18] tracking-tight text-text-primary"
     >
@@ -30,13 +29,24 @@
     <div
       class="hero-el flex flex-col sm:flex-row flex-wrap justify-center lg:justify-start gap-4 pt-1"
     >
-      <NuxtLink
-        to="/register"
-        class="btn-primary btn-lg shadow-md shadow-primary/25 w-full sm:w-auto"
-        aria-label="Mulai belajar LaTeX secara gratis"
-      >
-        Mulai Belajar Gratis →
-      </NuxtLink>
+      <template v-if="user">
+        <NuxtLink
+          :to="role === 'ADMIN' ? ROUTES.admin.dashboard : ROUTES.student.dashboard"
+          class="btn-primary btn-lg shadow-md shadow-primary/25 w-full sm:w-auto"
+          aria-label="Lanjutkan belajar LaTeX di dashboard"
+        >
+          Lanjutkan Belajar →
+        </NuxtLink>
+      </template>
+      <template v-else>
+        <NuxtLink
+          to="/register"
+          class="btn-primary btn-lg shadow-md shadow-primary/25 w-full sm:w-auto"
+          aria-label="Mulai belajar LaTeX secara gratis"
+        >
+          Mulai Belajar Gratis →
+        </NuxtLink>
+      </template>
       <button
         class="btn-ghost-outline btn-lg w-full sm:w-auto"
         aria-label="Lihat demo platform ScribeTex"

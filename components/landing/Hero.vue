@@ -5,6 +5,8 @@ import HeroGrid from "./hero/HeroGrid.vue";
 import HeroContent from "./hero/HeroContent.vue";
 import HeroMockup from "./hero/HeroMockup.vue";
 
+const heroRef = ref<HTMLElement | null>(null);
+
 function playEntryAnimations() {
   const prefersReducedMotion = window.matchMedia(
     "(prefers-reduced-motion: reduce)",
@@ -54,7 +56,7 @@ onMounted(() => {
       class="absolute top-0 right-0 z-0 w-2/3 h-full bg-linear-to-l from-primary/6 to-transparent blur-[140px] opacity-50 pointer-events-none"
     />
     <div
-      class="absolute -top-40 -left-40 z-0 size-[400px] md:size-[600px] bg-primary/4 rounded-full blur-[120px] pointer-events-none"
+      class="absolute -top-40 -left-40 z-0 size-100 md:size-150 bg-primary/4 rounded-full blur-[120px] pointer-events-none"
     />
 
     <div class="container mx-auto px-6 relative z-10">

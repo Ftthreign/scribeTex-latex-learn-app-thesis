@@ -4,13 +4,7 @@
     class="py-24 bg-surface-alt/40 border-t border-b border-border/40 relative"
   >
     <div class="container mx-auto px-6">
-      <!-- Header -->
       <div class="text-center max-w-2xl mx-auto mb-16 space-y-3">
-        <div
-          class="inline-flex items-center gap-2 px-3.5 py-1 rounded-full bg-primary-light text-primary font-bold text-xs uppercase tracking-widest mx-auto"
-        >
-          Bantuan Informasi
-        </div>
         <h2
           class="text-3xl md:text-5xl font-display font-bold text-text-primary tracking-tight"
         >

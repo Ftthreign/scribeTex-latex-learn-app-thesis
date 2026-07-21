@@ -1,13 +1,7 @@
 <template>
   <section id="comparison" class="py-24 overflow-hidden relative">
     <div class="container mx-auto px-6">
-      <!-- Section Header -->
       <div class="text-center max-w-2xl mx-auto mb-16 space-y-4">
-        <div
-          class="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-primary-light text-primary font-bold text-xs uppercase tracking-widest mx-auto"
-        >
-          Mengapa LaTeX?
-        </div>
         <h2
           class="text-4xl md:text-5xl font-display font-bold text-text-primary tracking-tight"
         >

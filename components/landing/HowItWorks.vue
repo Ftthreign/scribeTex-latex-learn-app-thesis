@@ -28,22 +28,17 @@ const steps = [
 <template>
   <section id="how-it-works" class="py-24 relative overflow-hidden">
     <div
-      class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 size-[600px] md:size-[900px] bg-primary/5 rounded-full blur-[140px] -z-10 pointer-events-none"
+      class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 size-150 md:size-225 bg-primary/5 rounded-full blur-[140px] -z-10 pointer-events-none"
     ></div>
 
     <div class="container mx-auto px-6">
       <div class="grid lg:grid-cols-12 gap-16 items-center">
         <div class="lg:col-span-5 space-y-10">
           <div class="space-y-6">
-            <div
-              class="inline-flex items-center px-4 py-1.5 rounded-full bg-primary-light text-primary font-bold text-xs uppercase tracking-widest"
-            >
-              Alur Belajar
-            </div>
             <h2
               class="text-3xl sm:text-4xl md:text-5xl font-display font-bold leading-[1.15] tracking-tight"
             >
-              Bagaimana <span class="text-gradient">ScribeTex</span> <br />
+              Bagaimana <span class="text-primary">ScribeTex</span> <br />
               Membantu Anda?
             </h2>
             <p

@@ -136,7 +136,9 @@ async function startTypingLoop() {
       currentSnippetIndex.value =
         (currentSnippetIndex.value + 1) % snippets.length;
     }
-  } catch (e) {}
+  } catch (_err) {
+    // Typing loop aborted or unmounted safely
+  }
 }
 
 onMounted(async () => {
@@ -162,9 +164,9 @@ onUnmounted(() => {
           class="flex items-center justify-between px-4 py-2.5 bg-[#161B22] border-b border-[#30363D]"
         >
           <div class="flex gap-1.5">
-            <div class="size-[10px] rounded-full bg-[#ff5f56]" />
-            <div class="size-[10px] rounded-full bg-[#ffbd2e]" />
-            <div class="size-[10px] rounded-full bg-[#27c93f]" />
+            <div class="size-2.5 rounded-full bg-[#ff5f56]" />
+            <div class="size-2.5 rounded-full bg-[#ffbd2e]" />
+            <div class="size-2.5 rounded-full bg-[#27c93f]" />
           </div>
           <span class="text-[11px] text-[#8b949e] font-mono tracking-tight"
             >LaTeX Editor</span
@@ -183,7 +185,7 @@ onUnmounted(() => {
         </div>
 
         <!-- Split Editor Body -->
-        <div class="flex flex-col sm:flex-row min-h-[320px] sm:min-h-[300px]">
+        <div class="flex flex-col sm:flex-row min-h-80 sm:min-h-75">
           <!-- Code Panel (Top/Left) -->
           <div
             class="flex-1 p-4 font-mono text-[13px] leading-[1.65] overflow-hidden border-b sm:border-b-0 sm:border-r border-[#30363D] relative"
@@ -203,11 +205,10 @@ onUnmounted(() => {
             </div>
             <span
               v-if="isTyping"
-              class="typing-cursor inline-block w-[2px] h-[15px] bg-code-accent align-middle ml-px"
+              class="typing-cursor inline-block w-0.5 h-3.75 bg-code-accent align-middle ml-px"
             />
           </div>
 
-          <!-- Preview Panel (Bottom/Right) -->
           <div
             class="flex-1 p-6 flex items-center justify-center relative overflow-hidden bg-code-bg"
           >

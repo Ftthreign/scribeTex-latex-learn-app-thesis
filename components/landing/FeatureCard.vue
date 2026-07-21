@@ -9,10 +9,11 @@
     <div>
       <div
         class="size-14 rounded-xl flex items-center justify-center mb-6 transition-transform duration-300 group-hover:scale-110 shadow-xs"
-        :class="[colorClass || 'bg-primary/10 text-primary']"
+        :class="[resolvedColorClass]"
       >
         <slot name="icon">
-          <IconCircle class="size-6" />
+          <component :is="icon" v-if="icon" class="size-6" />
+          <IconCircle v-else class="size-6" />
         </slot>
       </div>
 
@@ -42,13 +43,30 @@
 </template>
 
 <script setup lang="ts">
+import { computed, type Component } from "vue";
 import { IconCircle, IconArrowRight } from "@tabler/icons-vue";
 
-defineProps<{
+const props = defineProps<{
   title: string;
   description: string;
+  icon?: Component | any;
+  color?: string;
   colorClass?: string;
 }>();
 
 defineEmits(["learn-more"]);
+
+const colorMap: Record<string, string> = {
+  primary: "bg-primary/10 text-primary",
+  success: "bg-success/10 text-success",
+  warning: "bg-warning/10 text-warning",
+  "ai-primary": "bg-primary/10 text-primary",
+};
+
+const resolvedColorClass = computed(() => {
+  if (props.color && colorMap[props.color]) {
+    return colorMap[props.color];
+  }
+  return props.color || props.colorClass || "bg-primary/10 text-primary";
+});
 </script>

@@ -90,11 +90,6 @@ const openDetails = (feature: (typeof features)[0]) => {
 
     <div class="container mx-auto px-6 relative z-10">
       <div class="text-center max-w-3xl mx-auto mb-20 space-y-4">
-        <div
-          class="inline-flex items-center px-4 py-1.5 rounded-full bg-primary-light text-primary font-bold text-xs uppercase tracking-widest"
-        >
-          Keunggulan Platform
-        </div>
         <h2
           class="text-3xl sm:text-4xl md:text-5xl font-display font-bold tracking-tight"
         >

@@ -1,7 +1,7 @@
 <template>
   <header
     ref="navbarRef"
-    class="fixed top-0 left-0 right-0 z-50 transition-all duration-300 h-[60px] bg-surface border-b border-border flex items-center"
+    class="fixed top-0 left-0 right-0 z-50 transition-all duration-300 h-15 bg-surface border-b border-border flex items-center"
     :class="{ 'shadow-sm bg-surface/95 backdrop-blur-md': isScrolled }"
   >
     <div
@@ -55,7 +55,11 @@
             }}</strong>
           </span>
           <NuxtLink
-            :to="role === 'ADMIN' ? '/admin/dashboard' : '/student/dashboard'"
+            :to="
+              role === 'ADMIN'
+                ? ROUTES.admin.dashboard
+                : ROUTES.student.dashboard
+            "
             class="btn-primary btn-sm shadow-sm shadow-primary/20"
           >
             Ke Dashboard
@@ -111,7 +115,9 @@
             <template v-if="user">
               <NuxtLink
                 :to="
-                  role === 'ADMIN' ? '/admin/dashboard' : '/student/dashboard'
+                  role === 'ADMIN'
+                    ? ROUTES.admin.dashboard
+                    : ROUTES.student.dashboard
                 "
                 class="btn-primary btn-md w-full justify-center"
                 @click="isMobileMenuOpen = false"
@@ -151,6 +157,7 @@ import {
 } from "@tabler/icons-vue";
 import { ref, onMounted, onUnmounted } from "vue";
 import gsap from "gsap";
+import { ROUTES } from "~/constants/route";
 
 const isScrolled = ref(false);
 const isMobileMenuOpen = ref(false);
