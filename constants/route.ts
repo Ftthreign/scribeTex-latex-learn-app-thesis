@@ -5,6 +5,7 @@ export const ROUTES = {
   student: {
     dashboard: "/student/dashboard",
     modules: "/student/modules",
+    exercises: "/student/exercises",
     articles: "/student/panduan",
     progress: "/student/progress",
     help: "/help",

@@ -14,26 +14,26 @@ const props = withDefaults(
   },
 );
 
-// Placeholder untuk melindungi blok KaTeX dari diproses oleh marked
-const KATEX_PLACEHOLDER = '__KATEX_PLACEHOLDER_'
-const katexStore: string[] = []
-
-const saveKatex = (rendered: string): string => {
-  const idx = katexStore.length
-  katexStore.push(rendered)
-  return `${KATEX_PLACEHOLDER}${idx}__`
-}
+// Placeholder unik tanpa sintaks Markdown (tanpa __ atau **) agar tidak diubah oleh marked parser
+const KATEX_PREFIX = 'KATEXPH'
+const KATEX_SUFFIX = 'ENDPH'
 
 const renderedHtml = computed(() => {
   if (!props.content) return "";
 
-  // Reset store setiap kali content berubah
-  katexStore.length = 0
+  const katexStore: string[] = []
+  const saveKatex = (rendered: string): string => {
+    const idx = katexStore.length
+    katexStore.push(rendered)
+    return `${KATEX_PREFIX}${idx}${KATEX_SUFFIX}`
+  }
 
   let text = props.content;
 
-  // ── 1. Strip YAML frontmatter (--- ... ---) jika ada
+  // ── 1. Strip YAML frontmatter & Komentar LaTeX (%)
   text = text.replace(/^---[\s\S]*?---\n?/, '')
+  // Hapus komentar LaTeX (baris berawalan % yang tidak di-escape \%)
+  text = text.replace(/(^|[^\\])%[^\n]*/g, '$1')
 
   // ── 2. Render display math $$ ... $$ dan \[ ... \] → simpan sebagai placeholder
   text = text.replace(/\$\$\s*([\s\S]*?)\s*\$\$/g, (_, math) => {
@@ -54,41 +54,152 @@ const renderedHtml = computed(() => {
     }
   });
 
-  // ── 3. Render inline math $ ... $ → simpan sebagai placeholder
-  // Gunakan regex yang lebih presisi (hindari false positive di URL atau LaTeX \$ escaped)
-  text = text.replace(/(?<!\\)\$(?!\$)([^\n$]+?)(?<!\\)\$/g, (_, math) => {
+  // ── 3. Render inline math $ ... $ → simpan sebagai placeholder (Regex standar tanpa lookbehind)
+  text = text.replace(/(^|[^\\])\$([^\n$]+?)\$/g, (_, prefix, math) => {
     try {
-      return saveKatex(katex.renderToString(math, { displayMode: false, throwOnError: false }))
+      return prefix + saveKatex(katex.renderToString(math, { displayMode: false, throwOnError: false }))
     } catch {
-      return saveKatex(`<code class="katex-error">$${math}$</code>`)
+      return prefix + saveKatex(`<code class="katex-error">$${math}$</code>`)
     }
   });
 
-  // ── 4. Proses Markdown (marked mengubah teks → HTML)
-  //    Gunakan custom renderer agar tabel dibungkus div scrollable
+  // ── 3.5. Preprocessor Perintah Teks LaTeX → HTML
+  //    Mengubah perintah dokumen LaTeX ke ekuivalen HTML
+  //    agar tampilan preview panel kanan merender teks LaTeX dengan benar.
+
+  // Utility rekursif untuk memproses argumen bersarang
+  const processArg = (inner: string): string => {
+    // proses perintah bersarang pada argumen
+    return inner
+      .replace(/\\textbf\{([^{}]*)\}/g, '<strong>$1</strong>')
+      .replace(/\\textit\{([^{}]*)\}/g, '<em>$1</em>')
+      .replace(/\\emph\{([^{}]*)\}/g, '<em>$1</em>')
+      .replace(/\\underline\{([^{}]*)\}/g, '<u>$1</u>')
+      .replace(/\\texttt\{([^{}]*)\}/g, '<code>$1</code>')
+      .replace(/\\textrm\{([^{}]*)\}/g, '<span style="font-family:serif">$1</span>')
+      .replace(/\\textsf\{([^{}]*)\}/g, '<span style="font-family:sans-serif">$1</span>')
+      .replace(/\\text\{([^{}]*)\}/g, '$1')
+  }
+
+  // Format teks – paling umum
+  text = text.replace(/\\textbf\{([^{}]*)\}/g, (_, inner) => `<strong>${processArg(inner)}</strong>`)
+  text = text.replace(/\\textit\{([^{}]*)\}/g, (_, inner) => `<em>${processArg(inner)}</em>`)
+  text = text.replace(/\\emph\{([^{}]*)\}/g, (_, inner) => `<em>${processArg(inner)}</em>`)
+  text = text.replace(/\\underline\{([^{}]*)\}/g, (_, inner) => `<u>${processArg(inner)}</u>`)
+  text = text.replace(/\\texttt\{([^{}]*)\}/g, (_, inner) => `<code>${processArg(inner)}</code>`)
+  text = text.replace(/\\textrm\{([^{}]*)\}/g, (_, inner) => `<span style="font-family:serif">${processArg(inner)}</span>`)
+  text = text.replace(/\\textsf\{([^{}]*)\}/g, (_, inner) => `<span style="font-family:sans-serif">${processArg(inner)}</span>`)
+  text = text.replace(/\\text\{([^{}]*)\}/g, (_, inner) => processArg(inner))
+
+  // Ukuran font LaTeX
+  text = text.replace(/\\tiny\{([^{}]*)\}/g, '<span style="font-size:0.6em">$1</span>')
+  text = text.replace(/\\small\{([^{}]*)\}/g, '<span style="font-size:0.85em">$1</span>')
+  text = text.replace(/\\large\{([^{}]*)\}/g, '<span style="font-size:1.25em">$1</span>')
+  text = text.replace(/\\Large\{([^{}]*)\}/g, '<span style="font-size:1.5em">$1</span>')
+  text = text.replace(/\\LARGE\{([^{}]*)\}/g, '<span style="font-size:1.75em">$1</span>')
+  text = text.replace(/\\huge\{([^{}]*)\}/g, '<span style="font-size:2em">$1</span>')
+
+  // Warna teks: \textcolor{warna}{teks}
+  text = text.replace(/\\textcolor\{([^{}]*)\}\{([^{}]*)\}/g, (_, color, inner) =>
+    `<span style="color:${processArg(color)}">${processArg(inner)}</span>`
+  )
+
+  // Heading / struktur dokumen
+  text = text.replace(/\\chapter\*?\{([^{}]*)\}/g, (_, inner) => `\n# ${processArg(inner)}\n`)
+  text = text.replace(/\\section\*?\{([^{}]*)\}/g, (_, inner) => `\n## ${processArg(inner)}\n`)
+  text = text.replace(/\\subsection\*?\{([^{}]*)\}/g, (_, inner) => `\n### ${processArg(inner)}\n`)
+  text = text.replace(/\\subsubsection\*?\{([^{}]*)\}/g, (_, inner) => `\n#### ${processArg(inner)}\n`)
+  text = text.replace(/\\paragraph\*?\{([^{}]*)\}/g, (_, inner) => `\n**${processArg(inner)}**\n`)
+
+  // Daftar item LaTeX: \begin{itemize}...\end{itemize} dan \begin{enumerate}...\end{enumerate}
+  text = text.replace(/\\begin\{itemize\}([\s\S]*?)\\end\{itemize\}/g, (_, content) => {
+    const items = content.replace(/\\item\s*/g, '- ').trim()
+    return `\n${items}\n`
+  })
+  text = text.replace(/\\begin\{enumerate\}([\s\S]*?)\\end\{enumerate\}/g, (_, content) => {
+    let i = 1
+    const items = content.replace(/\\item\s*/g, () => `${i++}. `).trim()
+    return `\n${items}\n`
+  })
+
+  // Blok verbatim / lstlisting
+  text = text.replace(/\\begin\{verbatim\}([\s\S]*?)\\end\{verbatim\}/g,
+    (_, code) => `\n\`\`\`\n${code.trim()}\n\`\`\`\n`
+  )
+  text = text.replace(/\\begin\{lstlisting\}([\s\S]*?)\\end\{lstlisting\}/g,
+    (_, code) => `\n\`\`\`latex\n${code.trim()}\n\`\`\`\n`
+  )
+
+  // Link & footnote
+  text = text.replace(/\\href\{([^{}]*)\}\{([^{}]*)\}/g,
+    (_, url, label) => `<a href="${url}" target="_blank" rel="noopener">${processArg(label)}</a>`
+  )
+  text = text.replace(/\\footnote\{([^{}]*)\}/g,
+    (_, inner) => `<sup class="text-xs text-(--color-text-muted)" title="${inner}">[*]</sup>`
+  )
+
+  // Karakter spesial LaTeX → Unicode
+  text = text.replace(/\\&/g, '&amp;')
+  text = text.replace(/\\%/g, '%')
+  text = text.replace(/\\#/g, '#')
+  text = text.replace(/\\_/g, '_')
+  text = text.replace(/\\\$/g, '$')
+  text = text.replace(/\\ldots/g, '…')
+  text = text.replace(/\\dots/g, '…')
+  text = text.replace(/---/g, '—')
+  text = text.replace(/--/g, '–')
+
+  // Baris baru LaTeX
+  text = text.replace(/\\\\\s*\n?/g, '<br>\n')
+
+  // Hapus environment yang tidak dikenali agar tidak mengacau output
+  text = text.replace(/\\begin\{[a-z*]+\}|\\end\{[a-z*]+\}/g, '')
+
+  // Hapus perintah preamble LaTeX
+  text = text.replace(/\\documentclass(\[.*?\])?\{[^{}]*\}\s*\n?/g, '')
+  text = text.replace(/\\usepackage(\[.*?\])?\{[^{}]*\}\s*\n?/g, '')
+  text = text.replace(/\\title\{([^{}]*)\}/g, '# $1\n')
+  text = text.replace(/\\author\{([^{}]*)\}/g, '**Penulis:** $1\n')
+  text = text.replace(/\\date\{([^{}]*)\}/g, '*Tanggal:* $1\n')
+  text = text.replace(/\\maketitle/g, '')
+  text = text.replace(/\\newpage/g, '\n---\n')
+  text = text.replace(/\\clearpage/g, '\n---\n')
+
+  // ── 4. Proses Markdown (marked mengubah teks → HTML; tabel dibungkus div scrollable)
   if (props.isMarkdown) {
     try {
-      // Custom renderer: bungkus <table> dalam div.table-scroll-wrapper
       const renderer = new marked.Renderer()
       const originalTable = renderer.table.bind(renderer)
       renderer.table = (token) => {
         const html = originalTable(token)
         return `<div class="table-scroll-wrapper">${html}</div>`
       }
-      text = marked.parse(text, { renderer }) as string;
+      const parsed = marked.parse(text, { renderer, async: false }) as any
+      if (typeof parsed === 'string') {
+        text = parsed
+      } else if (parsed && typeof parsed.then === 'function') {
+        // jika marked mengembalikan Promise, konversi aman
+        text = text // fallback ke text mentah jika async promise
+      }
     } catch {
-      // fallback: gunakan marked default
-      try { text = marked.parse(text) as string } catch { /* noop */ }
+      try {
+        const parsed = marked.parse(text, { async: false }) as any
+        if (typeof parsed === 'string') text = parsed
+      } catch {
+        /* noop */
+      }
     }
   }
 
   // ── 5. Restore placeholder → KaTeX HTML yang sesungguhnya
-  text = text.replace(/__KATEX_PLACEHOLDER_(\d+)__/g, (_, idx) => {
-    return katexStore[Number(idx)] ?? ''
-  })
+  if (typeof text === 'string') {
+    text = text.replace(/KATEXPH(\d+)ENDPH/g, (_, idx) => {
+      return katexStore[Number(idx)] ?? ''
+    })
+  }
 
-  return text;
-});
+  return typeof text === 'string' ? text : ''
+})
 </script>
 
 <template>

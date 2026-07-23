@@ -91,6 +91,90 @@ const LESSONS_META = [
   { id: 16, lesson_file: 'lesson-16.md', module_id: 8, sort_order: 2 },
 ]
 
+// Data Master 16 Latihan Praktik Interaktif Spesifik per Lesson
+const EXERCISES_DATA: Record<number, { instruction: string; starter_code: string; solution_code: string }> = {
+  1: {
+    instruction: 'Praktikkan pembuatan dokumen LaTeX paling mendasar. Lengkapi kode awal dengan menentukan kelas dokumen \\documentclass{article} dan memasukkan kalimat "Hello World dari ScribeTex Unila!" di dalam lingkungan document.',
+    starter_code: '% TODO: Tentukan kelas dokumen article\n% \\documentclass{...}\n\n\\begin{document}\n  % TODO: Tuliskan kalimat Hello World di bawah ini\n\n\\end{document}',
+    solution_code: '\\documentclass{article}\n\n\\begin{document}\n  Hello World dari ScribeTex Unila!\n\\end{document}',
+  },
+  2: {
+    instruction: 'Praktikkan konsep pemisahan Preamble dan Body. Masukkan judul dokumen "Pengenalan LaTeX Skripsi" menggunakan perintah \\title{} di Preamble, lalu panggil \\maketitle di dalam lingkungan document.',
+    starter_code: '\\documentclass{article}\n% TODO: Tambahkan judul dokumen di area Preamble\n% \\title{...}\n\\author{Mahasiswa Unila}\n\n\\begin{document}\n  % TODO: Tampilkan judul dokumen dengan perintah \\maketitle\n\n  Dokumen pertama berhasil dibuat.\n\\end{document}',
+    solution_code: '\\documentclass{article}\n\\title{Pengenalan LaTeX Skripsi}\n\\author{Mahasiswa Unila}\n\n\\begin{document}\n  \\maketitle\n  Dokumen pertama berhasil dibuat.\n\\end{document}',
+  },
+  3: {
+    instruction: 'Praktikkan pengaturan margin naskah skripsi Unila (Top 3cm, Left 4cm, Right 3cm, Bottom 3cm) menggunakan paket geometry di area Preamble.',
+    starter_code: '\\documentclass{article}\n\\usepackage{geometry}\n% TODO: Atur konfigurasi margin geometry (top=3cm, left=4cm, right=3cm, bottom=3cm)\n% \\geometry{...}\n\n\\begin{document}\n  Naskah skripsi Universitas Lampung dengan margin standar 4-3-3-3 cm.\n\\end{document}',
+    solution_code: '\\documentclass{article}\n\\usepackage{geometry}\n\\geometry{top=3cm, left=4cm, right=3cm, bottom=3cm}\n\n\\begin{document}\n  Naskah skripsi Universitas Lampung dengan margin standar 4-3-3-3 cm.\n\\end{document}',
+  },
+  4: {
+    instruction: 'Praktikkan pemformatan teks akademik. Cetak tebal kata "Universitas Lampung" menggunakan \\textbf{}, miringkan kata "Typesetting" dengan \\textit{}, dan beri garis bawah kata "ScribeTex" dengan \\underline{}.',
+    starter_code: '\\documentclass{article}\n\\begin{document}\n  % TODO: Format teks berikut: Universitas Lampung (tebal), Typesetting (miring), ScribeTex (garis bawah)\n  Sistem ini dikembangkan di Universitas Lampung menggunakan teknologi Typesetting ScribeTex.\n\\end{document}',
+    solution_code: '\\documentclass{article}\n\\begin{document}\n  Sistem ini dikembangkan di \\textbf{Universitas Lampung} menggunakan teknologi \\textit{Typesetting} \\underline{ScribeTex}.\n\\end{document}',
+  },
+  5: {
+    instruction: 'Praktikkan pembuatan struktur bab dan seksi logis. Buat seksi \\section{Pendahuluan} dan sub-seksi \\subsection{Latar Belakang}.',
+    starter_code: '\\documentclass{article}\n\\begin{document}\n  % TODO: Buat seksi Pendahuluan dan sub-seksi Latar Belakang\n\n  Penulisan karya ilmiah membutuhkan struktur seksi yang teratur.\n\\end{document}',
+    solution_code: '\\documentclass{article}\n\\begin{document}\n  \\section{Pendahuluan}\n  \\subsection{Latar Belakang}\n  Penulisan karya ilmiah membutuhkan struktur seksi yang teratur.\n\\end{document}',
+  },
+  6: {
+    instruction: 'Praktikkan pembuatan daftar berurut (enumerate) dan daftar poin (itemize). Buat daftar bertingkat dengan 2 poin utama.',
+    starter_code: '\\documentclass{article}\n\\begin{document}\n  % TODO: Buat lingkungan itemize dengan 2 item: "Metode Penelitian" dan "Hasil Pembahasan"\n\n\\end{document}',
+    solution_code: '\\documentclass{article}\n\\begin{document}\n  \\begin{itemize}\n    \\item Metode Penelitian\n    \\item Hasil Pembahasan\n  \\end{itemize}\n\\end{document}',
+  },
+  7: {
+    instruction: 'Praktikkan penyisipan gambar akademik menggunakan lingkungan figure, paket graphicx, dan caption.',
+    starter_code: '\\documentclass{article}\n\\usepackage{graphicx}\n\n\\begin{document}\n  % TODO: Buat lingkungan figure, tampilkan gambar dengan width=0.5\\textwidth, caption "Logo Unila"\n\n\\end{document}',
+    solution_code: '\\documentclass{article}\n\\usepackage{graphicx}\n\n\\begin{document}\n  \\begin{figure}[h]\n    \\centering\n    \\includegraphics[width=0.5\\textwidth]{example-image}\n    \\caption{Logo Unila}\n    \\label{fig:logo}\n  \\end{figure}\n\\end{document}',
+  },
+  8: {
+    instruction: 'Praktikkan pembuatan tabel akademik clean menggunakan lingkungan tabular dengan 3 kolom.',
+    starter_code: '\\documentclass{article}\n\\begin{document}\n  % TODO: Buat tabel tabular dengan header: No | Nama | Nilai dan 2 baris data\n\n\\end{document}',
+    solution_code: '\\documentclass{article}\n\\begin{document}\n  \\begin{table}[h]\n    \\centering\n    \\begin{tabular}{|c|l|r|}\n      \\hline\n      No & Nama & Nilai \\\\\n      \\hline\n      1 & Fadhil & 95 \\\\\n      2 & Ahmad & 90 \\\\\n      \\hline\n    \\end{tabular}\n    \\caption{Tabel Hasil Ujian}\n  \\end{table}\n\\end{document}',
+  },
+  9: {
+    instruction: 'Praktikkan referensi silang (cross-referencing). Buat seksi dengan \\label{sec:metode} lalu sebutkan kembali menggunakan \\ref{sec:metode}.',
+    starter_code: '\\documentclass{article}\n\\begin{document}\n  \\section{Metodologi}\n  % TODO: Tambahkan label sec:metode pada seksi ini\n\n  \\section{Pembahasan}\n  % TODO: Rujuk seksi metodologi di atas dengan perintah \\ref{}\n  Sesuai dengan penjelasan pada Seksi ...\n\\end{document}',
+    solution_code: '\\documentclass{article}\n\\begin{document}\n  \\section{Metodologi}\n  \\label{sec:metode}\n\n  \\section{Pembahasan}\n  Sesuai dengan penjelasan pada Seksi \\ref{sec:metode}.\n\\end{document}',
+  },
+  10: {
+    instruction: 'Praktikkan penulisan notasi matematika inline ($ ... $). Tulis persamaan energi E = mc^2 dan teori Phytagoras a^2 + b^2 = c^2 di dalam narasi.',
+    starter_code: '\\documentclass{article}\n\\begin{document}\n  % TODO: Sisipkan notasi matematika inline E = mc^2 dan a^2 + b^2 = c^2 dalam kalimat\n  Persamaan Einstein adalah ... dan rumus Pythagoras adalah ...\n\\end{document}',
+    solution_code: '\\documentclass{article}\n\\begin{document}\n  Persamaan Einstein adalah $E = mc^2$ dan rumus Pythagoras adalah $a^2 + b^2 = c^2$.\n\\end{document}',
+  },
+  11: {
+    instruction: 'Praktikkan penulisan mode matematika display menggunakan lingkungan equation. Tulis rumus kuadratik abc secara terpisah dan terpusat.',
+    starter_code: '\\documentclass{article}\n\\usepackage{amsmath}\n\n\\begin{document}\n  % TODO: Buat lingkungan equation untuk rumus abc: x = \\frac{-b \\pm \\sqrt{b^2 - 4ac}}{2a}\n\n\\end{document}',
+    solution_code: '\\documentclass{article}\n\\usepackage{amsmath}\n\n\\begin{document}\n  \\begin{equation}\n    x = \\frac{-b \\pm \\sqrt{b^2 - 4ac}}{2a}\n  \\end{equation}\n\\end{document}',
+  },
+  12: {
+    instruction: 'Praktikkan penulisan pecahan (\\frac) dan bentuk akar (\\sqrt). Tuliskan turunan fungsi limit pecahan.',
+    starter_code: '\\documentclass{article}\n\\usepackage{amsmath}\n\n\\begin{document}\n  % TODO: Tulis pecahan 1/2 dan akar kuadrat \\sqrt{x + 1} dalam mode matematika\n\n\\end{document}',
+    solution_code: '\\documentclass{article}\n\\usepackage{amsmath}\n\n\\begin{document}\n  Hasil kalkulasi nilai $\\frac{1}{2}$ dan akar $\\sqrt{x + 1}$.\n\\end{document}',
+  },
+  13: {
+    instruction: 'Praktikkan pembuatan matriks menggunakan lingkungan bmatrix dari paket amsmath.',
+    starter_code: '\\documentclass{article}\n\\usepackage{amsmath}\n\n\\begin{document}\n  % TODO: Buat matriks 2x2 dengan bmatrix: [1 0; 0 1]\n\n\\end{document}',
+    solution_code: '\\documentclass{article}\n\\usepackage{amsmath}\n\n\\begin{document}\n  Matriks Identitas $I$:\n  \\begin{equation}\n    I = \\begin{bmatrix}\n      1 & 0 \\\\\n      0 & 1\n    \\end{bmatrix}\n  \\end{equation}\n\\end{document}',
+  },
+  14: {
+    instruction: 'Praktikkan pengutipan otomatis dengan perintah \\cite{key} untuk merujuk entitas pustaka di naskah akademik.',
+    starter_code: '\\documentclass{article}\n\\begin{document}\n  % TODO: Tambahkan kutipan sitasi \\cite{Lamport1994} pada kalimat berikut\n  Menurut penelitian Lamport ..., LaTeX sangat efisien untuk naskah ilmiah.\n\\end{document}',
+    solution_code: '\\documentclass{article}\n\\begin{document}\n  Menurut penelitian Lamport~\\cite{Lamport1994}, LaTeX sangat efisien untuk naskah ilmiah.\n\\end{document}',
+  },
+  15: {
+    instruction: 'Praktikkan pengorganisasian naskah panjang dengan membagi berkas menggunakan perintah \\input{}.',
+    starter_code: '\\documentclass{article}\n\\begin{document}\n  % TODO: Panggil file terpisah bab1.tex dengan perintah \\input{bab1}\n\n\\end{document}',
+    solution_code: '\\documentclass{article}\n\\begin{document}\n  \\input{bab1}\n\\end{document}',
+  },
+  16: {
+    instruction: 'Praktikkan debugging sintaks LaTeX. Perbaiki kesalahan tag penutup lingkungan yang saling bertabrakan (LIFO error).',
+    starter_code: '\\documentclass{article}\n\\begin{document}\n  % TODO: Perbaiki urutan penutupan lingkungan center dan quote di bawah ini\n  \\begin{center}\n    \\begin{quote}\n      Teks Kutipan\n    \\end{center}\n    \\end{quote}\n\\end{document}',
+    solution_code: '\\documentclass{article}\n\\begin{document}\n  \\begin{center}\n    \\begin{quote}\n      Teks Kutipan\n    \\end{quote}\n  \\end{center}\n\\end{document}',
+  },
+}
+
 // 5 Unila Academic Guide Articles
 const ARTICLES_DATA = [
   {
@@ -317,25 +401,27 @@ async function main() {
     console.log(`  📘 Lesson seeded: [ID: ${lesson.id}] ${title}`)
 
     // Create / Upsert Exercise for this lesson
-    const exerciseInstruction = `Praktikkan latihan interaktif untuk ${title}. Selesaikan perbaikan kode pada starter_code sesuai instruksi.`
-    const starterCode = `\\documentclass{article}\n\\begin{document}\n\\section{Latihan ${title}}\n% Tuliskan kode perbaikan Anda di sini\n\\end{document}`
-    const solutionCode = `\\documentclass{article}\n\\begin{document}\n\\section{Latihan ${title}}\nSolusi latihan berhasil dikompilasi.\n\\end{document}`
+    const specificEx = EXERCISES_DATA[meta.id] || {
+      instruction: `Praktikkan latihan interaktif untuk ${title}. Selesaikan perbaikan kode pada starter_code sesuai instruksi.`,
+      starter_code: `\\documentclass{article}\n\\begin{document}\n\\section{Latihan ${title}}\n% Tuliskan kode perbaikan Anda di sini\n\\end{document}`,
+      solution_code: `\\documentclass{article}\n\\begin{document}\n\\section{Latihan ${title}}\nSolusi latihan berhasil dikompilasi.\n\\end{document}`,
+    }
 
     await prisma.exercise.upsert({
       where: { id: meta.id },
       update: {
         lesson_id: lesson.id,
-        instruction: exerciseInstruction,
-        starter_code: starterCode,
-        solution_code: solutionCode,
+        instruction: specificEx.instruction,
+        starter_code: specificEx.starter_code,
+        solution_code: specificEx.solution_code,
         is_published: true,
       },
       create: {
         id: meta.id,
         lesson_id: lesson.id,
-        instruction: exerciseInstruction,
-        starter_code: starterCode,
-        solution_code: solutionCode,
+        instruction: specificEx.instruction,
+        starter_code: specificEx.starter_code,
+        solution_code: specificEx.solution_code,
         is_published: true,
       },
     })

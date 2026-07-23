@@ -3,6 +3,7 @@ import { ref } from "vue";
 import {
   IconLayoutDashboard,
   IconBook,
+  IconCode,
   IconFileText,
   IconTrendingUp,
   IconLogout,
@@ -27,6 +28,7 @@ const menuItems = [
     path: ROUTES.student.dashboard,
   },
   { name: "Modul LaTeX", icon: IconBook, path: ROUTES.student.modules },
+  { name: "Latihan Kode", icon: IconCode, path: ROUTES.student.exercises },
   { name: "Panduan Unila", icon: IconFileText, path: ROUTES.student.articles },
   { name: "Progress", icon: IconTrendingUp, path: ROUTES.student.progress },
 ];
@@ -99,7 +101,7 @@ const confirmLogout = async () => {
           :to="item.path"
           :class="[
             'flex items-center gap-3 px-3 py-2.5 rounded-md text-[13.5px] transition-all duration-150',
-            route.path === item.path
+            route.path.startsWith(item.path)
               ? 'bg-primary-light text-primary font-semibold'
               : 'font-medium text-text-secondary hover:bg-surface-alt hover:text-(--color-text-primary)',
           ]"

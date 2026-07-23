@@ -12,7 +12,9 @@
     "seed:reset": "bun run prisma/seed.ts --reset"
   },
   "dependencies": {
+    "@codemirror/lang-markdown": "^6.5.1",
     "@codemirror/language": "^6.10.8",
+    "@codemirror/legacy-modes": "^6.5.3",
     "@codemirror/state": "^6.5.1",
     "@codemirror/view": "^6.36.2",
     "@google/generative-ai": "^0.21.0",
