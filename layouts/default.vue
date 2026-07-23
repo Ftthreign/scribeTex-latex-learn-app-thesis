@@ -26,8 +26,8 @@ const menuItems = [
     icon: IconLayoutDashboard,
     path: ROUTES.student.dashboard,
   },
-  { name: "Modules", icon: IconBook, path: ROUTES.student.modules },
-  { name: "Articles", icon: IconFileText, path: ROUTES.student.articles },
+  { name: "Modul LaTeX", icon: IconBook, path: ROUTES.student.modules },
+  { name: "Panduan Unila", icon: IconFileText, path: ROUTES.student.articles },
   { name: "Progress", icon: IconTrendingUp, path: ROUTES.student.progress },
 ];
 
@@ -180,7 +180,7 @@ const confirmLogout = async () => {
         </div>
       </header>
 
-      <main class="flex-1 overflow-y-auto p-5 lg:p-8 h-full">
+      <main class="flex-1 overflow-y-auto p-4 lg:p-6 h-full">
         <slot />
       </main>
     </div>

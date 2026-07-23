@@ -4,9 +4,9 @@ export const ROUTES = {
   register: "/register",
   student: {
     dashboard: "/student/dashboard",
-    modules: "/modules",
-    articles: "/articles",
-    progress: "/progress",
+    modules: "/student/modules",
+    articles: "/student/panduan",
+    progress: "/student/progress",
     help: "/help",
     sandbox: "/sandbox",
     profile: "/student/profile",
