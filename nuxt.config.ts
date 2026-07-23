@@ -25,7 +25,7 @@ export default defineNuxtConfig({
   },
 
   runtimeConfig: {
-    geminiApiKey: "",
+    geminiApiKey: process.env.GEMINI_API_KEY || "",
     databaseUrl: "",
     public: {
       supabaseUrl: "",

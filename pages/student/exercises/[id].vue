@@ -5,9 +5,12 @@ import {
   IconCheck,
   IconX,
   IconAlertTriangle,
+  IconSparkles,
 } from "@tabler/icons-vue";
 import { useExercise } from "~/composables/useExercise";
+import { useAiChat } from "~/composables/useAiChat";
 import ExerciseSplitView from "~/components/learn/ExerciseSplitView.vue";
+import AiChatDrawer from "~/components/sandbox/AiChatDrawer.vue";
 
 definePageMeta({ layout: "default" });
 
@@ -26,6 +29,21 @@ const {
   resetCode,
   submitSolution,
 } = useExercise();
+
+// ─── AI Chat State (Inkremen 5) ─────────────────────────────────────────────
+const {
+  isOpen: isAiOpen,
+  messages: aiMessages,
+  savedHistory: aiSavedHistory,
+  loading: aiLoading,
+  historyLoading: aiHistoryLoading,
+  toggleDrawer: toggleAiDrawer,
+  fetchHistory: fetchAiHistory,
+  loadHistoryIntoChat: loadAiHistoryIntoChat,
+  loadSingleHistoryItem: loadSingleAiHistoryItem,
+  sendMessage: sendAiMessage,
+  clearChat: clearAiChat,
+} = useAiChat();
 
 const pageTitle = computed(() => {
   return currentExercise.value
@@ -69,7 +87,7 @@ const handleSubmit = async () => {
 </script>
 
 <template>
-  <div class="max-w-7xl mx-auto px-4 py-8 space-y-6">
+  <div class="max-w-7xl mx-auto px-4 py-8 space-y-6 relative">
     <!-- Header Bar & Tombol Kembali ke Materi -->
     <div class="flex items-center justify-between gap-4">
       <button
@@ -161,6 +179,36 @@ const handleSubmit = async () => {
         Lihat Semua Latihan
       </NuxtLink>
     </div>
+
+    <!-- Floating Action Button (FAB) Pembimbing AI di Pojok Kanan Bawah Halaman Latihan -->
+    <div class="fixed bottom-6 right-6 z-40">
+      <button
+        @click="toggleAiDrawer(true)"
+        class="btn-primary btn-md gap-2 rounded-2xl shadow-xl shadow-primary/20 hover:scale-105 active:scale-95 border border-white/20 transition-all cursor-pointer font-bold"
+        title="Buka Chatbot Pembimbing Cerdas AI"
+      >
+        <IconSparkles class="size-5 animate-pulse" />
+        <span>Pembimbing AI</span>
+      </button>
+    </div>
+
+    <!-- Drawer Chatbot AI (Inkremen 5) -->
+    <ClientOnly>
+      <AiChatDrawer
+        :isOpen="isAiOpen"
+        :messages="aiMessages"
+        :savedHistory="aiSavedHistory"
+        :loading="aiLoading"
+        :historyLoading="aiHistoryLoading"
+        :codeContext="userCode"
+        @close="toggleAiDrawer(false)"
+        @send="sendAiMessage"
+        @clear="clearAiChat"
+        @fetchHistory="fetchAiHistory"
+        @loadHistory="loadAiHistoryIntoChat"
+        @selectHistory="loadSingleAiHistoryItem"
+      />
+    </ClientOnly>
   </div>
 </template>
 

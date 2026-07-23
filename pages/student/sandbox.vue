@@ -1,14 +1,16 @@
 <script setup lang="ts">
 import { ref } from 'vue'
-import { IconRefresh, IconArrowLeft, IconFileText } from '@tabler/icons-vue'
+import { IconRefresh, IconArrowLeft, IconFileText, IconSparkles } from '@tabler/icons-vue'
 import { useCompile } from '~/composables/useCompile'
 import { useProjectFiles } from '~/composables/useProjectFiles'
+import { useAiChat } from '~/composables/useAiChat'
 import CodeMirrorEditor from '~/components/learn/CodeMirrorEditor.client.vue'
 import PdfViewer from '~/components/sandbox/PdfViewer.client.vue'
 import CompileToolbar from '~/components/sandbox/CompileToolbar.vue'
 import ErrorLogDrawer from '~/components/sandbox/ErrorLogDrawer.vue'
 import ReferencePdfModal from '~/components/sandbox/ReferencePdfModal.vue'
 import FileTreePanel from '~/components/sandbox/FileTreePanel.vue'
+import AiChatDrawer from '~/components/sandbox/AiChatDrawer.vue'
 
 definePageMeta({ layout: 'default' })
 useHead({ title: 'Project Sandbox LaTeX | ScribeTex' })
@@ -41,6 +43,22 @@ const {
   renameFile,
   toPayload,
 } = useProjectFiles()
+
+// ─── AI Chat State (Inkremen 5) ─────────────────────────────────────────────
+const {
+  isOpen: isAiOpen,
+  messages: aiMessages,
+  savedHistory: aiSavedHistory,
+  loading: aiLoading,
+  historyLoading: aiHistoryLoading,
+  toggleDrawer: toggleAiDrawer,
+  fetchHistory: fetchAiHistory,
+  loadHistoryIntoChat: loadAiHistoryIntoChat,
+  loadSingleHistoryItem: loadSingleAiHistoryItem,
+  sendMessage: sendAiMessage,
+  explainError: explainAiError,
+  clearChat: clearAiChat,
+} = useAiChat()
 
 // ─── UI State ────────────────────────────────────────────────────────────────
 const isReferenceModalOpen = ref<boolean>(false)
@@ -84,6 +102,11 @@ const handleDeleteFile = (name: string) => {
 const handleRenameFile = (oldName: string, newName: string) => {
   const { error } = renameFile(oldName, newName)
   if (error) alert(error)
+}
+
+/** Handler tanyakan kesalahan kompilasi ke AI */
+const handleAskAiError = () => {
+  explainAiError(logs.value, toPayload())
 }
 </script>
 
@@ -233,19 +256,30 @@ const handleRenameFile = (oldName: string, newName: string) => {
           :logs="logs"
           :securityWarning="securityWarning"
           :errorText="compileError"
+          @askAi="handleAskAiError"
         />
       </div>
     </div>
 
-    <!-- Floating Action Button (FAB) Referensi PDF -->
-    <div class="fixed bottom-6 right-6 z-40">
+    <!-- Floating Action Buttons (FAB) di Pojok Kanan Bawah: Pembimbing AI & Referensi PDF -->
+    <div class="fixed bottom-6 right-6 z-40 flex items-center gap-3">
+      <!-- FAB Artikel Referensi -->
       <button
         @click="isReferenceModalOpen = true"
-        class="px-4 py-3 bg-primary hover:bg-primary-hover text-white text-xs font-bold rounded-2xl shadow-xl transition-all hover:scale-105 active:scale-95 flex items-center gap-2 cursor-pointer border border-white/20"
+        class="px-3.5 py-2.5 bg-(--color-surface-alt) hover:bg-(--color-surface) text-(--color-text-primary) text-xs font-bold rounded-2xl shadow-xl transition-all hover:scale-105 active:scale-95 flex items-center gap-2 cursor-pointer border border-border"
         title="Buka / Unggah Artikel Referensi PDF"
       >
-        <IconFileText class="size-5" />
-        <span>Artikel Referensi PDF</span>
+        <IconFileText class="size-4.5 text-primary" />
+        <span class="hidden sm:inline">Artikel Referensi</span>
+      </button>
+
+      <button
+        @click="toggleAiDrawer(true)"
+        class="btn-primary btn-md gap-2 rounded-2xl shadow-xl shadow-primary/20 hover:scale-105 active:scale-95 border border-white/20 transition-all cursor-pointer font-bold"
+        title="Buka Chatbot Pembimbing Cerdas AI"
+      >
+        <IconSparkles class="size-5 animate-pulse" />
+        <span>Pembimbing AI</span>
       </button>
     </div>
 
@@ -254,6 +288,25 @@ const handleRenameFile = (oldName: string, newName: string) => {
       <ReferencePdfModal
         :isOpen="isReferenceModalOpen"
         @close="isReferenceModalOpen = false"
+      />
+    </ClientOnly>
+
+    <!-- Drawer Chatbot AI (Inkremen 5) -->
+    <ClientOnly>
+      <AiChatDrawer
+        :isOpen="isAiOpen"
+        :messages="aiMessages"
+        :savedHistory="aiSavedHistory"
+        :loading="aiLoading"
+        :historyLoading="aiHistoryLoading"
+        :codeContext="toPayload()"
+        :errorLogs="logs"
+        @close="toggleAiDrawer(false)"
+        @send="sendAiMessage"
+        @clear="clearAiChat"
+        @fetchHistory="fetchAiHistory"
+        @loadHistory="loadAiHistoryIntoChat"
+        @selectHistory="loadSingleAiHistoryItem"
       />
     </ClientOnly>
   </div>

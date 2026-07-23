@@ -1,14 +1,31 @@
 <script setup lang="ts">
 import { onMounted, watch } from 'vue'
-import { IconArrowLeft } from '@tabler/icons-vue'
+import { IconArrowLeft, IconSparkles } from '@tabler/icons-vue'
 import { useModules } from '~/composables/useModules'
+import { useAiChat } from '~/composables/useAiChat'
 import LessonContent from '~/components/learn/LessonContent.vue'
+import AiChatDrawer from '~/components/sandbox/AiChatDrawer.vue'
 
 definePageMeta({ layout: 'default' })
 
 const route = useRoute()
 const router = useRouter()
 const { currentLesson, loading, error, fetchLessonById } = useModules()
+
+// ─── AI Chat State (Inkremen 5) ─────────────────────────────────────────────
+const {
+  isOpen: isAiOpen,
+  messages: aiMessages,
+  savedHistory: aiSavedHistory,
+  loading: aiLoading,
+  historyLoading: aiHistoryLoading,
+  toggleDrawer: toggleAiDrawer,
+  fetchHistory: fetchAiHistory,
+  loadHistoryIntoChat: loadAiHistoryIntoChat,
+  loadSingleHistoryItem: loadSingleAiHistoryItem,
+  sendMessage: sendAiMessage,
+  clearChat: clearAiChat,
+} = useAiChat()
 
 const loadLessonData = async (id: number) => {
   if (!isNaN(id)) {
@@ -44,7 +61,7 @@ const handleStartExercise = (exerciseId: number) => {
 
 <template>
   <!-- w-full agar mengisi seluruh lebar main layout tanpa max-w pembatas -->
-  <div class="w-full space-y-6">
+  <div class="w-full space-y-6 relative">
     <!-- Tombol Kembali ke Modul -->
     <button
       v-if="currentLesson?.module"
@@ -77,6 +94,35 @@ const handleStartExercise = (exerciseId: number) => {
       @navigate="handleNavigate"
       @start-exercise="handleStartExercise"
     />
+
+    <!-- Floating Action Button (FAB) Pembimbing AI di Pojok Kanan Bawah Halaman Materi -->
+    <div class="fixed bottom-6 right-6 z-40">
+      <button
+        @click="toggleAiDrawer(true)"
+        class="btn-primary btn-md gap-2 rounded-2xl shadow-xl shadow-primary/20 hover:scale-105 active:scale-95 border border-white/20 transition-all cursor-pointer font-bold"
+        title="Buka Chatbot Pembimbing Cerdas AI"
+      >
+        <IconSparkles class="size-5 animate-pulse" />
+        <span>Pembimbing AI</span>
+      </button>
+    </div>
+
+    <!-- Drawer Chatbot AI (Inkremen 5) -->
+    <ClientOnly>
+      <AiChatDrawer
+        :isOpen="isAiOpen"
+        :messages="aiMessages"
+        :savedHistory="aiSavedHistory"
+        :loading="aiLoading"
+        :historyLoading="aiHistoryLoading"
+        :codeContext="currentLesson?.content"
+        @close="toggleAiDrawer(false)"
+        @send="sendAiMessage"
+        @clear="clearAiChat"
+        @fetchHistory="fetchAiHistory"
+        @loadHistory="loadAiHistoryIntoChat"
+        @selectHistory="loadSingleAiHistoryItem"
+      />
+    </ClientOnly>
   </div>
 </template>
-
