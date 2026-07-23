@@ -14,6 +14,7 @@ export const ROUTES = {
   },
   admin: {
     dashboard: "/admin/dashboard",
+    content: "/admin/content",
     modules: "/admin/modules",
     articles: "/admin/articles",
     users: "/admin/users",

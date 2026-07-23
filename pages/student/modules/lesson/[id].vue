@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { onMounted, watch } from 'vue'
-import { IconArrowLeft, IconSparkles } from '@tabler/icons-vue'
+import { IconArrowLeft, IconSparkles, IconLock } from '@tabler/icons-vue'
 import { useModules } from '~/composables/useModules'
 import { useAiChat } from '~/composables/useAiChat'
 import LessonContent from '~/components/learn/LessonContent.vue'
@@ -82,9 +82,26 @@ const handleStartExercise = (exerciseId: number) => {
       <div class="hidden xl:block w-56 h-64 bg-border/40 rounded-xl animate-pulse"></div>
     </div>
 
-    <!-- State Error -->
-    <div v-else-if="error" class="p-6 rounded-xl bg-red-500/10 border border-red-500/20 text-red-600 text-sm">
-      {{ error }}
+    <!-- State Error / Akses Terkunci (403 Forbidden) -->
+    <div v-else-if="error" class="max-w-xl mx-auto my-12 p-8 bg-(--color-surface) rounded-2xl border border-border shadow-modal text-center space-y-4">
+      <div class="size-16 rounded-full bg-amber-500/10 text-amber-600 flex items-center justify-center mx-auto">
+        <IconLock class="size-8" />
+      </div>
+      <div class="space-y-1.5">
+        <h3 class="text-xl font-bold text-(--color-text-primary) font-display tracking-tight">Materi Masih Terkunci</h3>
+        <p class="text-sm text-(--color-text-secondary) leading-relaxed">
+          {{ error }}
+        </p>
+      </div>
+      <div class="pt-2">
+        <button
+          @click="router.push('/student/modules')"
+          class="btn-primary btn-md gap-2 rounded-xl"
+        >
+          <IconArrowLeft class="size-4" />
+          <span>Kembali ke Daftar Modul</span>
+        </button>
+      </div>
     </div>
 
     <!-- Konten Materi Utama -->

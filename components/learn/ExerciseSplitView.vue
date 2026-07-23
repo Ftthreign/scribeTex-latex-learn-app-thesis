@@ -1,25 +1,46 @@
 <script setup lang="ts">
 import { ref } from 'vue'
-import { IconRefresh, IconSend, IconEye, IconCode } from '@tabler/icons-vue'
+import {
+  IconRefresh,
+  IconSend,
+  IconEye,
+  IconCode,
+  IconPlayerPlay,
+  IconFileTypePdf,
+  IconLoader2,
+} from '@tabler/icons-vue'
 import type { ExerciseDetail } from '~/composables/useExercise'
 import ExerciseInstruction from './ExerciseInstruction.vue'
 import CodeMirrorEditor from './CodeMirrorEditor.client.vue'
 import KatexRenderer from './KatexRenderer.vue'
+import CompileResultModal from './CompileResultModal.vue'
 
 const props = defineProps<{
   exercise: ExerciseDetail
   modelValue: string
   isDirty: boolean
   submitting: boolean
+  compiling?: boolean
+  pdfBase64?: string | null
+  compileError?: string | null
+  compileLogs?: any[] | null
 }>()
 
 const emit = defineEmits<{
   (e: 'update:modelValue', value: string): void
   (e: 'reset'): void
   (e: 'submit'): void
+  (e: 'compile'): void
+  (e: 'askAiError', errorText: string): void
 }>()
 
 const activeTabMobile = ref<'editor' | 'preview'>('editor')
+const showCompileModal = ref(false)
+
+async function handleCompileClick() {
+  showCompileModal.value = true
+  emit('compile')
+}
 </script>
 
 <template>
@@ -51,7 +72,7 @@ const activeTabMobile = ref<'editor' | 'preview'>('editor')
         ]"
       >
         <IconEye class="size-4" />
-        Live Preview
+        Pratinjau KaTeX
       </button>
     </div>
 
@@ -61,7 +82,7 @@ const activeTabMobile = ref<'editor' | 'preview'>('editor')
       <!-- Kolom Kiri: CodeMirror 6 Editor (LaTeX sTeX mode) -->
       <div :class="['space-y-3', activeTabMobile === 'editor' ? 'block' : 'hidden lg:block']">
         <!-- Header Editor Bar & Action Buttons -->
-        <div class="flex items-center justify-between px-1">
+        <div class="flex flex-wrap items-center justify-between gap-2 px-1">
           <div class="flex items-center gap-2 text-xs font-bold text-(--color-text-primary)">
             <IconCode class="size-4 text-primary" />
             <span>Editor Sintaks LaTeX</span>
@@ -72,19 +93,36 @@ const activeTabMobile = ref<'editor' | 'preview'>('editor')
               Berubah
             </span>
           </div>
-          <div class="flex items-center gap-2">
+
+          <div class="flex items-center gap-2 flex-wrap">
+            <!-- Reset Button -->
             <button
               @click="emit('reset')"
               :disabled="!isDirty"
-              class="px-3 py-1.5 border border-border hover:bg-(--color-surface-alt) disabled:opacity-50 text-(--color-text-secondary) text-xs font-semibold rounded-lg transition-all cursor-pointer flex items-center gap-1.5"
+              class="btn-secondary btn-sm gap-1.5 rounded-xl cursor-pointer disabled:opacity-50"
+              title="Kembalikan kode awal"
             >
               <IconRefresh class="size-3.5" />
               <span class="hidden sm:inline">Reset</span>
             </button>
+
+            <!-- Single-File Docker LaTeX Compile Button (Sesuai DESIGN.md) -->
+            <button
+              @click="handleCompileClick"
+              :disabled="compiling"
+              class="btn-primary btn-sm gap-1.5 rounded-xl shadow-xs cursor-pointer disabled:opacity-60"
+              title="Kompilasi dokumen LaTeX dan buka modal pratinjau PDF split layout"
+            >
+              <IconLoader2 v-if="compiling" class="size-3.5 animate-spin" />
+              <IconPlayerPlay v-else class="size-3.5" />
+              <span>{{ compiling ? 'Mengompilasi...' : '⚡ Uji Kompilasi PDF' }}</span>
+            </button>
+
+            <!-- Submit Button -->
             <button
               @click="emit('submit')"
               :disabled="submitting"
-              class="px-4 py-1.5 bg-primary hover:bg-primary-hover disabled:opacity-50 text-white text-xs font-bold rounded-lg transition-all cursor-pointer flex items-center gap-1.5 shadow-xs"
+              class="px-4 py-2 bg-emerald-600 hover:bg-emerald-700 disabled:opacity-50 text-white text-xs font-bold rounded-xl transition-all cursor-pointer flex items-center gap-1.5 shadow-xs"
             >
               <IconSend v-if="!submitting" class="size-3.5" />
               <span>{{ submitting ? 'Menyimpan...' : 'Kirim Jawaban' }}</span>
@@ -99,14 +137,14 @@ const activeTabMobile = ref<'editor' | 'preview'>('editor')
             @update:modelValue="emit('update:modelValue', $event)"
           />
           <template #fallback>
-            <div class="h-[380px] w-full rounded-lg bg-(--color-surface-alt) animate-pulse border border-border flex items-center justify-center text-xs text-(--color-text-muted)">
+            <div class="h-[420px] w-full rounded-lg bg-(--color-surface-alt) animate-pulse border border-border flex items-center justify-center text-xs text-(--color-text-muted)">
               Memuat CodeMirror 6 Editor…
             </div>
           </template>
         </ClientOnly>
       </div>
 
-      <!-- Kolom Kanan: KaTeX + LaTeX Text Preprocessor Live Preview -->
+      <!-- Kolom Kanan: KaTeX Instant Preview -->
       <div :class="['space-y-3', activeTabMobile === 'preview' ? 'block' : 'hidden lg:block']">
         <div class="flex items-center justify-between px-1">
           <div class="flex items-center gap-2 text-xs font-bold text-(--color-text-primary)">
@@ -118,10 +156,9 @@ const activeTabMobile = ref<'editor' | 'preview'>('editor')
 
         <!-- Output Preview Card -->
         <div
-          class="bg-(--color-surface) border border-border rounded-xl p-4 sm:p-6 min-h-[380px] overflow-x-auto shadow-xs"
+          class="bg-(--color-surface) border border-border rounded-2xl p-4 sm:p-6 min-h-[420px] max-h-[540px] overflow-y-auto shadow-xs"
           style="box-shadow: var(--shadow-card)"
         >
-          <!-- KatexRenderer dengan preprocessor perintah teks LaTeX built-in -->
           <KatexRenderer :content="modelValue" :isMarkdown="true" />
         </div>
 
@@ -131,5 +168,17 @@ const activeTabMobile = ref<'editor' | 'preview'>('editor')
         </p>
       </div>
     </div>
+
+    <!-- ─── MODAL POPUP KOMPILASI SPLIT 2 LAYOUT (LOG KIRI & PDF KANAN) ──────────── -->
+    <CompileResultModal
+      :isOpen="showCompileModal"
+      :isCompiling="compiling || false"
+      :isSuccess="!compileError && !!pdfBase64"
+      :pdfBase64="pdfBase64"
+      :errorLogs="compileError"
+      :title="`Hasil Kompilasi: Latihan #${exercise.id}`"
+      @close="showCompileModal = false"
+      @askAiError="(err) => emit('askAiError', err)"
+    />
   </div>
 </template>

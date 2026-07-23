@@ -1,44 +1,53 @@
 <script setup lang="ts">
 import { computed } from 'vue'
-import { IconBook, IconArrowRight } from '@tabler/icons-vue'
+import { IconBook, IconArrowRight, IconLock } from '@tabler/icons-vue'
 import type { ModuleData } from '~/composables/useModules'
 
 const props = defineProps<{
   module: ModuleData
 }>()
 
+const isLocked = computed(() => props.module.is_locked ?? false)
 const completed = computed(() => props.module.completed_lessons || 0)
 const total = computed(() => props.module.total_lessons || 0)
 const progressPercent = computed(() => props.module.progress_percent || 0)
 
 const statusBadge = computed(() => {
+  if (isLocked.value) {
+    return { label: '🔒 Terkunci', class: 'badge-neutral' }
+  }
   if (progressPercent.value >= 100) {
-    return { label: 'Selesai ✓', color: 'bg-emerald-50 text-emerald-600 border-emerald-200' }
+    return { label: 'Selesai ✓', class: 'badge-success' }
   }
   if (progressPercent.value > 0) {
-    return { label: `${progressPercent.value}% Selesai`, color: 'bg-primary/10 text-primary border-primary/20' }
+    return { label: `${progressPercent.value}% Selesai`, class: 'badge-warning' }
   }
-  return { label: 'Belum Dimulai', color: 'bg-(--color-surface-alt) text-(--color-text-muted) border-border' }
+  return { label: 'Belum Dimulai', class: 'badge-neutral' }
 })
 </script>
 
 <template>
-  <NuxtLink
-    :to="`/student/modules/${module.id}`"
-    class="group border border-border rounded-xl bg-(--color-surface) p-6 hover:border-primary/50 hover:shadow-md transition-all duration-200 cursor-pointer flex flex-col justify-between"
+  <div
+    :class="[
+      'group border border-border rounded-xl bg-(--color-surface) p-6 transition-all duration-200 flex flex-col justify-between relative',
+      isLocked
+        ? 'opacity-75 bg-(--color-surface-alt)/50 cursor-not-allowed border-border/80'
+        : 'hover:border-primary/50 hover:shadow-md cursor-pointer',
+    ]"
     style="box-shadow: var(--shadow-card)"
   >
     <div class="space-y-4">
       <!-- Top Row: Badge Modul & Status Progres -->
       <div class="flex items-center justify-between">
         <span
-          class="px-3 py-1 text-xs font-semibold rounded-full bg-primary/10 text-primary border border-primary/20"
+          :class="[
+            'px-3 py-1 text-xs font-semibold rounded-full border',
+            isLocked ? 'bg-(--color-surface-alt) text-(--color-text-muted) border-border' : 'bg-primary/10 text-primary border-primary/20',
+          ]"
         >
           Modul {{ module.sort_order }}
         </span>
-        <span
-          :class="['px-2.5 py-0.5 text-[10px] font-bold rounded-full border transition-colors', statusBadge.color]"
-        >
+        <span :class="statusBadge.class">
           {{ statusBadge.label }}
         </span>
       </div>
@@ -46,7 +55,10 @@ const statusBadge = computed(() => {
       <!-- Title & Description -->
       <div>
         <h3
-          class="text-lg font-bold text-(--color-text-primary) group-hover:text-primary transition-colors line-clamp-1"
+          :class="[
+            'text-lg font-bold transition-colors line-clamp-1',
+            isLocked ? 'text-(--color-text-muted)' : 'text-(--color-text-primary) group-hover:text-primary',
+          ]"
         >
           {{ module.title }}
         </h3>
@@ -81,11 +93,24 @@ const statusBadge = computed(() => {
 
       <!-- Action Footer -->
       <div class="pt-1 flex items-center justify-between">
-        <span class="text-xs font-semibold text-primary flex items-center gap-1 group-hover:translate-x-0.5 transition-transform">
-          {{ progressPercent > 0 ? (progressPercent >= 100 ? 'Review Modul' : 'Lanjutkan Belajar') : 'Pelajari Modul' }}
+        <NuxtLink
+          v-if="!isLocked"
+          :to="`/student/modules/${module.id}`"
+          class="text-xs font-semibold text-primary flex items-center gap-1 group-hover:translate-x-0.5 transition-transform"
+        >
+          <span>{{ progressPercent > 0 ? (progressPercent >= 100 ? 'Review Modul' : 'Lanjutkan Belajar') : 'Pelajari Modul' }}</span>
           <IconArrowRight class="size-3.5" />
+        </NuxtLink>
+
+        <span
+          v-else
+          class="text-xs font-medium text-(--color-text-muted) flex items-center gap-1.5"
+          title="Selesaikan modul sebelumnya terlebih dahulu untuk membuka"
+        >
+          <IconLock class="size-3.5" />
+          <span>Selesaikan Modul {{ module.sort_order - 1 }}</span>
         </span>
       </div>
     </div>
-  </NuxtLink>
+  </div>
 </template>

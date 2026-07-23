@@ -6,6 +6,7 @@ import {
   IconX,
   IconAlertTriangle,
   IconSparkles,
+  IconLock,
 } from "@tabler/icons-vue";
 import { useExercise } from "~/composables/useExercise";
 import { useAiChat } from "~/composables/useAiChat";
@@ -23,10 +24,15 @@ const {
   isDirty,
   loading,
   submitting,
+  compiling,
+  pdfBase64,
+  compileError,
+  compileLogs,
   error,
   fetchExerciseById,
   updateCode,
   resetCode,
+  compileCode,
   submitSolution,
 } = useExercise();
 
@@ -137,15 +143,28 @@ const handleSubmit = async () => {
       </div>
     </div>
 
-    <!-- State Error -->
+    <!-- State Error / Akses Terkunci (403 Forbidden) -->
     <div
       v-else-if="error"
-      class="p-6 rounded-xl bg-red-500/10 border border-red-500/20 text-red-600 text-sm flex items-center gap-3"
+      class="max-w-xl mx-auto my-12 p-8 bg-(--color-surface) rounded-2xl border border-border shadow-modal text-center space-y-4"
     >
-      <IconAlertTriangle class="size-5 shrink-0 text-red-600" />
-      <div>
-        <p class="font-bold">Gagal memuat latihan #{{ route.params.id }}</p>
-        <p class="text-xs mt-0.5 opacity-90">{{ error }}</p>
+      <div class="size-16 rounded-full bg-amber-500/10 text-amber-600 flex items-center justify-center mx-auto">
+        <IconLock class="size-8" />
+      </div>
+      <div class="space-y-1.5">
+        <h3 class="text-xl font-bold text-(--color-text-primary) font-display tracking-tight">Latihan Masih Terkunci</h3>
+        <p class="text-sm text-(--color-text-secondary) leading-relaxed">
+          {{ error }}
+        </p>
+      </div>
+      <div class="pt-2">
+        <button
+          @click="router.push('/student/modules')"
+          class="btn-primary btn-md gap-2 rounded-xl cursor-pointer"
+        >
+          <IconArrowLeft class="size-4" />
+          <span>Kembali ke Daftar Modul</span>
+        </button>
       </div>
     </div>
 
@@ -156,9 +175,15 @@ const handleSubmit = async () => {
       :modelValue="userCode"
       :isDirty="isDirty"
       :submitting="submitting"
+      :compiling="compiling"
+      :pdfBase64="pdfBase64"
+      :compileError="compileError"
+      :compileLogs="compileLogs"
       @update:modelValue="updateCode"
       @reset="resetCode"
+      @compile="compileCode"
       @submit="handleSubmit"
+      @askAiError="handleAskAiError"
     />
 
     <!-- Fallback jika data kosong tanpa error -->

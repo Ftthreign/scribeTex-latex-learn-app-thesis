@@ -154,7 +154,7 @@ function formatDate(dateStr: string) {
         <div class="flex items-center justify-between">
           <div class="flex items-center gap-2.5">
             <div
-              class="size-8 rounded-xl bg-gradient-to-tr from-purple-600 to-indigo-600 flex items-center justify-center text-white shadow-sm shrink-0"
+              class="size-8 rounded-xl bg-[var(--color-ai-primary)] flex items-center justify-center text-white shadow-sm shrink-0"
             >
               <IconSparkles class="size-4 animate-pulse" />
             </div>
@@ -165,9 +165,7 @@ function formatDate(dateStr: string) {
                 >
                   Pembimbing Cerdas AI
                 </h3>
-                <span
-                  class="text-[10px] font-bold px-1.5 py-0.5 rounded bg-purple-500/15 text-purple-600 dark:text-purple-400 uppercase tracking-wider"
-                >
+                <span class="badge-ai">
                   ScribeTex
                 </span>
               </div>

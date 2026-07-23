@@ -1,5 +1,7 @@
 import { defineEventHandler, createError } from 'h3'
+import { serverSupabaseUser } from '#supabase/server'
 import { prisma } from '~~/server/utils/prisma'
+import { checkLessonAccess } from '~~/server/utils/accessControl'
 
 export default defineEventHandler(async (event) => {
   const idParam = event.context.params?.id
@@ -10,6 +12,31 @@ export default defineEventHandler(async (event) => {
       statusCode: 400,
       statusMessage: 'ID Lesson tidak valid',
     })
+  }
+
+  const supabaseUser = await serverSupabaseUser(event)
+  let userRole = 'STUDENT'
+  let userId = ''
+
+  if (supabaseUser) {
+    userId = supabaseUser.id
+    const dbUser = await prisma.user.findUnique({
+      where: { id: userId },
+      select: { role: true },
+    })
+    if (dbUser) userRole = dbUser.role
+  }
+
+  // Enforcement Prerequisite Access Control (Sequential Locking)
+  if (userId) {
+    const access = await checkLessonAccess(userId, userRole, id)
+    if (!access.canAccess) {
+      throw createError({
+        statusCode: 403,
+        statusMessage: access.reason || 'Materi ini masih terkunci. Selesaikan materi prasyarat terlebih dahulu.',
+        data: access,
+      })
+    }
   }
 
   const lesson = await prisma.lesson.findUnique({

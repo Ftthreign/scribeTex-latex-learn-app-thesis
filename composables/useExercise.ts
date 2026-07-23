@@ -25,13 +25,17 @@ export const useExercise = () => {
   const currentExercise = ref<ExerciseDetail | null>(null)
   const userCode = ref<string>('')
   const starterCode = ref<string>('')
-  // loading dimulai dari true agar skeleton tampil sebelum data tiba
   const loading = ref<boolean>(true)
   const submitting = ref<boolean>(false)
   const error = ref<string | null>(null)
   const submissionResult = ref<ExerciseSubmissionResult | null>(null)
 
-  // Mengambil daftar seluruh 16 latihan dari API /api/exercises
+  // State kompilasi LaTeX Docker TeXLive Single-File
+  const compiling = ref<boolean>(false)
+  const pdfBase64 = ref<string | null>(null)
+  const compileError = ref<string | null>(null)
+  const compileLogs = ref<any[] | null>(null)
+
   const fetchExercises = async () => {
     loading.value = true
     error.value = null
@@ -51,16 +55,16 @@ export const useExercise = () => {
     }
   }
 
-  // Computed state untuk mendeteksi apakah kode telah diubah dari starter_code
   const isDirty = computed(() => {
     return userCode.value.trim() !== starterCode.value.trim()
   })
 
-  // Mengambil detail latihan berdasarkan ID dari API /api/exercises/[id]
   const fetchExerciseById = async (id: number) => {
     loading.value = true
     error.value = null
     submissionResult.value = null
+    pdfBase64.value = null
+    compileError.value = null
     try {
       const response = await $fetch<{ statusCode: number; data: ExerciseDetail }>(
         `/api/exercises/${id}`
@@ -80,17 +84,50 @@ export const useExercise = () => {
     }
   }
 
-  // Meng-update koding pengguna dari editor CodeMirror
   const updateCode = (newCode: string) => {
     userCode.value = newCode
   }
 
-  // Mengembalikan kode ke starter_code awal
   const resetCode = () => {
     userCode.value = starterCode.value
+    pdfBase64.value = null
+    compileError.value = null
   }
 
-  // Mengirim jawaban pengerjaan ke Nitro API /api/exercises/[id]/submit
+  const compileCode = async () => {
+    if (!userCode.value || !userCode.value.trim()) return false
+    compiling.value = true
+    compileError.value = null
+    pdfBase64.value = null
+    compileLogs.value = null
+
+    try {
+      const res = await $fetch<{
+        statusCode: number
+        data: { isSuccess: boolean; pdfBase64?: string; errorText?: string; logs?: any[] }
+      }>('/api/compile', {
+        method: 'POST',
+        body: { code: userCode.value },
+      })
+
+      if (res?.data?.isSuccess && res.data.pdfBase64) {
+        pdfBase64.value = res.data.pdfBase64
+        compileLogs.value = res.data.logs || []
+        return true
+      } else {
+        compileError.value = res?.data?.errorText || 'Galat kompilasi TeXLive'
+        compileLogs.value = res?.data?.logs || []
+        return false
+      }
+    } catch (e: any) {
+      compileError.value =
+        e?.data?.statusMessage || e?.data?.message || 'Gagal terhubung ke layanan kompilasi LaTeX'
+      return false
+    } finally {
+      compiling.value = false
+    }
+  }
+
   const submitSolution = async (isSuccess: boolean = true, errorLog: string | null = null) => {
     if (!currentExercise.value) return null
     submitting.value = true
@@ -126,12 +163,17 @@ export const useExercise = () => {
     isDirty,
     loading,
     submitting,
+    compiling,
+    pdfBase64,
+    compileError,
+    compileLogs,
     error,
     submissionResult,
     fetchExercises,
     fetchExerciseById,
     updateCode,
     resetCode,
+    compileCode,
     submitSolution,
   }
 }
