@@ -1,16 +1,18 @@
 <template>
   <main
     ref="mainRef"
-    class="relative bg-background text-text-primary overflow-x-hidden font-sans"
+    class="relative bg-background text-text-primary font-sans"
   >
-    <UiScrollProgress />
-    <LandingNavbar />
-    <LandingHero />
-    <LandingFeatures />
-    <LandingComparison />
-    <LandingHowItWorks />
-    <LandingFAQ />
-    <LandingCTA />
+    <div class="overflow-x-hidden">
+      <UiScrollProgress />
+      <LandingNavbar />
+      <LandingHero />
+      <LandingFeatures />
+      <LandingComparison />
+      <LandingHowItWorks />
+      <LandingFAQ />
+      <LandingCTA />
+    </div>
     <LandingFooter />
   </main>
 </template>
@@ -19,6 +21,14 @@
 import { onMounted, ref } from "vue";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
+
+definePageMeta({
+  layout: false,
+});
+
+useHead({
+  title: "ScribeTex - Platform Pembelajaran LaTeX Interaktif",
+});
 
 const mainRef = ref<HTMLElement | null>(null);
 
@@ -91,7 +101,24 @@ onMounted(() => {
         ease: "power3.out",
       },
     );
-  }, mainRef.value!);
+
+    // Footer content reveal when footer slides into view
+    gsap.fromTo(
+      ".landing-footer > div > *",
+      { y: 30, opacity: 0 },
+      {
+        y: 0,
+        opacity: 1,
+        stagger: 0.1,
+        duration: 0.8,
+        ease: "power3.out",
+        scrollTrigger: {
+          trigger: ".landing-footer",
+          start: "top 85%",
+        },
+      },
+    );
+  }, mainRef.value || undefined);
 
   return () => ctx.revert();
 });

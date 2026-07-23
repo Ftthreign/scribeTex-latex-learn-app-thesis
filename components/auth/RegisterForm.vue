@@ -1,115 +1,178 @@
 <script setup lang="ts">
 import { ref } from "vue";
-import { IconUser, IconMail, IconLock, IconEye, IconEyeOff, IconLoader2 } from "@tabler/icons-vue";
+import {
+  IconUser,
+  IconMail,
+  IconLock,
+  IconEye,
+  IconEyeOff,
+} from "@tabler/icons-vue";
+
+import { ROUTES } from "~/constants/route";
 
 const name = ref("");
 const email = ref("");
 const password = ref("");
 const showPassword = ref(false);
-const isLoading = ref(false);
+const errorMsg = ref("");
+const showSuccessModal = ref(false);
+
+const { register, isLoading } = useAuth();
 
 const handleRegister = async () => {
-  isLoading.value = true;
-  // TODO: Implement actual register logic with Supabase
-  setTimeout(() => {
-    isLoading.value = false;
-  }, 1500);
+  errorMsg.value = "";
+  try {
+    await register(email.value, password.value, name.value);
+    showSuccessModal.value = true;
+  } catch (err: any) {
+    console.error("Registration error:", err);
+    const rawMessage =
+      err.data?.statusMessage ||
+      err.statusMessage ||
+      err.message ||
+      "";
+    errorMsg.value =
+      rawMessage.replace(/^\[.*?\]\s*".*?":\s*\d+\s*/, "") ||
+      "Gagal mendaftar. Silakan coba lagi dengan data yang valid.";
+  }
+};
+
+const navigateToLogin = () => {
+  showSuccessModal.value = false;
+  navigateTo(ROUTES.login);
 };
 </script>
 
 <template>
   <form @submit.prevent="handleRegister" class="space-y-6">
+    <!-- Alert Error -->
+    <div
+      v-if="errorMsg"
+      class="bg-error-light border border-error text-error text-sm rounded-xl p-4 flex items-start gap-2.5 font-sans"
+    >
+      <svg
+        xmlns="http://www.w3.org/2000/svg"
+        class="size-5 shrink-0"
+        fill="none"
+        viewBox="0 0 24 24"
+        stroke="currentColor"
+      >
+        <path
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          stroke-width="2"
+          d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"
+        />
+      </svg>
+      <span>{{ errorMsg }}</span>
+    </div>
+
     <div class="space-y-5">
       <!-- Full Name -->
-      <div class="space-y-2">
-        <label for="name" class="text-sm font-bold text-text-primary font-sans">
-          Nama Lengkap
-        </label>
-        <div class="relative group">
-          <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-text-muted group-focus-within:text-primary transition-colors">
-            <IconUser class="size-5" />
-          </div>
-          <input
-            id="name"
-            v-model="name"
-            type="text"
-            placeholder="Contoh: Fadhil Ar"
-            class="w-full bg-surface-alt border border-border rounded-xl py-3.5 pl-12 pr-4 text-text-primary focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none transition-all font-sans"
-            required
-          />
-        </div>
-      </div>
+      <UiInput
+        id="name"
+        v-model="name"
+        type="text"
+        label="Nama Lengkap"
+        placeholder="Contoh: Fadhil Ar"
+        :disabled="isLoading"
+        required
+      >
+        <template #icon>
+          <IconUser class="size-5" />
+        </template>
+      </UiInput>
 
       <!-- Email Input -->
-      <div class="space-y-2">
-        <label for="email" class="text-sm font-bold text-text-primary font-sans">
-          Alamat Email
-        </label>
-        <div class="relative group">
-          <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-text-muted group-focus-within:text-primary transition-colors">
-            <IconMail class="size-5" />
-          </div>
-          <input
-            id="email"
-            v-model="email"
-            type="email"
-            placeholder="nama@email.com"
-            class="w-full bg-surface-alt border border-border rounded-xl py-3.5 pl-12 pr-4 text-text-primary focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none transition-all font-sans"
-            required
-          />
-        </div>
-      </div>
+      <UiInput
+        id="email"
+        v-model="email"
+        type="email"
+        label="Alamat Email"
+        placeholder="nama@email.com"
+        :disabled="isLoading"
+        required
+      >
+        <template #icon>
+          <IconMail class="size-5" />
+        </template>
+      </UiInput>
 
       <!-- Password Input -->
-      <div class="space-y-2">
-        <label for="password" class="text-sm font-bold text-text-primary font-sans">
-          Kata Sandi
-        </label>
-        <div class="relative group">
-          <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-text-muted group-focus-within:text-primary transition-colors">
-            <IconLock class="size-5" />
-          </div>
-          <input
-            id="password"
-            v-model="password"
-            :type="showPassword ? 'text' : 'password'"
-            placeholder="Min. 8 Karakter"
-            class="w-full bg-surface-alt border border-border rounded-xl py-3.5 pl-12 pr-12 text-text-primary focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none transition-all font-sans"
-            required
-          />
+      <UiInput
+        id="password"
+        v-model="password"
+        :type="showPassword ? 'text' : 'password'"
+        label="Kata Sandi"
+        placeholder="Min. 8 Karakter"
+        :disabled="isLoading"
+        required
+      >
+        <template #icon>
+          <IconLock class="size-5" />
+        </template>
+        <template #right>
           <button
             type="button"
             @click="showPassword = !showPassword"
-            class="absolute inset-y-0 right-0 pr-4 flex items-center text-text-muted hover:text-text-primary transition-colors"
+            class="text-text-muted hover:text-text-primary transition-colors cursor-pointer"
           >
             <IconEye v-if="!showPassword" class="size-5" />
             <IconEyeOff v-else class="size-5" />
           </button>
-        </div>
-      </div>
+        </template>
+      </UiInput>
     </div>
 
     <!-- Submit Button -->
-    <button
+    <UiButton
       type="submit"
-      :disabled="isLoading"
-      class="btn-primary btn-lg w-full shadow-lg shadow-primary/20 flex items-center justify-center gap-2"
+      variant="primary"
+      size="lg"
+      class="w-full shadow-lg shadow-primary/20"
+      :loading="isLoading"
     >
-      <IconLoader2 v-if="isLoading" class="size-5 animate-spin" />
-      <span>{{ isLoading ? 'Mendaftar...' : 'Buat Akun Sekarang' }}</span>
-    </button>
+      Buat Akun Sekarang
+    </UiButton>
 
     <!-- Login Link -->
     <p class="text-center text-sm font-sans text-text-secondary">
       Sudah punya akun?
-      <NuxtLink to="/login" class="text-primary font-bold hover:underline">
+      <NuxtLink
+        :to="ROUTES.login"
+        class="text-primary font-bold hover:underline"
+      >
         Masuk di Sini
       </NuxtLink>
     </p>
 
     <!-- Terms -->
-    <p class="text-center text-[10px] text-text-muted font-sans leading-relaxed">
-      Dengan mendaftar, Anda menyetujui <a href="#" class="underline">Ketentuan Layanan</a> dan <a href="#" class="underline">Kebijakan Privasi</a> ScribeTex.
+    <p
+      class="text-center text-[10px] text-text-muted font-sans leading-relaxed"
+    >
+      Dengan mendaftar, Anda menyetujui
+      <a href="#" class="underline">Ketentuan Layanan</a> dan
+      <a href="#" class="underline">Kebijakan Privasi</a> ScribeTex.
     </p>
   </form>
+
+  <!-- Success Modal -->
+  <UiModal
+    :isOpen="showSuccessModal"
+    title="Pendaftaran Berhasil"
+    @close="navigateToLogin"
+  >
+    <p class="text-sm text-text-secondary font-sans">
+      Akun Anda telah berhasil dibuat. Silakan masuk menggunakan alamat email
+      dan kata sandi yang telah Anda daftarkan.
+    </p>
+    <template #footer>
+      <button
+        @click="navigateToLogin"
+        class="btn-primary btn-md cursor-pointer"
+      >
+        OK, Masuk Sekarang
+      </button>
+    </template>
+  </UiModal>
 </template>

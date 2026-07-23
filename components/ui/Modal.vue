@@ -37,43 +37,47 @@ onUnmounted(() => toggleScroll(false));
     >
       <div
         v-if="isOpen"
-        class="fixed inset-0 z-100 flex items-center justify-center p-4 sm:p-6"
+        class="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6"
       >
         <div
-          class="absolute inset-0 bg-text-primary/60 backdrop-blur-sm"
+          class="absolute inset-0 bg-[#0f1b2d]/50 backdrop-blur-xs"
           @click="emit('close')"
         ></div>
 
         <div
-          class="relative w-full max-w-2xl bg-white rounded-[32px] shadow-2xl overflow-hidden flex flex-col"
+          class="relative w-full max-w-lg bg-(--color-surface) border border-border rounded-(--radius-lg) shadow-(--shadow-modal) overflow-hidden flex flex-col"
           @click.stop
         >
           <div
-            class="px-8 py-6 border-b border-border/50 flex items-center justify-between bg-surface shrink-0"
+            class="px-6 py-4.5 border-b border-border flex items-center justify-between bg-(--color-surface) shrink-0"
           >
-            <h3 class="text-2xl font-display font-bold text-text-primary">
+            <h3 class="text-lg font-bold text-(--color-text-primary)">
               {{ title }}
             </h3>
             <button
               @click="emit('close')"
-              class="p-2 rounded-full hover:bg-surface-alt transition-colors text-text-muted hover:text-text-primary"
+              class="p-1.5 rounded-full hover:bg-surface-alt transition-colors text-(--color-text-muted) hover:text-(--color-text-primary) cursor-pointer"
             >
-              <IconX class="size-6" />
+              <IconX class="size-5" />
             </button>
           </div>
 
+          <!-- Body -->
           <div
-            class="px-8 py-10 overflow-y-auto font-sans text-text-secondary leading-relaxed space-y-6"
+            class="px-6 py-6 overflow-y-auto font-sans text-sm text-text-secondary leading-relaxed space-y-4"
           >
             <slot />
           </div>
 
+          <!-- Footer -->
           <div
-            class="px-8 py-6 bg-surface-alt/30 border-t border-border/50 flex justify-end shrink-0"
+            class="px-6 py-4 bg-surface-alt/30 border-t border-border flex justify-end gap-2.5 shrink-0"
           >
-            <button @click="emit('close')" class="btn-primary btn-md px-8">
-              Tutup
-            </button>
+            <slot name="footer">
+              <button @click="emit('close')" class="btn-primary btn-md">
+                Tutup
+              </button>
+            </slot>
           </div>
         </div>
       </div>

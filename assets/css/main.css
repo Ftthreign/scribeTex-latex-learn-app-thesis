@@ -139,7 +139,7 @@
   }
 
   .card-module:hover {
-    @apply shadow-modal -translate-y-[2px];
+    @apply shadow-modal translate-y-[-2px];
   }
 
   /* Button Variants */

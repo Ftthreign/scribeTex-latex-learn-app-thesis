@@ -29,7 +29,7 @@ defineProps<{
           <IconMathIntegrals class="size-6" />
         </div>
         <span class="text-2xl font-display font-bold tracking-tight"
-          >ScribeTex</span
+          >[∑] ScribeTex</span
         >
       </NuxtLink>
 
