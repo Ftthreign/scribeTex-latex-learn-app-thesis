@@ -1,0 +1,132 @@
+generator client {
+  provider = "prisma-client-js"
+  output   = "../app/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+model User {
+  id               String           @id @default(uuid()) @db.Uuid
+  email            String           @unique
+  name             String
+  role             UserRole         @default(STUDENT)
+  created_at       DateTime         @default(now())
+  updated_at       DateTime         @updatedAt
+  ai_chats         AiChatHistory[]
+  articles         Article[]        @relation("AuthorArticles")
+  exercise_results ExerciseResult[]
+  progress         UserProgress[]
+
+  @@map("users")
+}
+
+model Module {
+  id           Int      @id @default(autoincrement())
+  title        String
+  description  String
+  sort_order   Int
+  is_published Boolean  @default(false)
+  created_at   DateTime @default(now())
+  updated_at   DateTime @updatedAt
+  lessons      Lesson[]
+
+  @@map("modules")
+}
+
+model Lesson {
+  id           Int            @id @default(autoincrement())
+  module_id    Int
+  title        String
+  content      String
+  sort_order   Int
+  is_published Boolean        @default(false)
+  created_at   DateTime       @default(now())
+  updated_at   DateTime       @updatedAt
+  exercises    Exercise[]
+  module       Module         @relation(fields: [module_id], references: [id], onDelete: Cascade)
+  progress     UserProgress[]
+
+  @@map("lessons")
+}
+
+model Exercise {
+  id            Int              @id @default(autoincrement())
+  lesson_id     Int
+  instruction   String
+  starter_code  String
+  solution_code String
+  is_published  Boolean          @default(false)
+  created_at    DateTime         @default(now())
+  updated_at    DateTime         @updatedAt
+  ai_chats      AiChatHistory[]
+  results       ExerciseResult[]
+  lesson        Lesson           @relation(fields: [lesson_id], references: [id], onDelete: Cascade)
+
+  @@map("exercises")
+}
+
+model ExerciseResult {
+  id             Int      @id @default(autoincrement())
+  user_id        String   @db.Uuid
+  exercise_id    Int
+  submitted_code String
+  is_success     Boolean  @default(false)
+  pdf_url        String?  @db.VarChar(255)
+  error_log      String?
+  created_at     DateTime @default(now())
+  exercise       Exercise @relation(fields: [exercise_id], references: [id], onDelete: Cascade)
+  user           User     @relation(fields: [user_id], references: [id], onDelete: Cascade)
+
+  @@index([user_id])
+  @@index([exercise_id])
+  @@map("exercise_results")
+}
+
+model UserProgress {
+  id           Int      @id @default(autoincrement())
+  user_id      String   @db.Uuid
+  lesson_id    Int
+  is_completed Boolean  @default(false)
+  updated_at   DateTime @updatedAt
+  lesson       Lesson   @relation(fields: [lesson_id], references: [id], onDelete: Cascade)
+  user         User     @relation(fields: [user_id], references: [id], onDelete: Cascade)
+
+  @@unique([user_id, lesson_id])
+  @@map("user_progress")
+}
+
+model AiChatHistory {
+  id          Int       @id @default(autoincrement())
+  user_id     String    @db.Uuid
+  exercise_id Int?
+  session_id  String    @db.VarChar(255)
+  message     String
+  response    String
+  created_at  DateTime  @default(now())
+  exercise    Exercise? @relation(fields: [exercise_id], references: [id])
+  user        User      @relation(fields: [user_id], references: [id], onDelete: Cascade)
+
+  @@index([user_id])
+  @@index([session_id])
+  @@map("ai_chat_history")
+}
+
+model Article {
+  id           Int      @id @default(autoincrement())
+  title        String
+  content      String
+  author_id    String   @db.Uuid
+  is_published Boolean  @default(false)
+  created_at   DateTime @default(now())
+  updated_at   DateTime @updatedAt
+  author       User     @relation("AuthorArticles", fields: [author_id], references: [id])
+
+  @@map("articles")
+}
+
+enum UserRole {
+  ADMIN
+  STUDENT
+}

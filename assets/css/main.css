@@ -1,0 +1,180 @@
+@import url("https://fonts.googleapis.com/css2?family=DM+Serif+Display&family=DM+Sans:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap");
+@import "tailwindcss";
+
+@theme {
+  --font-sans: "DM Sans", system-ui, sans-serif;
+  --font-display: "DM Serif Display", Georgia, serif;
+  --font-mono: "JetBrains Mono", "Courier New", monospace;
+
+  /* Neutrals / Surface */
+  --color-background: #f8f9fc;
+  --color-bg: #f8f9fc;
+  --color-foreground: #0f1b2d;
+  --color-surface: #ffffff;
+  --color-surface-alt: #f1f4f9;
+  --color-border: #e2e8f0;
+  --color-border-strong: #cbd5e1;
+
+  /* Brand Colors */
+  --color-primary: #1a56db;
+  --color-primary-hover: #1648c0;
+  --color-primary-light: #ebf2ff;
+  --color-primary-foreground: #ffffff;
+
+  /* Text Colors */
+  --color-text-primary: #0f1b2d;
+  --color-text-secondary: #4b5675;
+  --color-text-muted: #8a94a6;
+  --color-muted-foreground: #8a94a6;
+
+  /* Status Colors */
+  --color-success: #0f9d58;
+  --color-success-light: #e6f4ea;
+  --color-warning: #f59e0b;
+  --color-warning-light: #fef3c7;
+  --color-error: #dc2626;
+  --color-error-light: #fee2e2;
+  --color-destructive: #dc2626;
+  --color-destructive-foreground: #ffffff;
+
+  /* Code / LaTeX Specific */
+  --color-code-bg: #0d1117;
+  --color-code-surface: #161b22;
+  --color-code-border: #30363d;
+  --color-code-text: #e6edf3;
+  --color-code-accent: #58a6ff;
+
+  /* AI Chatbot */
+  --color-ai-primary: #7c3aed;
+  --color-ai-light: #f3eeff;
+  --color-ai-bubble: #ede9fe;
+
+  /* Radius */
+  --radius-sm: 6px;
+  --radius-md: 10px;
+  --radius-lg: 16px;
+  --radius-xl: 24px;
+  --radius-full: 9999px;
+
+  /* Shadows */
+  --shadow-card:
+    0 1px 3px rgba(15, 27, 45, 0.08), 0 4px 12px rgba(15, 27, 45, 0.05);
+  --shadow-modal: 0 8px 32px rgba(15, 27, 45, 0.16);
+  --shadow-float: 0 2px 8px rgba(15, 27, 45, 0.12);
+
+  /* Animations */
+  --animate-float: float 3s ease-in-out infinite;
+
+  @keyframes float {
+    0%,
+    100% {
+      transform: translateY(0);
+    }
+    50% {
+      transform: translateY(-10px);
+    }
+  }
+}
+
+/* Base styles */
+@layer base {
+  * {
+    @apply border-border;
+  }
+
+  body {
+    @apply bg-background text-foreground antialiased font-sans;
+  }
+
+  /* Custom Scrollbar Styling */
+  ::-webkit-scrollbar {
+    width: 8px;
+  }
+
+  ::-webkit-scrollbar-track {
+    background: transparent;
+  }
+
+  ::-webkit-scrollbar-thumb {
+    background: #cbd5e1;
+    border-radius: 20px;
+    border: 2px solid var(--color-background);
+  }
+
+  ::-webkit-scrollbar-thumb:hover {
+    background: var(--color-primary);
+  }
+
+  /* Firefox */
+  * {
+    scrollbar-width: thin;
+    scrollbar-color: #cbd5e1 transparent;
+  }
+
+  h1,
+  h2,
+  h3,
+  h4,
+  h5,
+  h6 {
+    @apply font-display tracking-tight;
+  }
+}
+
+@layer utilities {
+  .glass {
+    @apply bg-white/80 backdrop-blur-md border border-border shadow-card;
+  }
+
+  .dark .glass {
+    @apply bg-surface/80 backdrop-blur-md border border-border;
+  }
+
+  .text-gradient {
+    @apply bg-clip-text text-transparent bg-linear-to-r from-primary to-blue-400;
+  }
+
+  .card-module {
+    @apply bg-surface border border-border rounded-xl p-6 shadow-card transition-all duration-200;
+  }
+
+  .card-module:hover {
+    @apply shadow-modal translate-y-[-2px];
+  }
+
+  /* Button Variants */
+  .btn-primary {
+    @apply bg-primary text-primary-foreground font-bold hover:brightness-105 hover:-translate-y-px transition-all cursor-pointer inline-flex items-center justify-center;
+  }
+
+  .btn-secondary {
+    @apply bg-surface border border-border text-text-primary font-bold hover:brightness-95 hover:-translate-y-px transition-all cursor-pointer inline-flex items-center justify-center;
+  }
+
+  .btn-ghost {
+    @apply bg-transparent text-primary font-bold hover:bg-primary-light transition-all cursor-pointer inline-flex items-center justify-center;
+  }
+
+  .btn-danger {
+    @apply bg-error text-white font-bold hover:brightness-105 hover:-translate-y-px transition-all cursor-pointer inline-flex items-center justify-center;
+  }
+
+  /* Button Sizes */
+  .btn-sm {
+    padding: 6px 12px;
+    font-size: 13px;
+    border-radius: var(--radius-md);
+  }
+
+  .btn-md {
+    padding: 10px 20px;
+    font-size: 14px;
+    border-radius: var(--radius-md);
+  }
+
+  .btn-lg {
+    padding: 14px 28px;
+    font-size: 16px;
+    border-radius: var(--radius-lg);
+  }
+}
