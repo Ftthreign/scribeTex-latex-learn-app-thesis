@@ -14,6 +14,7 @@ import {
   IconPlus,
   IconHelp,
   IconHome,
+  IconTerminal,
 } from "@tabler/icons-vue";
 import { ROUTES } from "~/constants/route";
 
@@ -29,6 +30,7 @@ const menuItems = [
   },
   { name: "Modul LaTeX", icon: IconBook, path: ROUTES.student.modules },
   { name: "Latihan Kode", icon: IconCode, path: ROUTES.student.exercises },
+  { name: "Project Sandbox", icon: IconTerminal, path: ROUTES.student.sandbox },
   { name: "Panduan Unila", icon: IconFileText, path: ROUTES.student.articles },
   { name: "Progress", icon: IconTrendingUp, path: ROUTES.student.progress },
 ];

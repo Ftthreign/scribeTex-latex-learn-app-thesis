@@ -9,7 +9,7 @@ export const ROUTES = {
     articles: "/student/panduan",
     progress: "/student/progress",
     help: "/help",
-    sandbox: "/sandbox",
+    sandbox: "/student/sandbox",
     profile: "/student/profile",
   },
   admin: {

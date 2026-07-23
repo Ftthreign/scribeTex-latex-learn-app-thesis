@@ -32,8 +32,13 @@ const academicDarkTheme = EditorView.theme({
     fontFamily: 'var(--font-mono, "JetBrains Mono", monospace)',
     fontSize: '13px',
     height: '100%',
-    minHeight: '380px',
+    maxHeight: '100%',
     borderRadius: '0.5rem',
+  },
+  '.cm-scroller': {
+    overflow: 'auto !important',
+    height: '100% !important',
+    maxHeight: '100% !important',
   },
   '.cm-content': {
     caretColor: '#58a6ff',
