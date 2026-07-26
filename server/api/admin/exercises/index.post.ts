@@ -21,15 +21,35 @@ export default defineEventHandler(async (event) => {
   const lesson = await prisma.lesson.findUnique({ where: { id: body.lesson_id } })
   if (!lesson) throw createError({ statusCode: 404, statusMessage: 'Lesson tidak ditemukan.' })
 
-  const exercise = await prisma.exercise.create({
-    data: {
-      lesson_id: body.lesson_id,
-      instruction: body.instruction.trim(),
-      starter_code: body.starter_code?.trim() || '\\documentclass{article}\n\\begin{document}\n% Kode Anda di sini\n\\end{document}',
-      solution_code: body.solution_code?.trim() || '',
-      is_published: body.is_published ?? false,
-    },
-  })
+  let exercise
+  try {
+    exercise = await prisma.exercise.create({
+      data: {
+        lesson_id: body.lesson_id,
+        instruction: body.instruction.trim(),
+        starter_code: body.starter_code?.trim() || '\\documentclass{article}\n\\begin{document}\n% Kode Anda di sini\n\\end{document}',
+        solution_code: body.solution_code?.trim() || '',
+        is_published: body.is_published ?? false,
+      },
+    })
+  } catch (err: any) {
+    if (err?.code === 'P2002' || err?.message?.includes('Unique constraint')) {
+      const maxId = await prisma.exercise.findFirst({ orderBy: { id: 'desc' } })
+      const nextId = (maxId?.id ?? 0) + 1
+      exercise = await prisma.exercise.create({
+        data: {
+          id: nextId,
+          lesson_id: body.lesson_id,
+          instruction: body.instruction.trim(),
+          starter_code: body.starter_code?.trim() || '\\documentclass{article}\n\\begin{document}\n% Kode Anda di sini\n\\end{document}',
+          solution_code: body.solution_code?.trim() || '',
+          is_published: body.is_published ?? false,
+        },
+      })
+    } else {
+      throw err
+    }
+  }
 
   return { statusCode: 201, message: 'Latihan berhasil dibuat.', data: exercise }
 })

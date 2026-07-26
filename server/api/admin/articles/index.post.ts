@@ -20,14 +20,33 @@ export default defineEventHandler(async (event) => {
   const adminUser = await prisma.user.findFirst({ where: { role: 'ADMIN' } })
   if (!adminUser) throw createError({ statusCode: 500, statusMessage: 'Admin user tidak ditemukan di database.' })
 
-  const article = await prisma.article.create({
-    data: {
-      title: body.title.trim(),
-      content: body.content.trim(),
-      author_id: adminUser.id,
-      is_published: body.is_published ?? false,
-    },
-  })
+  let article
+  try {
+    article = await prisma.article.create({
+      data: {
+        title: body.title.trim(),
+        content: body.content.trim(),
+        author_id: adminUser.id,
+        is_published: body.is_published ?? false,
+      },
+    })
+  } catch (err: any) {
+    if (err?.code === 'P2002' || err?.message?.includes('Unique constraint')) {
+      const maxId = await prisma.article.findFirst({ orderBy: { id: 'desc' } })
+      const nextId = (maxId?.id ?? 0) + 1
+      article = await prisma.article.create({
+        data: {
+          id: nextId,
+          title: body.title.trim(),
+          content: body.content.trim(),
+          author_id: adminUser.id,
+          is_published: body.is_published ?? false,
+        },
+      })
+    } else {
+      throw err
+    }
+  }
 
   return { statusCode: 201, message: 'Artikel berhasil dibuat.', data: article }
 })

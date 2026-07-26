@@ -26,15 +26,35 @@ export default defineEventHandler(async (event) => {
     orderBy: { sort_order: 'desc' },
   })
 
-  const lesson = await prisma.lesson.create({
-    data: {
-      module_id: body.module_id,
-      title: body.title.trim(),
-      content: body.content?.trim() || '',
-      sort_order: body.sort_order ?? (maxOrder?.sort_order ?? 0) + 1,
-      is_published: body.is_published ?? false,
-    },
-  })
+  let lesson
+  try {
+    lesson = await prisma.lesson.create({
+      data: {
+        module_id: body.module_id,
+        title: body.title.trim(),
+        content: body.content?.trim() || '',
+        sort_order: body.sort_order ?? (maxOrder?.sort_order ?? 0) + 1,
+        is_published: body.is_published ?? false,
+      },
+    })
+  } catch (err: any) {
+    if (err?.code === 'P2002' || err?.message?.includes('Unique constraint')) {
+      const maxId = await prisma.lesson.findFirst({ orderBy: { id: 'desc' } })
+      const nextId = (maxId?.id ?? 0) + 1
+      lesson = await prisma.lesson.create({
+        data: {
+          id: nextId,
+          module_id: body.module_id,
+          title: body.title.trim(),
+          content: body.content?.trim() || '',
+          sort_order: body.sort_order ?? (maxOrder?.sort_order ?? 0) + 1,
+          is_published: body.is_published ?? false,
+        },
+      })
+    } else {
+      throw err
+    }
+  }
 
   return { statusCode: 201, message: 'Lesson berhasil dibuat.', data: lesson }
 })

@@ -21,14 +21,33 @@ export default defineEventHandler(async (event) => {
   const maxOrder = await prisma.module.findFirst({ orderBy: { sort_order: 'desc' } })
   const nextOrder = (maxOrder?.sort_order ?? 0) + 1
 
-  const module = await prisma.module.create({
-    data: {
-      title: body.title.trim(),
-      description: body.description?.trim() || '',
-      sort_order: body.sort_order ?? nextOrder,
-      is_published: body.is_published ?? false,
-    },
-  })
+  let module
+  try {
+    module = await prisma.module.create({
+      data: {
+        title: body.title.trim(),
+        description: body.description?.trim() || '',
+        sort_order: body.sort_order ?? nextOrder,
+        is_published: body.is_published ?? false,
+      },
+    })
+  } catch (err: any) {
+    if (err?.code === 'P2002' || err?.message?.includes('Unique constraint')) {
+      const maxId = await prisma.module.findFirst({ orderBy: { id: 'desc' } })
+      const nextId = (maxId?.id ?? 0) + 1
+      module = await prisma.module.create({
+        data: {
+          id: nextId,
+          title: body.title.trim(),
+          description: body.description?.trim() || '',
+          sort_order: body.sort_order ?? nextOrder,
+          is_published: body.is_published ?? false,
+        },
+      })
+    } else {
+      throw err
+    }
+  }
 
   return { statusCode: 201, message: 'Modul berhasil dibuat.', data: module }
 })
