@@ -1,12 +1,12 @@
 <script setup lang="ts">
-import { ref, watch, nextTick, onMounted } from "vue";
+import { ref, watch, nextTick } from "vue";
 import { marked } from "marked";
 import {
   IconUser,
   IconSend,
   IconX,
   IconTrash,
-  IconSparkles,
+  IconRobot,
   IconBulb,
   IconCode,
   IconMathSymbols,
@@ -15,6 +15,8 @@ import {
   IconClock,
   IconCheck,
   IconRefresh,
+  IconMaximize,
+  IconMinimize,
 } from "@tabler/icons-vue";
 import type { ChatMessage, DbChatEntry } from "~/composables/useAiChat";
 
@@ -45,6 +47,7 @@ const emit = defineEmits<{
 // ─── State ──────────────────────────────────────────────────────────────────
 const activeTab = ref<"chat" | "history">("chat");
 const inputPrompt = ref("");
+const isWideMode = ref(false);
 const chatScrollRef = ref<HTMLElement | null>(null);
 
 // Configure marked for clean inline markdown rendering
@@ -145,47 +148,57 @@ function formatDate(dateStr: string) {
   <Transition name="slide">
     <div
       v-if="isOpen"
-      class="fixed inset-y-0 right-0 w-full sm:w-[450px] bg-(--color-surface) border-l border-border shadow-2xl z-50 flex flex-col h-full overflow-hidden"
+      :class="[
+        'fixed inset-y-0 right-0 bg-[var(--color-surface)] border-l border-[var(--color-border)] shadow-2xl z-50 flex flex-col h-full overflow-hidden transition-all duration-300 font-body',
+        isWideMode
+          ? 'w-full sm:w-[680px] lg:w-[760px]'
+          : 'w-full sm:w-[540px] lg:w-[600px]'
+      ]"
     >
       <!-- Header dengan Tab Bar (Chat Aktif vs Riwayat) -->
       <div
-        class="bg-(--color-surface-alt)/90 backdrop-blur-md border-b border-border p-3 space-y-3 shrink-0"
+        class="bg-[var(--color-surface-alt)] border-b border-[var(--color-border)] p-3.5 space-y-3 shrink-0 font-body"
       >
         <div class="flex items-center justify-between">
           <div class="flex items-center gap-2.5">
             <div
-              class="size-8 rounded-xl bg-[var(--color-ai-primary)] flex items-center justify-center text-white shadow-sm shrink-0"
+              class="size-8 rounded-lg bg-[var(--color-primary)] flex items-center justify-center text-white shadow-xs shrink-0"
             >
-              <IconSparkles class="size-4 animate-pulse" />
+              <IconRobot class="size-5" />
             </div>
             <div>
               <div class="flex items-center gap-1.5">
                 <h3
-                  class="text-sm font-bold text-(--color-text-primary) font-display tracking-tight"
+                  class="text-sm font-bold text-[var(--color-text-primary)] font-display tracking-tight"
                 >
-                  Pembimbing Cerdas AI
+                  Pembimbing AI ScribeTex
                 </h3>
-                <span class="badge-ai">
-                  ScribeTex
-                </span>
               </div>
-              <p class="text-[11px] text-(--color-text-muted)">
-                Asisten Belajar \LaTeX{} Interaktif (Gemini)
+              <p class="text-[11px] text-[var(--color-text-muted)] font-sans">
+                Asisten Pembimbing Penulisan LaTeX Akademik
               </p>
             </div>
           </div>
 
-          <div class="flex items-center gap-1">
+          <div class="flex items-center gap-1 font-sans">
+            <button
+              @click="isWideMode = !isWideMode"
+              class="p-1.5 rounded-lg text-[var(--color-text-muted)] hover:text-[var(--color-primary)] hover:bg-[var(--color-surface)] transition-all cursor-pointer hidden sm:flex items-center"
+              :title="isWideMode ? 'Perkecil Panel AI' : 'Perlebar Panel AI'"
+            >
+              <IconMinimize v-if="isWideMode" class="size-4" />
+              <IconMaximize v-else class="size-4" />
+            </button>
             <button
               @click="emit('clear')"
-              class="p-1.5 rounded-lg text-(--color-text-muted) hover:text-(--color-error) hover:bg-(--color-error-light) transition-all cursor-pointer"
+              class="p-1.5 rounded-lg text-[var(--color-text-muted)] hover:text-[var(--color-error)] hover:bg-[var(--color-error-light)] transition-all cursor-pointer"
               title="Bersihkan Obrolan Aktif"
             >
               <IconTrash class="size-4" />
             </button>
             <button
               @click="emit('close')"
-              class="p-1.5 rounded-lg text-(--color-text-muted) hover:text-(--color-text-primary) hover:bg-(--color-surface-alt) transition-all cursor-pointer"
+              class="p-1.5 rounded-lg text-[var(--color-text-muted)] hover:text-[var(--color-text-primary)] hover:bg-[var(--color-surface)] transition-all cursor-pointer"
               title="Tutup AI Chat"
             >
               <IconX class="size-4.5" />
@@ -193,17 +206,17 @@ function formatDate(dateStr: string) {
           </div>
         </div>
 
-        <!-- Navigation Tabs Bar -->
+        <!-- Navigation Tabs Bar (Standar btn-primary / btn-secondary) -->
         <div
-          class="flex bg-(--color-surface) p-1 rounded-xl border border-border"
+          class="flex bg-(--color-surface) p-1 rounded-lg border border-border font-sans"
         >
           <button
             @click="handleSwitchTab('chat')"
             :class="[
-              'flex-1 py-1.5 text-xs font-bold rounded-lg transition-all flex items-center justify-center gap-1.5 cursor-pointer',
+              'flex-1 py-1.5 text-xs font-bold rounded-md transition-all flex items-center justify-center gap-1.5 cursor-pointer',
               activeTab === 'chat'
-                ? 'btn-primary text-white shadow-xs'
-                : 'text-(--color-text-muted) hover:text-(--color-text-primary) hover:bg-(--color-surface-alt)',
+                ? 'btn-primary shadow-xs'
+                : 'btn-secondary border-none text-(--color-text-secondary) hover:text-(--color-text-primary)',
             ]"
           >
             <IconMessage class="size-3.5" />
@@ -212,10 +225,10 @@ function formatDate(dateStr: string) {
           <button
             @click="handleSwitchTab('history')"
             :class="[
-              'flex-1 py-1.5 text-xs font-bold rounded-lg transition-all flex items-center justify-center gap-1.5 cursor-pointer',
+              'flex-1 py-1.5 text-xs font-bold rounded-md transition-all flex items-center justify-center gap-1.5 cursor-pointer',
               activeTab === 'history'
-                ? 'btn-primary text-white shadow-xs'
-                : 'text-(--color-text-muted) hover:text-(--color-text-primary) hover:bg-(--color-surface-alt)',
+                ? 'btn-primary shadow-xs'
+                : 'btn-secondary border-none text-(--color-text-secondary) hover:text-(--color-text-primary)',
             ]"
           >
             <IconHistory class="size-3.5" />
@@ -234,41 +247,42 @@ function formatDate(dateStr: string) {
       <div
         v-if="activeTab === 'chat'"
         ref="chatScrollRef"
-        class="flex-1 overflow-y-auto p-4 space-y-4 min-h-0"
+        class="flex-1 overflow-y-auto p-4 space-y-4 min-h-0 font-body"
       >
         <div
           v-for="msg in messages"
           :key="msg.id"
           :class="[
-            'flex gap-2.5 max-w-[90%]',
+            'flex gap-2.5 max-w-[90%] min-w-0',
             msg.role === 'user' ? 'ml-auto flex-row-reverse' : 'mr-auto',
           ]"
         >
-          <!-- Avatar Icon -->
+          <!-- Avatar Icon (Solid Clean) -->
           <div
             :class="[
-              'size-7 rounded-xl flex items-center justify-center shrink-0 text-white text-xs font-bold shadow-xs',
+              'size-7 rounded-lg flex items-center justify-center shrink-0 text-white text-xs font-bold shadow-xs',
               msg.role === 'user'
-                ? 'bg-primary'
-                : 'bg-gradient-to-br from-purple-600 to-indigo-600',
+                ? 'bg-[var(--color-primary)]'
+                : 'bg-[var(--color-primary)]',
             ]"
           >
             <IconUser v-if="msg.role === 'user'" class="size-4" />
+            <IconRobot v-else class="size-4" />
           </div>
 
           <!-- Message Body -->
           <div
             :class="[
-              'p-3.5 rounded-2xl text-xs leading-relaxed space-y-1 shadow-xs',
+              'p-3.5 rounded-xl text-xs leading-relaxed space-y-1 shadow-xs min-w-0 max-w-full overflow-hidden font-sans',
               msg.role === 'user'
-                ? 'bg-primary text-white rounded-tr-none'
-                : 'bg-(--color-surface-alt) text-(--color-text-primary) border border-border rounded-tl-none',
+                ? 'bg-[var(--color-primary)] text-white rounded-tr-none'
+                : 'bg-[var(--color-surface-alt)] text-[var(--color-text-primary)] border border-[var(--color-border)] rounded-tl-none',
             ]"
           >
             <!-- Formatted Markdown Content -->
             <div
               v-if="msg.role === 'assistant'"
-              class="ai-markdown prose prose-invert max-w-none text-xs leading-relaxed font-sans"
+              class="ai-markdown prose max-w-none text-xs leading-relaxed font-sans min-w-0 max-w-full overflow-hidden"
               v-html="renderMarkdown(msg.text)"
             ></div>
 
@@ -296,13 +310,15 @@ function formatDate(dateStr: string) {
           class="flex gap-2.5 mr-auto max-w-[80%] items-center"
         >
           <div
-            class="size-7 rounded-xl bg-gradient-to-br from-purple-600 to-indigo-600 flex items-center justify-center text-white shrink-0"
-          ></div>
-          <div
-            class="p-3.5 bg-(--color-surface-alt) border border-border rounded-2xl rounded-tl-none flex items-center gap-2 shadow-xs"
+            class="size-7 rounded-lg bg-[var(--color-primary)] text-white flex items-center justify-center shrink-0 shadow-xs"
           >
-            <span class="size-2 bg-purple-500 rounded-full animate-ping"></span>
-            <span class="text-xs text-(--color-text-muted) font-medium"
+            <IconRobot class="size-4" />
+          </div>
+          <div
+            class="p-3.5 bg-(--color-surface-alt) border border-border rounded-xl rounded-tl-none flex items-center gap-2 shadow-xs"
+          >
+            <span class="size-2 bg-(--color-primary) rounded-full animate-ping"></span>
+            <span class="text-xs text-(--color-text-secondary) font-sans font-medium"
               >Pembimbing AI sedang merancang saran…</span
             >
           </div>
@@ -310,16 +326,16 @@ function formatDate(dateStr: string) {
       </div>
 
       <!-- TAB 2: Riwayat Percakapan (History View dari Database) -->
-      <div v-else class="flex-1 overflow-y-auto p-4 space-y-3 min-h-0">
+      <div v-else class="flex-1 overflow-y-auto p-4 space-y-3 min-h-0 font-body">
         <div
-          class="flex items-center justify-between pb-2 border-b border-border"
+          class="flex items-center justify-between pb-2 border-b border-border font-sans"
         >
-          <span class="text-xs font-bold text-(--color-text-primary)"
+          <span class="text-xs font-bold text-(--color-text-primary) font-display"
             >Riwayat Percakapan Tersimpan</span
           >
           <button
             @click="emit('fetchHistory')"
-            class="btn-ghost btn-sm text-xs gap-1 font-medium cursor-pointer"
+            class="btn-secondary btn-sm gap-1 cursor-pointer font-sans"
           >
             <IconRefresh class="size-3" />
             <span>Muat Ulang</span>
@@ -330,7 +346,7 @@ function formatDate(dateStr: string) {
         <button
           v-if="savedHistory.length > 0"
           @click="handleLoadHistoryToChat"
-          class="btn-secondary btn-sm w-full gap-2 rounded-xl border-primary/20 bg-primary-light/50 text-primary hover:bg-primary-light transition-all cursor-pointer font-bold"
+          class="btn-primary btn-sm w-full gap-2 cursor-pointer font-bold font-sans shadow-xs"
         >
           <IconCheck class="size-4" />
           <span>Tampilkan Semua Riwayat di Obrolan</span>
@@ -346,22 +362,22 @@ function formatDate(dateStr: string) {
         </div>
 
         <!-- History List -->
-        <div v-else-if="savedHistory.length > 0" class="space-y-2.5">
+        <div v-else-if="savedHistory.length > 0" class="space-y-2.5 font-sans">
           <div
             v-for="item in savedHistory"
             :key="item.id"
             @click="handleSelectHistoryItem(item)"
-            class="group p-3.5 rounded-xl bg-(--color-surface-alt) border border-border space-y-2 hover:border-primary/60 hover:bg-(--color-surface) transition-all cursor-pointer shadow-2xs hover:shadow-xs relative"
+            class="group p-3.5 rounded-xl bg-(--color-surface) border border-border space-y-2 hover:border-(--color-primary) hover:bg-(--color-surface-alt)/40 transition-all cursor-pointer shadow-xs relative"
             title="Klik untuk membuka obrolan ini"
           >
             <div
               class="flex items-center justify-between text-[11px] text-(--color-text-muted)"
             >
               <div class="flex items-center gap-1 font-mono">
-                <IconClock class="size-3 text-purple-500" />
+                <IconClock class="size-3 text-(--color-primary)" />
                 <span>{{ formatDate(item.created_at) }}</span>
               </div>
-              <span class="text-[10px] text-primary font-bold group-hover:underline flex items-center gap-0.5">
+              <span class="text-[10px] text-(--color-primary) font-bold group-hover:underline flex items-center gap-0.5 font-sans">
                 Buka di Chat &rarr;
               </span>
             </div>
@@ -370,14 +386,14 @@ function formatDate(dateStr: string) {
             <div
               class="text-xs font-semibold text-(--color-text-primary) line-clamp-2"
             >
-              <span class="text-primary font-bold">Q:</span> {{ item.message }}
+              <span class="text-(--color-primary) font-bold">Q:</span> {{ item.message }}
             </div>
 
             <!-- Preview Jawaban AI -->
             <div
-              class="text-[11px] text-(--color-text-secondary) line-clamp-2 bg-(--color-surface) p-2 rounded-lg border border-border/60 font-mono"
+              class="text-[11px] text-(--color-text-secondary) line-clamp-2 bg-(--color-surface-alt) p-2 rounded-lg border border-border/60 font-mono"
             >
-              <span class="text-purple-600 font-bold">AI:</span>
+              <span class="text-(--color-primary) font-bold">AI:</span>
               {{ item.response.replace(/[*#]/g, "") }}
             </div>
           </div>
@@ -386,10 +402,10 @@ function formatDate(dateStr: string) {
         <!-- Empty History State -->
         <div
           v-else
-          class="text-center py-16 text-(--color-text-muted) space-y-2"
+          class="text-center py-16 text-(--color-text-muted) space-y-2 font-sans"
         >
-          <IconHistory class="size-10 mx-auto opacity-30 text-purple-500" />
-          <p class="text-xs font-medium">
+          <IconHistory class="size-10 mx-auto opacity-30 text-(--color-primary)" />
+          <p class="text-xs font-medium text-(--color-text-primary)">
             Belum ada riwayat percakapan yang tersimpan.
           </p>
           <p class="text-[11px] text-(--color-text-muted) max-w-xs mx-auto">
@@ -399,27 +415,27 @@ function formatDate(dateStr: string) {
         </div>
       </div>
 
-      <!-- Quick Prompt Badges (Hanya di Tab Chat) -->
+      <!-- Quick Prompt (Standar btn-secondary) -->
       <div
         v-if="activeTab === 'chat'"
-        class="px-4 py-2.5 bg-(--color-surface-alt)/60 border-t border-border shrink-0"
+        class="px-4 py-3 bg-(--color-surface-alt)/50 border-t border-border shrink-0 font-sans"
       >
         <p
-          class="text-[10px] text-(--color-text-muted) font-bold uppercase tracking-wider mb-1.5 flex items-center gap-1"
+          class="text-[10px] text-(--color-text-muted) font-bold uppercase tracking-wider mb-2 flex items-center gap-1 font-display"
         >
-          <IconBulb class="size-3 text-amber-500" />
+          <IconBulb class="size-3.5 text-(--color-primary)" />
           <span>Rekomendasi Pertanyaan Cepat:</span>
         </p>
-        <div class="flex flex-wrap gap-1.5">
+        <div class="flex flex-wrap gap-2">
           <button
             @click="
               handleQuickPrompt(
                 'Tolong jelaskan galat kompilasi ini dan berikan petunjuk perbaikannya.',
               )
             "
-            class="px-2.5 py-1 rounded-lg bg-(--color-error-light) hover:bg-red-200/80 text-(--color-error) border border-red-500/20 text-[11px] font-semibold transition-all cursor-pointer flex items-center gap-1.5 shadow-2xs hover:-translate-y-px"
+            class="btn-secondary btn-sm flex items-center gap-1.5 cursor-pointer font-bold shadow-xs text-xs"
           >
-            <IconBulb class="size-3" />
+            <IconBulb class="size-3.5 text-(--color-primary)" />
             <span>Jelaskan Error Log</span>
           </button>
           <button
@@ -428,9 +444,9 @@ function formatDate(dateStr: string) {
                 'Bagaimana cara membuat tabel atau notasi matematika dalam LaTeX?',
               )
             "
-            class="px-2.5 py-1 rounded-lg bg-primary-light hover:bg-blue-100 text-primary border border-primary/20 text-[11px] font-semibold transition-all cursor-pointer flex items-center gap-1.5 shadow-2xs hover:-translate-y-px"
+            class="btn-secondary btn-sm flex items-center gap-1.5 cursor-pointer font-bold shadow-xs text-xs"
           >
-            <IconMathSymbols class="size-3" />
+            <IconMathSymbols class="size-3.5 text-(--color-primary)" />
             <span>Notasi MTK</span>
           </button>
           <button
@@ -439,9 +455,9 @@ function formatDate(dateStr: string) {
                 'Bantu berikan masukan untuk merapikan sintaks dokumen LaTeX saya.',
               )
             "
-            class="px-2.5 py-1 rounded-lg bg-purple-500/10 hover:bg-purple-500/20 text-purple-700 dark:text-purple-300 border border-purple-500/20 text-[11px] font-semibold transition-all cursor-pointer flex items-center gap-1.5 shadow-2xs hover:-translate-y-px"
+            class="btn-secondary btn-sm flex items-center gap-1.5 cursor-pointer font-bold shadow-xs text-xs"
           >
-            <IconCode class="size-3" />
+            <IconCode class="size-3.5 text-(--color-primary)" />
             <span>Rapikan Sintaks</span>
           </button>
         </div>
@@ -450,7 +466,7 @@ function formatDate(dateStr: string) {
       <!-- Input Action Bar (Hanya di Tab Chat) -->
       <div
         v-if="activeTab === 'chat'"
-        class="p-3 bg-(--color-surface) border-t border-border shrink-0"
+        class="p-3 bg-(--color-surface) border-t border-border shrink-0 font-sans"
       >
         <form @submit.prevent="handleSend" class="flex items-center gap-2">
           <input
@@ -458,12 +474,12 @@ function formatDate(dateStr: string) {
             type="text"
             placeholder="Tanyakan sesuatu ke Pembimbing AI..."
             :disabled="loading"
-            class="flex-1 bg-(--color-surface-alt) text-xs text-(--color-text-primary) placeholder:text-(--color-text-muted) px-3.5 py-2.5 rounded-xl border border-border outline-none focus:border-primary transition-all disabled:opacity-50 font-sans"
+            class="input flex-1 text-xs text-(--color-text-primary) placeholder:text-(--color-text-muted) px-3.5 py-2.5 rounded-lg border border-border outline-none focus:border-primary transition-all disabled:opacity-50 font-sans"
           />
           <button
             type="submit"
             :disabled="!inputPrompt.trim() || loading"
-            class="btn-primary p-2.5 rounded-xl shadow-md transition-all cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed disabled:transform-none disabled:hover:brightness-100 shrink-0"
+            class="btn-primary p-2.5 rounded-lg shadow-xs transition-all cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed shrink-0"
             title="Kirim Pertanyaan"
           >
             <IconSend class="size-4" />
@@ -476,8 +492,16 @@ function formatDate(dateStr: string) {
 
 <style>
 /* Markdown Styling inside Assistant Chat Bubble */
+.ai-markdown {
+  word-break: break-word !important;
+  overflow-wrap: anywhere !important;
+  max-width: 100% !important;
+  overflow: hidden !important;
+}
 .ai-markdown p {
   margin-bottom: 0.5rem;
+  word-break: break-word !important;
+  overflow-wrap: anywhere !important;
 }
 .ai-markdown p:last-child {
   margin-bottom: 0;
@@ -490,16 +514,28 @@ function formatDate(dateStr: string) {
   font-size: 0.75rem;
   color: var(--color-code-accent, #58a6ff);
   border: 1px solid var(--color-code-border, #30363d);
+  word-break: break-word !important;
 }
 .ai-markdown pre {
-  background-color: var(--color-code-bg, #0d1117);
-  color: var(--color-code-text, #e6edf3);
-  padding: 0.75rem;
-  border-radius: 0.75rem;
-  overflow-x: auto;
-  margin: 0.5rem 0;
-  border: 1px solid var(--color-code-border, #30363d);
-  font-family: var(--font-mono, "JetBrains Mono", monospace);
+  background-color: var(--color-code-bg, #0d1117) !important;
+  color: var(--color-code-text, #e6edf3) !important;
+  padding: 0.75rem !important;
+  border-radius: 0.75rem !important;
+  max-width: 100% !important;
+  width: 100% !important;
+  overflow-x: auto !important;
+  white-space: pre !important;
+  margin: 0.5rem 0 !important;
+  border: 1px solid var(--color-code-border, #30363d) !important;
+  font-family: var(--font-mono, "JetBrains Mono", monospace) !important;
+  box-sizing: border-box !important;
+}
+.ai-markdown pre code {
+  white-space: pre !important;
+  word-break: normal !important;
+  border: none !important;
+  padding: 0 !important;
+  background-color: transparent !important;
 }
 .ai-markdown ul,
 .ai-markdown ol {
@@ -508,6 +544,12 @@ function formatDate(dateStr: string) {
 }
 .ai-markdown li {
   margin-bottom: 0.25rem;
+}
+.ai-markdown table {
+  display: block !important;
+  width: 100% !important;
+  max-width: 100% !important;
+  overflow-x: auto !important;
 }
 
 /* Transitions */

@@ -448,6 +448,17 @@ async function main() {
     console.log(`  📜 Article seeded: [ID: ${article.id}] ${article.title}`)
   }
 
+  // Sinkronisasi PostgreSQL Auto-Increment Sequence agar tidak terjadi Unique Constraint Error (id) saat Admin membuat data baru
+  try {
+    await prisma.$executeRawUnsafe(`SELECT setval(pg_get_serial_sequence('"modules"', 'id'), coalesce(max(id), 1)) FROM "modules";`)
+    await prisma.$executeRawUnsafe(`SELECT setval(pg_get_serial_sequence('"lessons"', 'id'), coalesce(max(id), 1)) FROM "lessons";`)
+    await prisma.$executeRawUnsafe(`SELECT setval(pg_get_serial_sequence('"exercises"', 'id'), coalesce(max(id), 1)) FROM "exercises";`)
+    await prisma.$executeRawUnsafe(`SELECT setval(pg_get_serial_sequence('"articles"', 'id'), coalesce(max(id), 1)) FROM "articles";`)
+    console.log('🔄 PostgreSQL Auto-increment sequences berhasil disinkronkan!')
+  } catch (seqErr) {
+    console.warn('⚠️ Peringatan saat sinkronisasi sequence PostgreSQL:', seqErr)
+  }
+
   console.log('🎉 Seeding Selesai 100%! Data kurikulum & artikel regulasi Unila terbaru telah aktif.')
 }
 

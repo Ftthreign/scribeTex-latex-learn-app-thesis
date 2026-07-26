@@ -24,6 +24,7 @@ const props = defineProps<{
   pdfBase64?: string | null
   compileError?: string | null
   compileLogs?: any[] | null
+  isCompleted?: boolean
 }>()
 
 const emit = defineEmits<{
@@ -32,6 +33,7 @@ const emit = defineEmits<{
   (e: 'submit'): void
   (e: 'compile'): void
   (e: 'askAiError', errorText: string): void
+  (e: 'viewResult'): void
 }>()
 
 const activeTabMobile = ref<'editor' | 'preview'>('editor')
@@ -46,7 +48,11 @@ async function handleCompileClick() {
 <template>
   <div class="space-y-6">
     <!-- Instruksi Latihan -->
-    <ExerciseInstruction :exercise="exercise" />
+    <ExerciseInstruction
+      :exercise="exercise"
+      :isCompleted="isCompleted"
+      @viewResult="emit('viewResult')"
+    />
 
     <!-- Mobile Switcher Tab -->
     <div class="flex lg:hidden bg-(--color-surface-alt) p-1 rounded-xl border border-border">
@@ -72,14 +78,14 @@ async function handleCompileClick() {
         ]"
       >
         <IconEye class="size-4" />
-        Pratinjau KaTeX
+        Pratinjau Hasil
       </button>
     </div>
 
     <!-- Layout Split-View 2 Kolom -->
     <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 items-start">
 
-      <!-- Kolom Kiri: CodeMirror 6 Editor (LaTeX sTeX mode) -->
+      <!-- Kolom Kiri: Editor Kode LaTeX -->
       <div :class="['space-y-3', activeTabMobile === 'editor' ? 'block' : 'hidden lg:block']">
         <!-- Header Editor Bar & Action Buttons -->
         <div class="flex flex-wrap items-center justify-between gap-2 px-1">
@@ -88,41 +94,41 @@ async function handleCompileClick() {
             <span>Editor Sintaks LaTeX</span>
             <span
               v-if="isDirty"
-              class="px-2 py-0.5 text-[10px] font-bold rounded-full bg-amber-500/10 text-amber-600 border border-amber-500/20"
+              class="px-2 py-0.5 text-[10px] font-bold rounded-full bg-(--color-primary-light) text-(--color-primary) border border-(--color-primary)/20"
             >
               Berubah
             </span>
           </div>
 
-          <div class="flex items-center gap-2 flex-wrap">
+          <div class="flex items-center gap-2 flex-wrap font-sans">
             <!-- Reset Button -->
             <button
               @click="emit('reset')"
               :disabled="!isDirty"
-              class="btn-secondary btn-sm gap-1.5 rounded-xl cursor-pointer disabled:opacity-50"
+              class="btn-secondary btn-sm gap-1.5 cursor-pointer disabled:opacity-50 font-semibold"
               title="Kembalikan kode awal"
             >
               <IconRefresh class="size-3.5" />
               <span class="hidden sm:inline">Reset</span>
             </button>
 
-            <!-- Single-File Docker LaTeX Compile Button (Sesuai DESIGN.md) -->
+            <!-- Single-File LaTeX Compile Button -->
             <button
               @click="handleCompileClick"
               :disabled="compiling"
-              class="btn-primary btn-sm gap-1.5 rounded-xl shadow-xs cursor-pointer disabled:opacity-60"
-              title="Kompilasi dokumen LaTeX dan buka modal pratinjau PDF split layout"
+              class="btn-secondary btn-sm gap-1.5 shadow-xs cursor-pointer disabled:opacity-60 font-bold"
+              title="Kompilasi dokumen LaTeX dan buka modal pratinjau PDF"
             >
               <IconLoader2 v-if="compiling" class="size-3.5 animate-spin" />
-              <IconPlayerPlay v-else class="size-3.5" />
-              <span>{{ compiling ? 'Mengompilasi...' : '⚡ Uji Kompilasi PDF' }}</span>
+              <IconPlayerPlay v-else class="size-3.5 text-(--color-primary)" />
+              <span>{{ compiling ? 'Mengompilasi...' : 'Uji Kompilasi PDF' }}</span>
             </button>
 
-            <!-- Submit Button -->
+            <!-- Submit Button (btn-primary) -->
             <button
               @click="emit('submit')"
               :disabled="submitting"
-              class="px-4 py-2 bg-emerald-600 hover:bg-emerald-700 disabled:opacity-50 text-white text-xs font-bold rounded-xl transition-all cursor-pointer flex items-center gap-1.5 shadow-xs"
+              class="btn-primary btn-sm gap-1.5 shadow-xs cursor-pointer disabled:opacity-50 font-bold"
             >
               <IconSend v-if="!submitting" class="size-3.5" />
               <span>{{ submitting ? 'Menyimpan...' : 'Kirim Jawaban' }}</span>
@@ -130,7 +136,7 @@ async function handleCompileClick() {
           </div>
         </div>
 
-        <!-- CodeMirror Editor (Client-Only, LaTeX sTeX syntax highlighting) -->
+        <!-- CodeMirror Editor (Client-Only) -->
         <ClientOnly>
           <CodeMirrorEditor
             :modelValue="modelValue"
@@ -138,20 +144,20 @@ async function handleCompileClick() {
           />
           <template #fallback>
             <div class="h-[420px] w-full rounded-lg bg-(--color-surface-alt) animate-pulse border border-border flex items-center justify-center text-xs text-(--color-text-muted)">
-              Memuat CodeMirror 6 Editor…
+              Memuat Editor Kode LaTeX…
             </div>
           </template>
         </ClientOnly>
       </div>
 
-      <!-- Kolom Kanan: KaTeX Instant Preview -->
+      <!-- Kolom Kanan: Instant Document Preview -->
       <div :class="['space-y-3', activeTabMobile === 'preview' ? 'block' : 'hidden lg:block']">
         <div class="flex items-center justify-between px-1">
           <div class="flex items-center gap-2 text-xs font-bold text-(--color-text-primary)">
             <IconEye class="size-4 text-primary" />
-            <span>Pratinjau Instan (KaTeX + LaTeX)</span>
+            <span>Pratinjau Hasil Tampilan Dokumen</span>
           </div>
-          <span class="text-[10px] text-(--color-text-muted)">Render Sisi Klien</span>
+          <span class="text-[10px] text-(--color-text-muted)">Pratinjau Langsung</span>
         </div>
 
         <!-- Output Preview Card -->
@@ -163,8 +169,8 @@ async function handleCompileClick() {
         </div>
 
         <p class="text-[10px] text-(--color-text-muted) px-1">
-          ✓ Merender math LaTeX (<code class="text-[9px]">$x^2$</code>, <code class="text-[9px]">$$\frac{a}{b}$$</code>)
-          dan perintah teks (<code class="text-[9px]">\textit{}</code>, <code class="text-[9px]">\textbf{}</code>, <code class="text-[9px]">\section{}</code>, dll.)
+          ✓ Menyajikan notasi matematika (<code class="text-[9px]">$x^2$</code>, <code class="text-[9px]">$$\frac{a}{b}$$</code>)
+          dan format teks (<code class="text-[9px]">\textit{}</code>, <code class="text-[9px]">\textbf{}</code>, <code class="text-[9px]">\section{}</code>, dll.) secara langsung
         </p>
       </div>
     </div>

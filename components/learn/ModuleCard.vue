@@ -1,40 +1,55 @@
 <script setup lang="ts">
-import { computed } from 'vue'
-import { IconBook, IconArrowRight, IconLock } from '@tabler/icons-vue'
-import type { ModuleData } from '~/composables/useModules'
+import { computed } from "vue";
+import { IconBook, IconArrowRight, IconLock } from "@tabler/icons-vue";
+import type { ModuleData } from "~/composables/useModules";
 
 const props = defineProps<{
-  module: ModuleData
-}>()
+  module: ModuleData;
+}>();
 
-const isLocked = computed(() => props.module.is_locked ?? false)
-const completed = computed(() => props.module.completed_lessons || 0)
-const total = computed(() => props.module.total_lessons || 0)
-const progressPercent = computed(() => props.module.progress_percent || 0)
+const isLocked = computed(() => props.module.is_locked ?? false);
+const completed = computed(() => props.module.completed_lessons || 0);
+const total = computed(() => props.module.total_lessons || 0);
+const progressPercent = computed(() => props.module.progress_percent || 0);
 
 const statusBadge = computed(() => {
   if (isLocked.value) {
-    return { label: '🔒 Terkunci', class: 'badge-neutral' }
+    return {
+      label: "Terkunci",
+      class:
+        "bg-[var(--color-surface-alt)] text-[var(--color-text-muted)] border-[var(--color-border)]",
+    };
   }
   if (progressPercent.value >= 100) {
-    return { label: 'Selesai ✓', class: 'badge-success' }
+    return {
+      label: "Selesai",
+      class:
+        "bg-[var(--color-primary-light)] text-[var(--color-primary)] border-[var(--color-primary)]/30 font-bold",
+    };
   }
   if (progressPercent.value > 0) {
-    return { label: `${progressPercent.value}% Selesai`, class: 'badge-warning' }
+    return {
+      label: `${progressPercent.value}% Selesai`,
+      class:
+        "bg-[var(--color-primary-light)] text-[var(--color-primary)] border-[var(--color-primary)]/20",
+    };
   }
-  return { label: 'Belum Dimulai', class: 'badge-neutral' }
-})
+  return {
+    label: "Belum Dimulai",
+    class:
+      "bg-[var(--color-surface-alt)] text-[var(--color-text-secondary)] border-[var(--color-border)]",
+  };
+});
 </script>
 
 <template>
   <div
     :class="[
-      'group border border-border rounded-xl bg-(--color-surface) p-6 transition-all duration-200 flex flex-col justify-between relative',
+      'group border border-[var(--color-border)] rounded-[var(--radius-lg)] bg-[var(--color-surface)] p-6 transition-all duration-300 flex flex-col justify-between relative font-body shadow-xs',
       isLocked
-        ? 'opacity-75 bg-(--color-surface-alt)/50 cursor-not-allowed border-border/80'
-        : 'hover:border-primary/50 hover:shadow-md cursor-pointer',
+        ? 'opacity-75 bg-[var(--color-surface-alt)]/50 cursor-not-allowed border-[var(--color-border)]/80'
+        : 'hover:border-[var(--color-primary)]/50 hover:shadow-md cursor-pointer hover:-translate-y-1',
     ]"
-    style="box-shadow: var(--shadow-card)"
   >
     <div class="space-y-4">
       <!-- Top Row: Badge Modul & Status Progres -->
@@ -42,12 +57,19 @@ const statusBadge = computed(() => {
         <span
           :class="[
             'px-3 py-1 text-xs font-semibold rounded-full border',
-            isLocked ? 'bg-(--color-surface-alt) text-(--color-text-muted) border-border' : 'bg-primary/10 text-primary border-primary/20',
+            isLocked
+              ? 'bg-[var(--color-surface-alt)] text-[var(--color-text-muted)] border-[var(--color-border)]'
+              : 'bg-[var(--color-primary-light)] text-[var(--color-primary)] border-[var(--color-primary)]/20',
           ]"
         >
           Modul {{ module.sort_order }}
         </span>
-        <span :class="statusBadge.class">
+        <span
+          :class="[
+            'px-2.5 py-0.5 text-[11px] font-bold rounded-full border font-sans',
+            statusBadge.class,
+          ]"
+        >
           {{ statusBadge.label }}
         </span>
       </div>
@@ -56,36 +78,46 @@ const statusBadge = computed(() => {
       <div>
         <h3
           :class="[
-            'text-lg font-bold transition-colors line-clamp-1',
-            isLocked ? 'text-(--color-text-muted)' : 'text-(--color-text-primary) group-hover:text-primary',
+            'text-lg font-bold transition-colors line-clamp-1 font-display tracking-tight',
+            isLocked
+              ? 'text-[var(--color-text-muted)]'
+              : 'text-[var(--color-text-primary)] group-hover:text-[var(--color-primary)]',
           ]"
         >
           {{ module.title }}
         </h3>
-        <p class="text-xs text-(--color-text-muted) mt-2 line-clamp-2 leading-relaxed">
+        <p
+          class="text-xs text-[var(--color-text-muted)] mt-2 line-clamp-2 leading-relaxed"
+        >
           {{ module.description }}
         </p>
       </div>
     </div>
 
-    <!-- Progress Track Section (DESIGN.md) -->
-    <div class="pt-4 mt-4 border-t border-border/50 space-y-2.5">
+    <!-- Progress Track Section -->
+    <div class="pt-4 mt-4 border-t border-[var(--color-border)]/60 space-y-2.5">
       <div class="flex items-center justify-between text-xs">
-        <span class="flex items-center gap-1.5 text-(--color-text-muted) font-medium">
-          <IconBook class="size-3.5 text-primary" />
+        <span
+          class="flex items-center gap-1.5 text-[var(--color-text-muted)] font-medium"
+        >
+          <IconBook class="size-3.5 text-[var(--color-primary)]" />
           {{ completed }}/{{ total }} Bab Selesai
         </span>
-        <span class="font-bold text-(--color-text-primary) tabular-nums">
+        <span class="font-bold text-[var(--color-text-primary)] tabular-nums">
           {{ progressPercent }}%
         </span>
       </div>
 
       <!-- Progress Bar Track -->
-      <div class="h-1.5 w-full bg-surface-alt rounded-full overflow-hidden border border-border">
+      <div
+        class="h-1.5 w-full bg-[var(--color-surface-alt)] rounded-full overflow-hidden border border-[var(--color-border)]/50"
+      >
         <div
           :class="[
             'h-full rounded-full transition-all duration-500 ease-out',
-            progressPercent >= 100 ? 'bg-success' : 'bg-primary',
+            progressPercent >= 100
+              ? 'bg-[var(--color-success)]'
+              : 'bg-[var(--color-primary)]',
           ]"
           :style="{ width: progressPercent + '%' }"
         />
@@ -96,15 +128,21 @@ const statusBadge = computed(() => {
         <NuxtLink
           v-if="!isLocked"
           :to="`/student/modules/${module.id}`"
-          class="text-xs font-semibold text-primary flex items-center gap-1 group-hover:translate-x-0.5 transition-transform"
+          class="text-xs font-semibold text-[var(--color-primary)] flex items-center gap-1 group-hover:translate-x-0.5 transition-transform"
         >
-          <span>{{ progressPercent > 0 ? (progressPercent >= 100 ? 'Review Modul' : 'Lanjutkan Belajar') : 'Pelajari Modul' }}</span>
+          <span>{{
+            progressPercent > 0
+              ? progressPercent >= 100
+                ? "Review Modul"
+                : "Lanjutkan Belajar"
+              : "Pelajari Modul"
+          }}</span>
           <IconArrowRight class="size-3.5" />
         </NuxtLink>
 
         <span
           v-else
-          class="text-xs font-medium text-(--color-text-muted) flex items-center gap-1.5"
+          class="text-xs font-medium text-[var(--color-text-muted)] flex items-center gap-1.5"
           title="Selesaikan modul sebelumnya terlebih dahulu untuk membuka"
         >
           <IconLock class="size-3.5" />

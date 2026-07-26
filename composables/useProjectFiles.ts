@@ -1,19 +1,10 @@
-/**
- * composables/useProjectFiles.ts
- * State management untuk Multi-File Project Workspace pada Sandbox.
- * Mengelola daftar berkas, konten, dan berkas yang sedang aktif di editor.
- */
-
-import { ref, computed } from 'vue'
+import { ref, computed } from "vue";
 
 export interface ProjectFile {
-  /** Nama berkas lengkap, mis. "main.tex", "preamble.tex", "references.bib" */
-  name: string
-  /** Konten teks berkas */
-  content: string
+  isDirty: boolean;
+  name: string;
+  content: string;
 }
-
-// ─── Default Workspace (2 berkas awal) ───────────────────────────────────────
 
 const DEFAULT_PREAMBLE = `% preamble.tex — Pengaturan dokumen global
 \\usepackage[utf8]{inputenc}
@@ -22,7 +13,7 @@ const DEFAULT_PREAMBLE = `% preamble.tex — Pengaturan dokumen global
 \\usepackage{graphicx}
 \\usepackage{geometry}
 \\geometry{margin=2.5cm}
-`
+`;
 
 const DEFAULT_MAIN = `% main.tex — Berkas utama kompilasi (jangan hapus)
 \\documentclass[12pt]{report}
@@ -46,91 +37,97 @@ seperti \\texttt{bab1.tex} lalu memuatnya dengan perintah:
 \\end{verbatim}
 
 \\end{document}
-`
-
-// ─── Composable ──────────────────────────────────────────────────────────────
+`;
 
 export function useProjectFiles() {
-  /** Daftar seluruh berkas di workspace */
   const files = ref<ProjectFile[]>([
-    { name: 'main.tex', content: DEFAULT_MAIN },
-    { name: 'preamble.tex', content: DEFAULT_PREAMBLE },
-  ])
+    {
+      name: "main.tex",
+      content: DEFAULT_MAIN,
+      isDirty: false,
+    },
+    {
+      name: "preamble.tex",
+      content: DEFAULT_PREAMBLE,
+      isDirty: false,
+    },
+  ]);
 
-  /** Nama berkas yang saat ini terbuka di editor */
-  const activeFileName = ref<string>('main.tex')
+  const activeFileName = ref<string>("main.tex");
 
-  /** Berkas yang sedang aktif (computed dari activeFileName) */
   const activeFile = computed<ProjectFile>(
-    () => files.value.find((f) => f.name === activeFileName.value) ?? files.value[0]
-  )
+    () =>
+      files.value.find((f) => f.name === activeFileName.value) ??
+      files.value[0],
+  );
 
-  /** Berkas root yang dikompilasi Docker — selalu main.tex */
-  const ENTRY_FILE = 'main.tex'
+  const ENTRY_FILE = "main.tex";
 
-  // ─── Actions ───────────────────────────────────────────────────────────────
-
-  /** Beralih ke berkas lain di editor */
   function switchFile(name: string) {
     if (files.value.some((f) => f.name === name)) {
-      activeFileName.value = name
+      activeFileName.value = name;
     }
   }
 
-  /** Update konten berkas aktif saat editor berubah */
   function updateContent(name: string, content: string) {
-    const file = files.value.find((f) => f.name === name)
-    if (file) file.content = content
+    const file = files.value.find((f) => f.name === name);
+    if (file) file.content = content;
   }
 
-  /** Tambah berkas baru ke workspace */
-  function addFile(name: string, content: string = '') {
-    const trimmedName = name.trim()
-    if (!trimmedName) return { error: 'Nama berkas tidak boleh kosong.' }
+  function addFile(name: string, content: string = "") {
+    const trimmedName = name.trim();
+    if (!trimmedName) return { error: "Nama berkas tidak boleh kosong." };
     if (files.value.some((f) => f.name === trimmedName)) {
-      return { error: `Berkas "${trimmedName}" sudah ada di workspace.` }
+      return { error: `Berkas "${trimmedName}" sudah ada di workspace.` };
     }
-    // Pastikan berkas memiliki ekstensi yang wajar
-    const allowedExtensions = ['.tex', '.bib', '.sty', '.cls', '.bst']
-    const ext = trimmedName.includes('.') ? `.${trimmedName.split('.').pop()}` : ''
+    const allowedExtensions = [".tex", ".bib", ".sty", ".cls", ".bst"];
+    const ext = trimmedName.includes(".")
+      ? `.${trimmedName.split(".").pop()}`
+      : "";
     if (!allowedExtensions.includes(ext)) {
-      return { error: `Ekstensi "${ext || 'tidak ada'}" tidak didukung. Gunakan: ${allowedExtensions.join(', ')}` }
+      return {
+        error: `Ekstensi "${ext || "tidak ada"}" tidak didukung. Gunakan: ${allowedExtensions.join(", ")}`,
+      };
     }
-    files.value.push({ name: trimmedName, content })
-    activeFileName.value = trimmedName
-    return { error: null }
+    files.value.push({
+      name: trimmedName,
+      content,
+      isDirty: false,
+    });
+    activeFileName.value = trimmedName;
+    return { error: null };
   }
 
-  /** Hapus berkas dari workspace (main.tex tidak bisa dihapus) */
   function deleteFile(name: string) {
-    if (name === ENTRY_FILE) return { error: 'Berkas "main.tex" tidak dapat dihapus.' }
-    const index = files.value.findIndex((f) => f.name === name)
-    if (index === -1) return { error: `Berkas "${name}" tidak ditemukan.` }
+    if (name === ENTRY_FILE)
+      return { error: 'Berkas "main.tex" tidak dapat dihapus.' };
+    const index = files.value.findIndex((f) => f.name === name);
+    if (index === -1) return { error: `Berkas "${name}" tidak ditemukan.` };
 
-    files.value.splice(index, 1)
-    // Jika berkas yang dihapus adalah yang aktif, beralih ke main.tex
+    files.value.splice(index, 1);
     if (activeFileName.value === name) {
-      activeFileName.value = ENTRY_FILE
+      activeFileName.value = ENTRY_FILE;
     }
-    return { error: null }
+    return { error: null };
   }
 
   /** Rename berkas (main.tex tidak bisa di-rename) */
   function renameFile(oldName: string, newName: string) {
-    if (oldName === ENTRY_FILE) return { error: 'Berkas "main.tex" tidak dapat di-rename.' }
-    const file = files.value.find((f) => f.name === oldName)
-    if (!file) return { error: `Berkas "${oldName}" tidak ditemukan.` }
+    if (oldName === ENTRY_FILE)
+      return { error: 'Berkas "main.tex" tidak dapat di-rename.' };
+    const file = files.value.find((f) => f.name === oldName);
+    if (!file) return { error: `Berkas "${oldName}" tidak ditemukan.` };
     if (files.value.some((f) => f.name === newName)) {
-      return { error: `Nama "${newName}" sudah digunakan.` }
+      return { error: `Nama "${newName}" sudah digunakan.` };
     }
-    file.name = newName
-    if (activeFileName.value === oldName) activeFileName.value = newName
-    return { error: null }
+    file.name = newName;
+    if (activeFileName.value === oldName) activeFileName.value = newName;
+    return { error: null };
   }
 
   /** Konversi state ke payload API: Record<string, string> */
   function toPayload(): Record<string, string> {
-    return Object.fromEntries(files.value.map((f) => [f.name, f.content]))
+    return Object.fromEntries(files.value.map((f) => [f.name, f.content]));
   }
 
   return {
@@ -144,5 +141,5 @@ export function useProjectFiles() {
     deleteFile,
     renameFile,
     toPayload,
-  }
+  };
 }

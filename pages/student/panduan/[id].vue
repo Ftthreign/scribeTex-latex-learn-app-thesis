@@ -43,14 +43,15 @@ watch(
 </script>
 
 <template>
-  <div class="max-w-4xl mx-auto px-4 py-8 space-y-6">
+  <!-- w-full agar mengisi seluruh lebar main layout tanpa space kosong di kiri dan kanan -->
+  <div class="w-full space-y-6 relative">
     <!-- Tombol Kembali -->
     <button
       @click="router.push('/student/panduan')"
       class="flex items-center gap-2 text-xs font-semibold text-primary hover:underline cursor-pointer"
     >
       <IconArrowLeft class="size-4" />
-      Kembali ke Panduan Regulasi
+      <span>Kembali ke Panduan Regulasi</span>
     </button>
 
     <!-- State Loading -->
@@ -60,37 +61,37 @@ watch(
     </div>
 
     <!-- State Error -->
-    <div v-else-if="error" class="p-6 rounded-xl bg-red-500/10 border border-red-500/20 text-red-600 text-sm">
+    <div v-else-if="error" class="p-6 rounded-xl bg-red-500/10 border border-red-500/20 text-red-600 text-sm font-sans">
       {{ error }}
     </div>
 
     <!-- Detail Artikel -->
-    <div v-else-if="currentArticle" class="space-y-8">
+    <div v-else-if="currentArticle" class="space-y-6">
       <!-- Header Artikel -->
-      <div class="border-b border-border pb-6 space-y-3">
+      <div class="bg-(--color-surface) border border-border rounded-2xl p-6 lg:p-8 shadow-xs space-y-3 font-sans">
         <div class="flex items-center gap-2 text-xs font-semibold text-primary">
           <IconFileText class="size-4" />
           <span>Panduan Regulasi Akademik Universitas Lampung</span>
         </div>
 
-        <h1 class="text-2xl lg:text-3xl font-bold text-(--color-text-primary)">
+        <h1 class="text-2xl lg:text-3xl font-bold text-(--color-text-primary) font-display tracking-tight leading-tight">
           {{ currentArticle.title }}
         </h1>
 
         <div class="flex items-center gap-4 text-xs text-(--color-text-muted) pt-1">
-          <span class="flex items-center gap-1">
+          <span class="flex items-center gap-1 font-semibold">
             <IconUser class="size-3.5" />
             {{ currentArticle.author?.name || 'Admin Unila' }}
           </span>
-          <span class="flex items-center gap-1">
+          <span class="flex items-center gap-1 font-semibold">
             <IconCalendar class="size-3.5" />
             {{ formatDate(currentArticle.created_at) }}
           </span>
         </div>
       </div>
 
-      <!-- Area Teks Konten Artikel -->
-      <div class="bg-(--color-surface) border border-border rounded-xl p-6 lg:p-10 shadow-sm">
+      <!-- Area Teks Konten Artikel Full Width -->
+      <div class="bg-(--color-surface) border border-border rounded-2xl p-6 lg:p-10 shadow-xs">
         <KatexRenderer :content="currentArticle.content" :isMarkdown="true" />
       </div>
     </div>

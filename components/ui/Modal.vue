@@ -1,13 +1,44 @@
 <script setup lang="ts">
-import { onUnmounted, watch } from "vue";
+import { computed, onUnmounted, watch } from "vue";
 import { IconX } from "@tabler/icons-vue";
 
-const props = defineProps<{
-  isOpen: boolean;
-  title: string;
-}>();
+const props = withDefaults(
+  defineProps<{
+    isOpen: boolean;
+    title: string;
+    size?: "sm" | "md" | "lg" | "xl" | "2xl" | "4xl" | "5xl" | "6xl" | "full";
+  }>(),
+  {
+    size: "lg",
+  }
+);
 
 const emit = defineEmits(["close"]);
+
+const modalSizeClass = computed(() => {
+  switch (props.size) {
+    case "sm":
+      return "max-w-sm";
+    case "md":
+      return "max-w-md";
+    case "lg":
+      return "max-w-lg";
+    case "xl":
+      return "max-w-xl";
+    case "2xl":
+      return "max-w-2xl";
+    case "4xl":
+      return "max-w-4xl";
+    case "5xl":
+      return "max-w-5xl";
+    case "6xl":
+      return "max-w-6xl";
+    case "full":
+      return "max-w-[95vw]";
+    default:
+      return "max-w-lg";
+  }
+});
 
 // Prevent scroll when modal is open
 const toggleScroll = (open: boolean) => {
@@ -45,13 +76,16 @@ onUnmounted(() => toggleScroll(false));
         ></div>
 
         <div
-          class="relative w-full max-w-lg bg-(--color-surface) border border-border rounded-(--radius-lg) shadow-(--shadow-modal) overflow-hidden flex flex-col"
+          :class="[
+            'relative w-full bg-(--color-surface) border border-border rounded-(--radius-lg) shadow-(--shadow-modal) overflow-hidden flex flex-col max-h-[90vh]',
+            modalSizeClass
+          ]"
           @click.stop
         >
           <div
-            class="px-6 py-4.5 border-b border-border flex items-center justify-between bg-(--color-surface) shrink-0"
+            class="px-6 py-4 border-b border-border flex items-center justify-between bg-(--color-surface) shrink-0 font-body"
           >
-            <h3 class="text-lg font-bold text-(--color-text-primary)">
+            <h3 class="text-base sm:text-lg font-bold text-(--color-text-primary) font-display tracking-tight">
               {{ title }}
             </h3>
             <button
@@ -64,14 +98,14 @@ onUnmounted(() => toggleScroll(false));
 
           <!-- Body -->
           <div
-            class="px-6 py-6 overflow-y-auto font-sans text-sm text-text-secondary leading-relaxed space-y-4"
+            class="px-6 py-5 overflow-y-auto font-sans text-sm text-text-secondary leading-relaxed space-y-4 flex-1"
           >
             <slot />
           </div>
 
           <!-- Footer -->
           <div
-            class="px-6 py-4 bg-surface-alt/30 border-t border-border flex justify-end gap-2.5 shrink-0"
+            class="px-6 py-3.5 bg-surface-alt/30 border-t border-border flex justify-end gap-2.5 shrink-0 font-sans"
           >
             <slot name="footer">
               <button @click="emit('close')" class="btn-primary btn-md">

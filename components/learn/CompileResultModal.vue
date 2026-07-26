@@ -63,8 +63,10 @@ function handleDownloadPdf() {
             </div>
             <div>
               <div class="flex items-center gap-2">
-                <h3 class="font-bold text-(--color-text-primary) font-display tracking-tight text-base">
-                  {{ title || "Hasil Kompilasi Docker TeXLive" }}
+                <h3
+                  class="font-bold text-(--color-text-primary) font-display tracking-tight text-base"
+                >
+                  {{ title || "Hasil Kompilasi PDF" }}
                 </h3>
                 <!-- Status Badges -->
                 <span v-if="isCompiling" class="badge-neutral animate-pulse">
@@ -81,7 +83,7 @@ function handleDownloadPdf() {
                 </span>
               </div>
               <p class="text-[11px] text-(--color-text-muted)">
-                Hasil eksekusi berkas \LaTeX{} oleh kontainer Docker TeXLive server.
+                Hasil eksekusi kompilasi berkas \LaTeX{} oleh mesin kompilator server.
               </p>
             </div>
           </div>
@@ -95,14 +97,17 @@ function handleDownloadPdf() {
         </div>
 
         <!-- Modal Body (2-Column Split View) -->
-        <div class="flex-1 overflow-y-auto p-6 grid grid-cols-1 md:grid-cols-2 gap-6 items-start">
-          
+        <div
+          class="flex-1 overflow-y-auto p-6 grid grid-cols-1 md:grid-cols-2 gap-6 items-start"
+        >
           <!-- ─── KOLOM KIRI: LOG TERMINAL & ERROR DEBUGGER ──────────────────── -->
           <div class="flex flex-col space-y-3 h-full">
             <div class="flex items-center justify-between">
-              <div class="flex items-center gap-1.5 text-xs font-bold text-(--color-text-primary)">
+              <div
+                class="flex items-center gap-1.5 text-xs font-bold text-(--color-text-primary)"
+              >
                 <IconTerminal2 class="size-4 text-primary" />
-                <span>Log Output TeXLive / Debugger</span>
+                <span>Log Hasil Kompilasi / Debugger</span>
               </div>
 
               <!-- Shortcut Tanya AI if Error -->
@@ -122,7 +127,9 @@ function handleDownloadPdf() {
               class="flex-1 p-6 bg-slate-950 text-slate-400 rounded-2xl border border-slate-800 font-mono text-xs flex flex-col items-center justify-center space-y-3 min-h-[56vh]"
             >
               <IconLoader2 class="size-8 text-primary animate-spin" />
-              <p class="text-xs font-semibold text-slate-300">Menjalankan mesin pdflatex di kontainer Docker...</p>
+              <p class="text-xs font-semibold text-slate-300">
+                Menjalankan proses kompilasi dokumen PDF...
+              </p>
             </div>
 
             <!-- Scrollable Log Box -->
@@ -130,21 +137,29 @@ function handleDownloadPdf() {
               v-else
               class="flex-1 p-4 bg-slate-950 text-slate-200 rounded-2xl border border-slate-800 font-mono text-xs overflow-y-auto min-h-[56vh] max-h-[58vh] leading-relaxed shadow-inner"
             >
-              <pre v-if="isSuccess && !errorLogs" class="text-emerald-400 whitespace-pre-wrap">✅ Kompilasi LaTeX Sempurna!
-[TeXLive 2026 Engine]
-- Entrypoint: main.tex
-- Return code: 0
-- PDF Output Generated successfully.
-- No fatal errors detected.
-</pre>
-              <pre v-else class="text-red-300 whitespace-pre-wrap">{{ errorLogs || "Tidak ada log galat yang terekam." }}</pre>
+              <pre
+                v-if="isSuccess && !errorLogs"
+                class="text-emerald-400 whitespace-pre-wrap"
+              >
+✅ Kompilasi LaTeX Sempurna!
+[Mesin Kompilator LaTeX]
+- Berkas Dokumen: main.tex
+- Status: Berhasil (0 Error)
+- Dokumen PDF telah berhasil dibuat.
+</pre
+              >
+              <pre v-else class="text-red-300 whitespace-pre-wrap">{{
+                errorLogs || "Tidak ada log error yang terekam."
+              }}</pre>
             </div>
           </div>
 
           <!-- ─── KOLOM KANAN: PRATINJAU DOKUMEN PDF ────────────────────────── -->
           <div class="flex flex-col space-y-3 h-full">
             <div class="flex items-center justify-between">
-              <div class="flex items-center gap-1.5 text-xs font-bold text-(--color-text-primary)">
+              <div
+                class="flex items-center gap-1.5 text-xs font-bold text-(--color-text-primary)"
+              >
                 <IconFileTypePdf class="size-4 text-emerald-600" />
                 <span>Pratinjau Dokumen PDF</span>
               </div>
@@ -165,7 +180,9 @@ function handleDownloadPdf() {
               class="flex-1 p-6 bg-(--color-surface-alt) rounded-2xl border border-border flex flex-col items-center justify-center text-center space-y-3 min-h-[56vh]"
             >
               <IconLoader2 class="size-8 text-primary animate-spin" />
-              <p class="text-xs font-semibold text-(--color-text-muted)">Menyiapkan dokumen PDF...</p>
+              <p class="text-xs font-semibold text-(--color-text-muted)">
+                Menyiapkan dokumen PDF...
+              </p>
             </div>
 
             <!-- PDF Embedded Iframe Viewer -->
@@ -184,13 +201,19 @@ function handleDownloadPdf() {
               v-else
               class="flex-1 p-8 bg-(--color-surface-alt) rounded-2xl border border-border flex flex-col items-center justify-center text-center space-y-3 min-h-[56vh]"
             >
-              <div class="size-12 rounded-2xl bg-red-100 text-red-500 flex items-center justify-center">
+              <div
+                class="size-12 rounded-2xl bg-red-100 text-red-500 flex items-center justify-center"
+              >
                 <IconAlertTriangle class="size-6" />
               </div>
               <div class="max-w-xs space-y-1">
-                <p class="text-sm font-bold text-(--color-text-primary)">PDF Tidak Dapat Dirender</p>
+                <p class="text-sm font-bold text-(--color-text-primary)">
+                  PDF Tidak Dapat Dirender
+                </p>
                 <p class="text-xs text-(--color-text-muted) leading-relaxed">
-                  Dokumen PDF tidak dapat dibuat karena terdapat galat sintaks \LaTeX{} fatal. Silakan perbaiki kesalahan pada log di sebelah kiri.
+                  Dokumen PDF tidak dapat dibuat karena terdapat galat sintaks
+                  \LaTeX{} fatal. Silakan perbaiki kesalahan pada log di sebelah
+                  kiri.
                 </p>
               </div>
             </div>
@@ -217,6 +240,12 @@ function handleDownloadPdf() {
 </template>
 
 <style scoped>
-.fade-enter-active, .fade-leave-active { transition: opacity 0.2s ease; }
-.fade-enter-from, .fade-leave-to { opacity: 0; }
+.fade-enter-active,
+.fade-leave-active {
+  transition: opacity 0.2s ease;
+}
+.fade-enter-from,
+.fade-leave-to {
+  opacity: 0;
+}
 </style>

@@ -15,6 +15,8 @@ export interface AssignmentItem {
   deadline: string
   deadlineLabel: string
   icon: string
+  exercise_id?: number
+  lesson_id?: number
 }
 
 interface DashboardStats {
@@ -35,6 +37,28 @@ interface ActiveModuleData {
   badge: string
 }
 
+export interface AnalyticsData {
+  compilationHealth: {
+    total: number
+    success: number
+    error: number
+    successRate: number
+  }
+  weeklyActivity: Array<{
+    day: string
+    compilations: number
+    completedLessons: number
+  }>
+  moduleBreakdown: Array<{
+    id: number
+    sortOrder: number
+    title: string
+    completed: number
+    total: number
+    percentage: number
+  }>
+}
+
 interface DashboardApiResponse {
   stats: {
     modules_completed: string
@@ -43,6 +67,8 @@ interface DashboardApiResponse {
     ai_chat_sessions: number
   }
   activeModule: Omit<ActiveModuleData, 'badge'> | null
+  analytics?: AnalyticsData
+  assignments: AssignmentItem[]
   articles: ArticleItem[]
 }
 
@@ -101,8 +127,15 @@ export function useStudentDashboard() {
     return apiData.value?.articles || []
   })
 
-  // Assignments sementara tetap sebagai placeholder ringkas
-  const assignments = ref<AssignmentItem[]>([])
+  // Assignments dari API (latihan/materi belum diselesaikan)
+  const assignments = computed<AssignmentItem[]>(() => {
+    return apiData.value?.assignments || []
+  })
+
+  // Analytics data dari API
+  const analytics = computed<AnalyticsData | null>(() => {
+    return apiData.value?.analytics || null
+  })
 
   const fetchDashboardData = async () => {
     isLoading.value = true
@@ -137,6 +170,7 @@ export function useStudentDashboard() {
     studentName,
     stats,
     activeModule,
+    analytics,
     assignments,
     articles,
     isLoading,

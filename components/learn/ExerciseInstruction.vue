@@ -1,40 +1,69 @@
 <script setup lang="ts">
-import { IconBook, IconCode, IconInfoCircle } from '@tabler/icons-vue'
+import { IconBook, IconCode, IconInfoCircle, IconFileText } from '@tabler/icons-vue'
 import type { ExerciseDetail } from '~/composables/useExercise'
 
 defineProps<{
-  exercise: ExerciseDetail
+  exercise: ExerciseDetail;
+  isCompleted?: boolean;
+}>()
+
+const emit = defineEmits<{
+  (e: 'viewResult'): void;
 }>()
 </script>
 
 <template>
-  <div class="bg-(--color-surface) border border-border rounded-xl p-5 space-y-3" style="box-shadow: var(--shadow-card)">
+  <div class="card p-5 space-y-4 font-body">
+    <!-- Header Status Akademik jika Latihan Sudah Pernah Diselesaikan -->
+    <div
+      v-if="isCompleted"
+      class="p-3.5 rounded-(--radius-md) bg-(--color-surface-alt)/60 border border-border flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 transition-all"
+    >
+      <div class="flex items-center gap-2.5">
+        <span class="size-2 rounded-full bg-(--color-primary) shrink-0"></span>
+        <div>
+          <h4 class="text-xs font-bold text-(--color-text-primary) font-display">Anda Telah Menyelesaikan Latihan Ini</h4>
+          <p class="text-[11px] text-(--color-text-secondary) leading-relaxed font-sans">
+            Kode jawaban Anda terverifikasi 100% tepat. Anda dapat meninjau riwayat kode & berkas PDF hasil pengerjaan Anda kapan saja.
+          </p>
+        </div>
+      </div>
+
+      <button
+        @click="emit('viewResult')"
+        class="btn-primary btn-sm flex items-center gap-1.5 shrink-0 self-end sm:self-auto cursor-pointer font-bold shadow-xs"
+      >
+        <IconFileText class="size-4" />
+        <span>Lihat Hasil Pengerjaan Saya</span>
+      </button>
+    </div>
+
     <!-- Header Modul & Lesson -->
     <div class="flex items-center justify-between gap-2 border-b border-border pb-3">
-      <div class="flex items-center gap-2 text-xs font-semibold text-primary">
+      <div class="flex items-center gap-2 text-xs font-semibold text-(--color-primary)">
         <IconBook class="size-4 shrink-0" />
-        <span class="truncate">{{ exercise?.module_title || 'Modul Pembelajaran' }}</span>
+        <span class="truncate font-display tracking-tight">{{ exercise?.module_title || 'Modul Pembelajaran' }}</span>
       </div>
-      <span class="px-2.5 py-0.5 text-[10px] font-bold rounded-full bg-primary/10 text-primary border border-primary/20 shrink-0">
+      <span class="px-2.5 py-0.5 text-[11px] font-bold rounded-full bg-(--color-primary-light) text-(--color-primary) border border-(--color-primary)/20 font-sans">
         {{ exercise?.lesson_title || 'Latihan Kode' }}
       </span>
     </div>
 
     <!-- Instruksi Utama -->
     <div class="space-y-1.5">
-      <h3 class="text-sm font-bold text-(--color-text-primary) flex items-center gap-2">
-        <IconCode class="size-4 text-primary shrink-0" />
+      <h3 class="text-sm font-bold text-(--color-text-primary) flex items-center gap-2 font-display">
+        <IconCode class="size-4 text-(--color-primary) shrink-0" />
         Instruksi Latihan Kode
       </h3>
-      <p class="text-xs text-(--color-text-secondary) leading-relaxed">
-        {{ exercise?.instruction || 'Selesaikan perbaikan kode pada starter_code sesuai petunjuk materi.' }}
+      <p class="text-xs text-(--color-text-secondary) leading-relaxed font-sans">
+        {{ exercise?.instruction || 'Selesaikan perbaikan kode pada editor sesuai petunjuk materi.' }}
       </p>
     </div>
 
     <!-- Petunjuk Singkat -->
     <div class="pt-2 flex items-center gap-1.5 text-[11px] text-(--color-text-muted) border-t border-border/60">
-      <IconInfoCircle class="size-3.5 text-primary shrink-0" />
-      <span>Edit sintaks pada editor di bawah lalu amati hasil rendering instan KaTeX pada panel pratinjau.</span>
+      <IconInfoCircle class="size-3.5 text-(--color-primary) shrink-0" />
+      <span>Edit sintaks pada editor di bawah lalu amati hasil pratinjau notasi matematika secara langsung pada panel sebelah kanan.</span>
     </div>
   </div>
 </template>

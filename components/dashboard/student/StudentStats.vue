@@ -1,57 +1,109 @@
 <script setup lang="ts">
-import { IconClipboardList, IconSquareCheck, IconStar, IconMessage2 } from '@tabler/icons-vue'
+import {
+  IconBook,
+  IconCircleCheck,
+  IconSchool,
+  IconSparkles,
+} from "@tabler/icons-vue";
 
 interface StatItem {
-  label: string
-  value: string | number
-  badge?: string
-  icon: string
+  label: string;
+  value: string | number;
+  badge?: string;
+  icon: string;
 }
 
-defineProps<{ stats: StatItem[] }>()
+defineProps<{ stats: StatItem[] }>();
 
-const iconMap: Record<string, any> = {
-  menu_book: IconClipboardList,
-  task_alt:  IconSquareCheck,
-  school:    IconStar,
-  smart_toy: IconMessage2,
-}
-
-const iconBgMap: Record<string, string> = {
-  menu_book: 'bg-blue-50 text-blue-600',
-  task_alt:  'bg-violet-50 text-violet-600',
-  school:    'bg-amber-50 text-amber-500',
-  smart_toy: 'bg-sky-50 text-sky-600',
-}
+const themeMap: Record<
+  string,
+  {
+    icon: any;
+    bgSolid: string;
+    textColor: string;
+    badgeStyle: string;
+  }
+> = {
+  menu_book: {
+    icon: IconBook,
+    bgSolid: "bg-[var(--color-primary)]",
+    textColor: "text-[var(--color-primary)]",
+    badgeStyle:
+      "text-[var(--color-primary)] bg-[var(--color-primary-light)] border-[var(--color-primary)]/20",
+  },
+  task_alt: {
+    icon: IconCircleCheck,
+    bgSolid: "bg-[var(--color-success)]",
+    textColor: "text-[var(--color-success)]",
+    badgeStyle:
+      "text-[var(--color-success)] bg-[var(--color-success-light)] border-[var(--color-success)]/20",
+  },
+  school: {
+    icon: IconSchool,
+    bgSolid: "bg-amber-500",
+    textColor: "text-amber-600",
+    badgeStyle: "text-amber-700 bg-amber-50 border-amber-200",
+  },
+  smart_toy: {
+    icon: IconSparkles,
+    bgSolid: "bg-[var(--color-ai-primary)]",
+    textColor: "text-[var(--color-ai-primary)]",
+    badgeStyle:
+      "text-[var(--color-ai-primary)] bg-[var(--color-ai-light)] border-[var(--color-ai-primary)]/20",
+  },
+};
 </script>
 
 <template>
-  <section class="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+  <section class="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-8 font-body">
     <div
-      v-for="stat in stats" :key="stat.label"
-      class="bg-[var(--color-surface)] border border-[var(--color-border)] rounded-xl p-5 hover:shadow-sm transition-shadow"
+      v-for="stat in stats"
+      :key="stat.label"
+      class="group relative overflow-hidden bg-(--color-surface) border border-border rounded-(--radius-lg) p-5 hover:-translate-y-1 hover:shadow-md hover:border-border-strong transition-all duration-300 cursor-default flex flex-col justify-between"
     >
-      <!-- Top row: icon + optional badge -->
-      <div class="flex items-start justify-between mb-4">
-        <div :class="['w-9 h-9 rounded-lg flex items-center justify-center shrink-0', iconBgMap[stat.icon] ?? 'bg-blue-50 text-blue-600']">
-          <component :is="iconMap[stat.icon] ?? IconClipboardList" class="size-4.5" />
-        </div>
-        <span
-          v-if="stat.badge"
-          class="text-[10px] font-bold text-emerald-600 bg-emerald-50 border border-emerald-200 px-2 py-0.5 rounded-full leading-none whitespace-nowrap"
-        >
-          {{ stat.badge }}
-        </span>
-      </div>
+      <div
+        class="absolute -top-5 -right-5 w-28 h-28 rounded-2xl opacity-[0.08] rotate-12 transition-transform duration-500 group-hover:rotate-6 group-hover:scale-110 pointer-events-none"
+        :class="themeMap[stat.icon]?.bgSolid ?? 'bg-primary'"
+      />
 
-      <!-- Value -->
-      <p class="text-[28px] font-bold text-[var(--color-text-primary)] leading-none mb-1.5 font-display tracking-tight">
-        {{ stat.value }}
-      </p>
-      <!-- Label -->
-      <p class="text-[10px] font-bold text-[var(--color-text-muted)] uppercase tracking-widest leading-none">
-        {{ stat.label }}
-      </p>
+      <div class="relative z-10 flex items-start justify-between gap-3">
+        <div class="flex-1 min-w-0">
+          <div class="flex items-center gap-2 mb-2">
+            <p
+              class="text-[11px] font-bold text-(--color-text-muted) uppercase tracking-wider truncate"
+            >
+              {{ stat.label }}
+            </p>
+          </div>
+
+          <p
+            class="text-[28px] lg:text-[32px] font-bold text-(--color-text-primary) leading-none font-display tracking-tight group-hover:text-primary transition-colors mb-2"
+          >
+            {{ stat.value }}
+          </p>
+
+          <span
+            v-if="stat.badge"
+            class="inline-block text-[9px] font-bold border px-2 py-0.5 rounded-full uppercase tracking-wider"
+            :class="
+              themeMap[stat.icon]?.badgeStyle ?? 'text-primary bg-primary-light'
+            "
+          >
+            {{ stat.badge }}
+          </span>
+        </div>
+
+        <!-- Right Side: Rotated Featured Icon Box -->
+        <div
+          class="w-11 h-11 rounded-xl flex items-center justify-center text-white shrink-0 shadow-xs rotate-6 transition-all duration-300 group-hover:rotate-0 group-hover:scale-105"
+          :class="themeMap[stat.icon]?.bgSolid ?? 'bg-primary'"
+        >
+          <component
+            :is="themeMap[stat.icon]?.icon ?? IconBook"
+            class="size-5.5 -rotate-6 group-hover:rotate-0 transition-transform duration-300"
+          />
+        </div>
+      </div>
     </div>
   </section>
 </template>

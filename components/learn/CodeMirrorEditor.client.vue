@@ -9,7 +9,8 @@ import {
   highlightActiveLineGutter,
 } from '@codemirror/view'
 import { defaultKeymap, history, historyKeymap, indentWithTab } from '@codemirror/commands'
-import { StreamLanguage } from '@codemirror/language'
+import { StreamLanguage, syntaxHighlighting, HighlightStyle } from '@codemirror/language'
+import { tags } from '@lezer/highlight'
 import { stex } from '@codemirror/legacy-modes/mode/stex'
 
 const props = defineProps<{
@@ -24,6 +25,19 @@ const emit = defineEmits<{
 const editorRef = ref<HTMLElement | null>(null)
 let view: EditorView | null = null
 
+// Skema Warna Syntax Highlighting khusus LaTeX berstandar Dark Academic DESIGN.md
+const latexHighlightStyle = HighlightStyle.define([
+  { tag: tags.keyword, color: '#79c0ff', fontWeight: 'bold' },
+  { tag: tags.atom, color: '#ffa657' },
+  { tag: tags.number, color: '#d2a8ff' },
+  { tag: tags.string, color: '#a5d6ff' },
+  { tag: tags.variableName, color: '#ffa657' },
+  { tag: tags.comment, color: '#8b949e', fontStyle: 'italic' },
+  { tag: tags.bracket, color: '#7ee787' },
+  { tag: tags.meta, color: '#d29922' },
+  { tag: tags.escape, color: '#d29922' },
+])
+
 // Custom Dark Academic Theme sesuai DESIGN.md (JetBrains Mono, #0d1117 bg)
 const academicDarkTheme = EditorView.theme({
   '&': {
@@ -32,17 +46,17 @@ const academicDarkTheme = EditorView.theme({
     fontFamily: 'var(--font-mono, "JetBrains Mono", monospace)',
     fontSize: '13px',
     height: '100%',
-    maxHeight: '100%',
+    minHeight: '380px',
     borderRadius: '0.5rem',
   },
   '.cm-scroller': {
     overflow: 'auto !important',
-    height: '100% !important',
-    maxHeight: '100% !important',
+    minHeight: '380px !important',
   },
   '.cm-content': {
     caretColor: '#58a6ff',
     padding: '12px 0',
+    color: '#e6edf3 !important',
   },
   '.cm-cursor, .cm-dropCursor': {
     borderLeftColor: '#58a6ff',
@@ -67,6 +81,7 @@ const academicDarkTheme = EditorView.theme({
   },
   '.cm-line': {
     padding: '0 12px',
+    color: '#e6edf3',
   },
 })
 
@@ -82,6 +97,7 @@ onMounted(() => {
         highlightActiveLine(),
         history(),
         StreamLanguage.define(stex), // Bahasa sintaks spesifik LaTeX (TeX / sTeX)
+        syntaxHighlighting(latexHighlightStyle), // Ekstensi Pewarnaan Sintaks LaTeX
         keymap.of([...defaultKeymap, ...historyKeymap, indentWithTab]),
         academicDarkTheme,
         EditorView.updateListener.of((update) => {

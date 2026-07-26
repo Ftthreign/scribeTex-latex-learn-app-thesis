@@ -11,7 +11,6 @@ export default defineEventHandler(async (event) => {
 
   const userId = supabaseUser.id;
 
-  // 1. Ambil semua modul yang terpublikasi beserta lesson-nya
   const allModules = await prisma.module.findMany({
     where: { is_published: true },
     orderBy: { sort_order: "asc" },
@@ -26,7 +25,6 @@ export default defineEventHandler(async (event) => {
 
   const totalLessons = allModules.reduce((acc, m) => acc + m.lessons.length, 0);
 
-  // 2. Ambil progress lesson user
   const userProgress = await prisma.userProgress.findMany({
     where: { user_id: userId },
     select: { lesson_id: true, is_completed: true },
@@ -38,7 +36,6 @@ export default defineEventHandler(async (event) => {
 
   const totalCompleted = completedLessonIds.size;
 
-  // 3. Cari modul aktif: modul pertama yang memiliki lesson belum selesai
   let activeModuleData: (typeof allModules)[0] | null = null;
   let activeModuleCompletedCount = 0;
   let activeModuleTotalLessons = 0;
@@ -56,7 +53,6 @@ export default defineEventHandler(async (event) => {
     }
   }
 
-  // Fallback: jika semua selesai, tampilkan modul terakhir
   if (!activeModuleData) {
     activeModuleData = allModules[allModules.length - 1] || null;
     if (activeModuleData) {
@@ -65,7 +61,6 @@ export default defineEventHandler(async (event) => {
     }
   }
 
-  // 4. Cari ID lesson berikutnya yang belum diselesaikan dalam activeModule
   let nextLessonId: number | null = null;
   if (activeModuleData) {
     for (const lesson of activeModuleData.lessons) {
@@ -80,7 +75,6 @@ export default defineEventHandler(async (event) => {
     }
   }
 
-  // 5. Hitung progress modul aktif dalam persentase
   const activeModuleProgress =
     activeModuleTotalLessons > 0
       ? Math.round(
@@ -88,12 +82,9 @@ export default defineEventHandler(async (event) => {
         )
       : 0;
 
-  // 6. Hitung jumlah AI chat sessions user
   const aiChatCount = await prisma.aiChatHistory.count({
     where: { user_id: userId },
   });
-
-  // 7. Ambil 3 artikel panduan Unila terbaru
   const latestArticles = await prisma.article.findMany({
     where: { is_published: true },
     orderBy: { id: "asc" },
@@ -104,7 +95,6 @@ export default defineEventHandler(async (event) => {
     },
   });
 
-  // 8. Hitung jumlah modul yang sudah selesai semua lesson-nya
   let completedModulesCount = 0;
   for (const mod of allModules) {
     const allDone = mod.lessons.every((l) => completedLessonIds.has(l.id));
@@ -113,7 +103,6 @@ export default defineEventHandler(async (event) => {
     }
   }
 
-  // 9. Ambil upcoming exercises/assignments yang belum diselesaikan oleh user
   const upcomingExercises = await prisma.exercise.findMany({
     where: {
       is_published: true,
@@ -187,7 +176,6 @@ export default defineEventHandler(async (event) => {
       };
     });
   } else {
-    // Fallback: Jika tidak ada exercise spesifik, ambil lesson belum selesai dari activeModule/allModules
     const pendingLessons: Array<{
       id: number;
       title: string;

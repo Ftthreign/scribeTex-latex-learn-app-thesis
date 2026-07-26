@@ -38,8 +38,6 @@ const menuItems = [
     icon: IconDatabase,
     path: ROUTES.admin.content,
   },
-  { name: "Modules", icon: IconBook, path: ROUTES.admin.modules },
-  { name: "Articles", icon: IconFileText, path: ROUTES.admin.articles },
 ];
 
 const showLogoutModal = ref(false);

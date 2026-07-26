@@ -173,7 +173,7 @@ const progressTextClass = computed(() =>
 </script>
 
 <template>
-  <div class="relative">
+  <div class="relative font-body">
     <div class="flex gap-6 xl:gap-8 items-start w-full">
       <article ref="contentRef" class="flex-1 min-w-0 space-y-8">
         <LessonHeader
@@ -186,8 +186,7 @@ const progressTextClass = computed(() =>
         />
 
         <div
-          class="bg-(--color-surface) border border-border rounded-xl p-4 sm:p-6 lg:p-10 shadow-sm"
-          style="box-shadow: var(--shadow-card)"
+          class="bg-[var(--color-surface)] border border-[var(--color-border)] rounded-[var(--radius-xl)] p-4 sm:p-6 lg:p-10 shadow-xs"
         >
           <KatexRenderer :content="lesson.content" :isMarkdown="true" />
         </div>
