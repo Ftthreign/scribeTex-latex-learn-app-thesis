@@ -39,14 +39,67 @@ function insertFormatting(prefix: string, suffix: string = "") {
   const start = el.selectionStart;
   const end = el.selectionEnd;
   const text = el.value;
-  const selected = text.substring(start, end) || "teks";
+  const selectedText = text.substring(start, end);
+
+  if (
+    suffix &&
+    selectedText.startsWith(prefix) &&
+    selectedText.endsWith(suffix) &&
+    selectedText.length >= prefix.length + suffix.length
+  ) {
+    const unwrapped = selectedText.substring(
+      prefix.length,
+      selectedText.length - suffix.length,
+    );
+    modelValue.value =
+      text.substring(0, start) + unwrapped + text.substring(end);
+    nextTick(() => {
+      el.focus();
+      el.setSelectionRange(start, start + unwrapped.length);
+    });
+    return;
+  }
+
+  if (
+    suffix &&
+    start >= prefix.length &&
+    text.substring(start - prefix.length, start) === prefix &&
+    text.substring(end, end + suffix.length) === suffix
+  ) {
+    const before = text.substring(0, start - prefix.length);
+    const after = text.substring(end + suffix.length);
+    modelValue.value = before + selectedText + after;
+    nextTick(() => {
+      el.focus();
+      const newStart = start - prefix.length;
+      el.setSelectionRange(newStart, newStart + selectedText.length);
+    });
+    return;
+  }
+
+  if (!suffix && selectedText.startsWith(prefix)) {
+    const unwrapped = selectedText.substring(prefix.length);
+    modelValue.value =
+      text.substring(0, start) + unwrapped + text.substring(end);
+    nextTick(() => {
+      el.focus();
+      el.setSelectionRange(start, start + unwrapped.length);
+    });
+    return;
+  }
+
+  const selected = selectedText || "teks";
   const replacement = `${prefix}${selected}${suffix}`;
 
-  modelValue.value = text.substring(0, start) + replacement + text.substring(end);
+  modelValue.value =
+    text.substring(0, start) + replacement + text.substring(end);
 
   nextTick(() => {
     el.focus();
-    el.setSelectionRange(start + prefix.length, start + prefix.length + selected.length);
+    el.setSelectionRange(
+      start + prefix.length,
+      start + prefix.length + selected.length,
+    );
   });
 }
 </script>
@@ -59,7 +112,9 @@ function insertFormatting(prefix: string, suffix: string = "") {
       </label>
 
       <!-- 3 Viewport Mode Switcher Toolbar -->
-      <div class="flex items-center bg-surface-alt rounded-lg border border-border p-0.5 text-xs shadow-2xs">
+      <div
+        class="flex items-center bg-surface-alt rounded-lg border border-border p-0.5 text-xs shadow-2xs"
+      >
         <button
           type="button"
           @click="viewMode = 'editor'"
@@ -67,7 +122,7 @@ function insertFormatting(prefix: string, suffix: string = "") {
             'px-2.5 py-1 rounded-md text-[11px] font-bold transition-all cursor-pointer flex items-center gap-1',
             viewMode === 'editor'
               ? 'bg-surface text-primary shadow-2xs'
-              : 'text-text-secondary hover:text-(--color-text-primary)'
+              : 'text-text-secondary hover:text-(--color-text-primary)',
           ]"
           title="Hanya Editor Kode"
         >
@@ -82,7 +137,7 @@ function insertFormatting(prefix: string, suffix: string = "") {
             'px-2.5 py-1 rounded-md text-[11px] font-bold transition-all cursor-pointer flex items-center gap-1',
             viewMode === 'split'
               ? 'bg-surface text-primary shadow-2xs'
-              : 'text-text-secondary hover:text-(--color-text-primary)'
+              : 'text-text-secondary hover:text-(--color-text-primary)',
           ]"
           title="Tampilan Split Screen"
         >
@@ -97,7 +152,7 @@ function insertFormatting(prefix: string, suffix: string = "") {
             'px-2.5 py-1 rounded-md text-[11px] font-bold transition-all cursor-pointer flex items-center gap-1',
             viewMode === 'preview'
               ? 'bg-surface text-primary shadow-2xs'
-              : 'text-text-secondary hover:text-(--color-text-primary)'
+              : 'text-text-secondary hover:text-(--color-text-primary)',
           ]"
           title="Hanya Pratinjau WYSIWYG"
         >
@@ -108,7 +163,9 @@ function insertFormatting(prefix: string, suffix: string = "") {
     </div>
 
     <!-- Viewport Panel Container -->
-    <div class="border border-border rounded-xl overflow-hidden bg-surface shadow-2xs min-h-65">
+    <div
+      class="border border-border rounded-xl overflow-hidden bg-surface shadow-2xs min-h-65"
+    >
       <!-- Editor Formatting Action Bar (Header, Bold, Italic, Code, List, Quote) -->
       <div
         v-if="viewMode === 'editor' || viewMode === 'split'"
@@ -195,11 +252,16 @@ function insertFormatting(prefix: string, suffix: string = "") {
       <div
         :class="[
           'grid gap-0 h-full min-h-55',
-          viewMode === 'split' ? 'grid-cols-1 md:grid-cols-2 divide-y md:divide-y-0 md:divide-x divide-border' : 'grid-cols-1'
+          viewMode === 'split'
+            ? 'grid-cols-1 md:grid-cols-2 divide-y md:divide-y-0 md:divide-x divide-border'
+            : 'grid-cols-1',
         ]"
       >
         <!-- Editor Input Panel -->
-        <div v-if="viewMode === 'editor' || viewMode === 'split'" class="p-3 flex flex-col">
+        <div
+          v-if="viewMode === 'editor' || viewMode === 'split'"
+          class="p-3 flex flex-col"
+        >
           <textarea
             ref="textareaRef"
             v-model="modelValue"
@@ -219,8 +281,12 @@ function insertFormatting(prefix: string, suffix: string = "") {
             class="prose prose-sm max-w-none text-xs leading-relaxed space-y-2"
             v-html="renderedContent"
           />
-          <div v-else class="text-center py-12 text-(--color-text-muted) italic">
-            Pratinjau WYSIWYG akan muncul di sini saat Anda mengetikkan materi...
+          <div
+            v-else
+            class="text-center py-12 text-(--color-text-muted) italic"
+          >
+            Pratinjau WYSIWYG akan muncul di sini saat Anda mengetikkan
+            materi...
           </div>
         </div>
       </div>

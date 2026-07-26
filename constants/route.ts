@@ -27,4 +27,5 @@ export const PUBLIC_ROUTES: string[] = [
   ROUTES.landing,
   ROUTES.login,
   ROUTES.register,
+  "/panduan-pengujian",
 ];

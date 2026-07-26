@@ -44,6 +44,7 @@ const {
   deleteFile,
   renameFile,
   toPayload,
+  hasUnsavedChanges,
 } = useProjectFiles();
 
 const {
@@ -69,7 +70,21 @@ const showResetModal = ref(false);
 const showDeleteModal = ref(false);
 const fileToDelete = ref<string | null>(null);
 const showErrorModal = ref(false);
+const showLeaveModal = ref(false);
 const errorMessage = ref("");
+
+const handleGoBack = () => {
+  if (hasUnsavedChanges.value) {
+    showLeaveModal.value = true;
+  } else {
+    router.push("/student/dashboard");
+  }
+};
+
+const confirmLeave = () => {
+  showLeaveModal.value = false;
+  router.push("/student/dashboard");
+};
 
 const handleCompile = async () => {
   const res = await compileLatex(toPayload(), ENTRY_FILE);
@@ -124,7 +139,7 @@ const handleRenameFile = (oldName: string, newName: string) => {
     <SandboxHeader
       :compiling="compiling"
       :isDirty="activeFile?.isDirty || false"
-      @goBack="router.push('/student/dashboard')"
+      @goBack="handleGoBack"
       @reset="showResetModal = true"
       @openReference="isReferenceModalOpen = true"
       @compile="handleCompile"
@@ -138,7 +153,7 @@ const handleRenameFile = (oldName: string, newName: string) => {
         :files="files"
         :activeFileName="activeFileName"
         :entryFile="ENTRY_FILE"
-        @select="switchFile"
+        @switch="switchFile"
         @add="handleAddFile"
         @delete="handleDeleteFile"
         @rename="handleRenameFile"
@@ -255,6 +270,38 @@ const handleRenameFile = (oldName: string, newName: string) => {
         @confirmDelete="confirmDeleteFile"
         @closeError="showErrorModal = false"
       />
+    </ClientOnly>
+
+    <!-- Modal Konfirmasi Keluar saat Ada Perubahan Belum Disimpan (H3 Guard) -->
+    <ClientOnly>
+      <UiModal
+        :isOpen="showLeaveModal"
+        title="Perubahan Belum Disimpan"
+        size="md"
+        @close="showLeaveModal = false"
+      >
+        <div class="space-y-3 font-sans text-sm text-text-secondary">
+          <p>
+            Anda memiliki perubahan berkas LaTeX yang belum
+            disimpan/dikompilasi. Apakah Anda yakin ingin mengabaikan perubahan
+            dan kembali ke dasbor?
+          </p>
+        </div>
+        <template #footer>
+          <button
+            @click="showLeaveModal = false"
+            class="btn-secondary btn-sm font-semibold cursor-pointer"
+          >
+            Batal
+          </button>
+          <button
+            @click="confirmLeave"
+            class="px-4 py-2 bg-amber-600 hover:bg-amber-700 text-white text-xs font-bold rounded-lg transition-all cursor-pointer shadow-xs font-sans"
+          >
+            Ya, Tinggalkan Workspace
+          </button>
+        </template>
+      </UiModal>
     </ClientOnly>
   </div>
 </template>

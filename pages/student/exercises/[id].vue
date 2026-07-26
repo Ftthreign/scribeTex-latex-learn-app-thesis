@@ -59,13 +59,27 @@ const { animateExerciseDetailEntrance } = useStudentAnimations();
 
 import UiModal from "~/components/ui/Modal.vue";
 import ExerciseResultModal from "~/components/learn/ExerciseResultModal.vue";
-import { IconCheck, IconAlertTriangle, IconSparkles, IconArrowRight } from "@tabler/icons-vue";
+import {
+  IconCheck,
+  IconAlertTriangle,
+  IconSparkles,
+  IconArrowRight,
+} from "@tabler/icons-vue";
 
-// State Modal Konfirmasi & Result Penilaian
 const showConfirmModal = ref(false);
+const showResetConfirmModal = ref(false);
 const showResultModal = ref(false);
 const showViewDetailModal = ref(false);
 const submitResultData = ref<ExerciseSubmissionResult | null>(null);
+
+const handleRequestReset = () => {
+  showResetConfirmModal.value = true;
+};
+
+const handleConfirmResetCode = () => {
+  resetCode();
+  showResetConfirmModal.value = false;
+};
 
 const loadExerciseData = async (id: number) => {
   if (!isNaN(id) && id > 0) {
@@ -127,7 +141,9 @@ const handleConfirmSubmit = async () => {
 const handleNextLesson = () => {
   showResultModal.value = false;
   if (submitResultData.value?.next_lesson_id) {
-    router.push(`/student/modules/lesson/${submitResultData.value.next_lesson_id}`);
+    router.push(
+      `/student/modules/lesson/${submitResultData.value.next_lesson_id}`,
+    );
   } else if (currentExercise.value?.lesson_id) {
     router.push(`/student/modules/lesson/${currentExercise.value.lesson_id}`);
   } else {
@@ -243,7 +259,7 @@ const handleAskAiError = async (errorText: string) => {
         :compileLogs="compileLogs"
         :isCompleted="Boolean(userSuccessResult?.is_success)"
         @update:modelValue="updateCode"
-        @reset="resetCode"
+        @reset="handleRequestReset"
         @compile="compileCode"
         @submit="handleSubmit"
         @askAiError="handleAskAiError"
@@ -274,6 +290,42 @@ const handleAskAiError = async (errorText: string) => {
       />
     </ClientOnly>
 
+    <UiModal
+      :isOpen="showResetConfirmModal"
+      title="Konfirmasi Reset Kode"
+      @close="showResetConfirmModal = false"
+    >
+      <div class="space-y-3 font-sans">
+        <p class="text-sm text-text-primary">
+          Apakah Anda yakin ingin mereset kode ke Kode Starter awal?
+        </p>
+        <div
+          class="p-3 rounded-lg bg-amber-500/10 border border-amber-500/30 text-xs text-amber-600 space-y-1"
+        >
+          <p class="font-semibold text-text-primary">Peringatan:</p>
+          <p>
+            Seluruh ketikan dan modifikasi kode LaTeX Anda saat ini akan dihapus
+            dan dikembalikan ke kode templat awal.
+          </p>
+        </div>
+      </div>
+
+      <template #footer>
+        <button
+          @click="showResetConfirmModal = false"
+          class="btn-secondary btn-md cursor-pointer font-bold"
+        >
+          Batal
+        </button>
+        <button
+          @click="handleConfirmResetCode"
+          class="btn-primary btn-md gap-2 cursor-pointer font-bold bg-red-600 hover:bg-red-700 text-white border-red-600"
+        >
+          <span>Ya, Reset Kode</span>
+        </button>
+      </template>
+    </UiModal>
+
     <!-- ═══ MODAL KONFIRMASI SUBMISSION (REUSABLE UI MODAL) ═══ -->
     <UiModal
       :isOpen="showConfirmModal"
@@ -282,11 +334,18 @@ const handleAskAiError = async (errorText: string) => {
     >
       <div class="space-y-3 font-sans">
         <p class="text-sm text-text-primary">
-          Apakah Anda yakin ingin mengirimkan kode LaTeX ini sebagai jawaban akhir latihan Anda?
+          Apakah Anda yakin ingin mengirimkan kode LaTeX ini sebagai jawaban
+          akhir latihan Anda?
         </p>
-        <div class="p-3 rounded-lg bg-surface-alt border border-border text-xs text-text-muted space-y-1">
+        <div
+          class="p-3 rounded-lg bg-surface-alt border border-border text-xs text-text-muted space-y-1"
+        >
           <p class="font-semibold text-text-primary">Catatan Sistem:</p>
-          <p>Sistem akan memverifikasi kesesuaian kode Anda dengan kode solusi. Jika jawaban 100% tepat, status materi bab ini akan otomatis tuntas dan bab berikutnya akan terbuka.</p>
+          <p>
+            Sistem akan memverifikasi kesesuaian kode Anda dengan kode solusi.
+            Jika jawaban 100% tepat, status materi bab ini akan otomatis tuntas
+            dan bab berikutnya akan terbuka.
+          </p>
         </div>
       </div>
 
@@ -312,31 +371,50 @@ const handleAskAiError = async (errorText: string) => {
     <!-- ═══ MODAL HASIL PENILAIAN (SUCCESS / TRY AGAIN) ═══ -->
     <UiModal
       :isOpen="showResultModal"
-      :title="submitResultData?.is_match ? 'Latihan Berhasil Diselesaikan!' : 'Jawaban Belum Sesuai Solusi'"
+      :title="
+        submitResultData?.is_match
+          ? 'Latihan Berhasil Diselesaikan!'
+          : 'Jawaban Belum Sesuai Solusi'
+      "
       @close="showResultModal = false"
     >
       <!-- Mode Jawaban Sukses / Match -->
-      <div v-if="submitResultData?.is_match" class="space-y-4 text-center py-2 font-body">
-        <div class="w-12 h-12 rounded-full bg-emerald-500/10 border border-emerald-500/30 text-emerald-500 flex items-center justify-center mx-auto">
+      <div
+        v-if="submitResultData?.is_match"
+        class="space-y-4 text-center py-2 font-body"
+      >
+        <div
+          class="w-12 h-12 rounded-full bg-emerald-500/10 border border-emerald-500/30 text-emerald-500 flex items-center justify-center mx-auto"
+        >
           <IconCheck class="size-6 stroke-[2.5]" />
         </div>
         <div class="space-y-1 font-sans">
-          <h4 class="text-base font-bold text-text-primary font-display">Selamat! Kode Anda 100% Tepat</h4>
+          <h4 class="text-base font-bold text-text-primary font-display">
+            Selamat! Kode Anda 100% Tepat
+          </h4>
           <p class="text-xs text-text-muted leading-relaxed">
-            Selamat, kode LaTeX Anda telah terverifikasi cocok dengan solusi. Status materi bab ini kini 100% tuntas dan materi/latihan berikutnya telah terbuka!
+            Selamat, kode LaTeX Anda telah terverifikasi cocok dengan solusi.
+            Status materi bab ini kini 100% tuntas dan materi/latihan berikutnya
+            telah terbuka!
           </p>
         </div>
       </div>
 
       <!-- Mode Jawaban Belum Match -->
       <div v-else class="space-y-4 py-2 font-body">
-        <div class="w-12 h-12 rounded-full bg-amber-500/10 border border-amber-500/30 text-amber-500 flex items-center justify-center mx-auto">
+        <div
+          class="w-12 h-12 rounded-full bg-amber-500/10 border border-amber-500/30 text-amber-500 flex items-center justify-center mx-auto"
+        >
           <IconAlertTriangle class="size-6 stroke-[2.5]" />
         </div>
         <div class="space-y-2 text-center font-sans">
-          <h4 class="text-base font-bold text-text-primary font-display">Jawaban Belum Sesuai Solusi</h4>
+          <h4 class="text-base font-bold text-text-primary font-display">
+            Jawaban Belum Sesuai Solusi
+          </h4>
           <p class="text-xs text-text-muted leading-relaxed">
-            Kode LaTeX yang Anda kirimkan belum cocok dengan kode solusi resmi. Silakan periksa kembali penulisan sintaks atau gunakan bantuan AI ScribeTex.
+            Kode LaTeX yang Anda kirimkan belum cocok dengan kode solusi resmi.
+            Silakan periksa kembali penulisan sintaks atau gunakan bantuan AI
+            ScribeTex.
           </p>
         </div>
       </div>
