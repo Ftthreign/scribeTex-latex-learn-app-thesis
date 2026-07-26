@@ -5,7 +5,7 @@ export default defineNuxtRouteMiddleware(async (to) => {
   const user = useSupabaseUser();
   const { role, syncSession } = useAuth();
 
-  const isPublicPath = PUBLIC_ROUTES.includes(to.path);
+  const isPublicPath = PUBLIC_ROUTES.includes(to.path) || to.meta.auth === false;
 
   if (user.value && !role.value) {
     try {

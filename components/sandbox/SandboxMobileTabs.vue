@@ -1,17 +1,19 @@
 <script setup lang="ts">
-import { IconCode, IconEye } from '@tabler/icons-vue'
+import { IconCode, IconEye } from "@tabler/icons-vue";
 
 defineProps<{
-  activeTab: 'editor' | 'preview';
-}>()
+  activeTab: "editor" | "preview";
+}>();
 
 const emit = defineEmits<{
-  (e: 'update:activeTab', tab: 'editor' | 'preview'): void;
-}>()
+  (e: "update:activeTab", tab: "editor" | "preview"): void;
+}>();
 </script>
 
 <template>
-  <div class="flex lg:hidden bg-(--color-surface-alt) p-1 rounded-xl border border-border shrink-0 font-sans">
+  <div
+    class="flex lg:hidden bg-surface-alt p-1 rounded-xl border border-border shrink-0 font-sans"
+  >
     <button
       @click="emit('update:activeTab', 'editor')"
       :class="[

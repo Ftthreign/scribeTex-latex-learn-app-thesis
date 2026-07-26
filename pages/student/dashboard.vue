@@ -118,7 +118,7 @@ onMounted(() => {
 
     <button
       @click="handleOpenChat"
-      class="fixed bottom-8 right-8 w-14 h-14 bg-[var(--color-primary)] hover:bg-[var(--color-primary-hover)] text-white flex items-center justify-center rounded-[var(--radius-xl)] shadow-lg hover:shadow-xl transition-all z-40 cursor-pointer"
+      class="fixed bottom-8 right-8 w-14 h-14 bg-primary hover:bg-primary-hover text-white flex items-center justify-center rounded-(--radius-xl) shadow-lg hover:shadow-xl transition-all z-40 cursor-pointer"
       title="Tanya AI Assistant"
     >
       <IconMessages class="size-6" />

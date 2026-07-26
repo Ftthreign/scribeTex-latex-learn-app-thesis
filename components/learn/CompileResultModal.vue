@@ -53,7 +53,7 @@ function handleDownloadPdf() {
       >
         <!-- Modal Header -->
         <div
-          class="flex items-center justify-between px-6 py-4 border-b border-border bg-(--color-surface-alt)/50 shrink-0"
+          class="flex items-center justify-between px-6 py-4 border-b border-border bg-surface-alt/50 shrink-0"
         >
           <div class="flex items-center gap-3">
             <div
@@ -83,14 +83,15 @@ function handleDownloadPdf() {
                 </span>
               </div>
               <p class="text-[11px] text-(--color-text-muted)">
-                Hasil eksekusi kompilasi berkas \LaTeX{} oleh mesin kompilator server.
+                Hasil eksekusi kompilasi berkas \LaTeX{} oleh mesin kompilator
+                server.
               </p>
             </div>
           </div>
 
           <button
             @click="emit('close')"
-            class="p-2 rounded-xl hover:bg-(--color-surface-alt) text-(--color-text-muted) hover:text-(--color-text-primary) transition-colors cursor-pointer"
+            class="p-2 rounded-xl hover:bg-surface-alt text-(--color-text-muted) hover:text-(--color-text-primary) transition-colors cursor-pointer"
           >
             <IconX class="size-5" />
           </button>
@@ -177,7 +178,7 @@ function handleDownloadPdf() {
             <!-- Loading State PDF -->
             <div
               v-if="isCompiling"
-              class="flex-1 p-6 bg-(--color-surface-alt) rounded-2xl border border-border flex flex-col items-center justify-center text-center space-y-3 min-h-[56vh]"
+              class="flex-1 p-6 bg-surface-alt rounded-2xl border border-border flex flex-col items-center justify-center text-center space-y-3 min-h-[56vh]"
             >
               <IconLoader2 class="size-8 text-primary animate-spin" />
               <p class="text-xs font-semibold text-(--color-text-muted)">
@@ -199,7 +200,7 @@ function handleDownloadPdf() {
             <!-- Empty / Error State for PDF Column -->
             <div
               v-else
-              class="flex-1 p-8 bg-(--color-surface-alt) rounded-2xl border border-border flex flex-col items-center justify-center text-center space-y-3 min-h-[56vh]"
+              class="flex-1 p-8 bg-surface-alt rounded-2xl border border-border flex flex-col items-center justify-center text-center space-y-3 min-h-[56vh]"
             >
               <div
                 class="size-12 rounded-2xl bg-red-100 text-red-500 flex items-center justify-center"
@@ -222,7 +223,7 @@ function handleDownloadPdf() {
 
         <!-- Modal Footer -->
         <div
-          class="flex items-center justify-between px-6 py-3.5 border-t border-border bg-(--color-surface-alt)/50 shrink-0 text-xs"
+          class="flex items-center justify-between px-6 py-3.5 border-t border-border bg-surface-alt/50 shrink-0 text-xs"
         >
           <span class="text-(--color-text-muted)">
             ScribeTex Academic Compiler Engine — TeXLive Docker

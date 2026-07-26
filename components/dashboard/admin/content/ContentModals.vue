@@ -21,19 +21,28 @@ const emit = defineEmits<{
 }>();
 
 const formData = ref<any>({});
+const initialFormDataStr = ref<string>("");
+const showCancelGuardModal = ref(false);
 
 watch(
   () => [props.showModal, props.editingItem, props.modalType],
   () => {
+    let initialObj: any = {};
     if (props.editingItem) {
-      formData.value = {
+      initialObj = {
         ...props.editingItem,
-        instruction: props.editingItem.instruction || props.editingItem.instructions || "",
-        instructions: props.editingItem.instruction || props.editingItem.instructions || "",
-        title: props.editingItem.title || props.editingItem.instruction_preview || props.editingItem.instruction || "",
+        instruction:
+          props.editingItem.instruction || props.editingItem.instructions || "",
+        instructions:
+          props.editingItem.instruction || props.editingItem.instructions || "",
+        title:
+          props.editingItem.title ||
+          props.editingItem.instruction_preview ||
+          props.editingItem.instruction ||
+          "",
       };
     } else {
-      formData.value = {
+      initialObj = {
         title: "",
         description: "",
         summary: "",
@@ -43,7 +52,8 @@ watch(
         instruction: "",
         instructions: "",
         difficulty: "SEDANG",
-        starter_code: "\\documentclass{article}\n\\begin{document}\n\n\\end{document}",
+        starter_code:
+          "\\documentclass{article}\n\\begin{document}\n\n\\end{document}",
         solution_code: "",
         category: "PANDUAN",
         excerpt: "",
@@ -51,14 +61,36 @@ watch(
         read_time: "5 min",
       };
     }
+    formData.value = { ...initialObj };
+    initialFormDataStr.value = JSON.stringify(initialObj);
   },
   { immediate: true },
 );
 
+function isFormDirty() {
+  return JSON.stringify(formData.value) !== initialFormDataStr.value;
+}
+
+function handleRequestClose() {
+  if (isFormDirty()) {
+    showCancelGuardModal.value = true;
+  } else {
+    emit("closeModal");
+  }
+}
+
+function confirmCloseForm() {
+  showCancelGuardModal.value = false;
+  emit("closeModal");
+}
+
 function handleSave() {
   if (!props.modalType) return;
   if (props.modalType === "exercise") {
-    formData.value.instruction = formData.value.instruction || formData.value.instructions || formData.value.title;
+    formData.value.instruction =
+      formData.value.instruction ||
+      formData.value.instructions ||
+      formData.value.title;
     formData.value.instructions = formData.value.instruction;
   }
   emit("saveItem", {
@@ -82,14 +114,29 @@ function handleConfirmDelete() {
     <!-- CRUD Form Modal (Spacious 4XL Container size) -->
     <UiModal
       :isOpen="showModal"
-      :title="editingItem ? `Edit Data ${modalType?.toUpperCase()}` : `Tambah ${modalType?.toUpperCase()} Baru`"
-      :size="modalType === 'exercise' || modalType === 'lesson' || modalType === 'article' ? '4xl' : '2xl'"
-      @close="emit('closeModal')"
+      :title="
+        editingItem
+          ? `Edit Data ${modalType?.toUpperCase()}`
+          : `Tambah ${modalType?.toUpperCase()} Baru`
+      "
+      :size="
+        modalType === 'exercise' ||
+        modalType === 'lesson' ||
+        modalType === 'article'
+          ? '4xl'
+          : '2xl'
+      "
+      @close="handleRequestClose"
     >
-      <form @submit.prevent="handleSave" class="space-y-4 font-body max-h-[75vh] overflow-y-auto pr-1">
+      <form
+        @submit.prevent="handleSave"
+        class="space-y-4 font-body max-h-[75vh] overflow-y-auto pr-1"
+      >
         <!-- Title Field -->
         <div class="space-y-1 font-sans">
-          <label class="text-xs font-bold text-(--color-text-primary)">Judul Konten</label>
+          <label class="text-xs font-bold text-(--color-text-primary)"
+            >Judul Konten</label
+          >
           <input
             v-model="formData.title"
             type="text"
@@ -102,7 +149,9 @@ function handleConfirmDelete() {
         <!-- MODUL SPECIFIC FIELDS -->
         <template v-if="modalType === 'module'">
           <div class="space-y-1 font-sans">
-            <label class="text-xs font-bold text-(--color-text-primary)">Deskripsi Modul</label>
+            <label class="text-xs font-bold text-(--color-text-primary)"
+              >Deskripsi Modul</label
+            >
             <textarea
               v-model="formData.description"
               rows="3"
@@ -115,7 +164,9 @@ function handleConfirmDelete() {
         <!-- LESSON SPECIFIC FIELDS -->
         <template v-if="modalType === 'lesson'">
           <div class="space-y-1 font-sans">
-            <label class="text-xs font-bold text-(--color-text-primary)">Modul Kurikulum Terkait</label>
+            <label class="text-xs font-bold text-(--color-text-primary)"
+              >Modul Kurikulum Terkait</label
+            >
             <select
               v-model="formData.module_id"
               required
@@ -128,7 +179,9 @@ function handleConfirmDelete() {
           </div>
 
           <div class="space-y-1 font-sans">
-            <label class="text-xs font-bold text-(--color-text-primary)">Ringkasan Singkat</label>
+            <label class="text-xs font-bold text-(--color-text-primary)"
+              >Ringkasan Singkat</label
+            >
             <input
               v-model="formData.summary"
               type="text"
@@ -144,7 +197,9 @@ function handleConfirmDelete() {
         <template v-if="modalType === 'exercise'">
           <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 font-sans">
             <div class="space-y-1">
-              <label class="text-xs font-bold text-(--color-text-primary)">Materi Lesson Terkait</label>
+              <label class="text-xs font-bold text-(--color-text-primary)"
+                >Materi Lesson Terkait</label
+              >
               <select
                 v-model="formData.lesson_id"
                 required
@@ -157,7 +212,9 @@ function handleConfirmDelete() {
             </div>
 
             <div class="space-y-1">
-              <label class="text-xs font-bold text-(--color-text-primary)">Tingkat Kesulitan</label>
+              <label class="text-xs font-bold text-(--color-text-primary)"
+                >Tingkat Kesulitan</label
+              >
               <select
                 v-model="formData.difficulty"
                 class="w-full px-3 py-2 bg-surface border border-border rounded-xl text-xs font-semibold text-(--color-text-primary) outline-none focus:border-primary transition-all cursor-pointer"
@@ -170,7 +227,9 @@ function handleConfirmDelete() {
           </div>
 
           <div class="space-y-1 font-sans">
-            <label class="text-xs font-bold text-(--color-text-primary)">Petunjuk Pengerjaan (Instructions)</label>
+            <label class="text-xs font-bold text-(--color-text-primary)"
+              >Petunjuk Pengerjaan (Instructions)</label
+            >
             <textarea
               v-model="formData.instruction"
               rows="3"
@@ -189,7 +248,9 @@ function handleConfirmDelete() {
         <template v-if="modalType === 'article'">
           <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 font-sans">
             <div class="space-y-1">
-              <label class="text-xs font-bold text-(--color-text-primary)">Kategori Artikel</label>
+              <label class="text-xs font-bold text-(--color-text-primary)"
+                >Kategori Artikel</label
+              >
               <select
                 v-model="formData.category"
                 class="w-full px-3 py-2 bg-surface border border-border rounded-xl text-xs font-semibold text-(--color-text-primary) outline-none focus:border-primary transition-all cursor-pointer"
@@ -201,7 +262,9 @@ function handleConfirmDelete() {
             </div>
 
             <div class="space-y-1">
-              <label class="text-xs font-bold text-(--color-text-primary)">Estimasi Waktu Baca</label>
+              <label class="text-xs font-bold text-(--color-text-primary)"
+                >Estimasi Waktu Baca</label
+              >
               <input
                 v-model="formData.read_time"
                 type="text"
@@ -212,7 +275,9 @@ function handleConfirmDelete() {
           </div>
 
           <div class="space-y-1 font-sans">
-            <label class="text-xs font-bold text-(--color-text-primary)">Ringkasan Artikel (Excerpt)</label>
+            <label class="text-xs font-bold text-(--color-text-primary)"
+              >Ringkasan Artikel (Excerpt)</label
+            >
             <textarea
               v-model="formData.excerpt"
               rows="2"
@@ -222,7 +287,9 @@ function handleConfirmDelete() {
           </div>
 
           <div class="space-y-1 font-sans">
-            <label class="text-xs font-bold text-(--color-text-primary)">Isi Artikel Complete (Markdown Content)</label>
+            <label class="text-xs font-bold text-(--color-text-primary)"
+              >Isi Artikel Complete (Markdown Content)</label
+            >
             <textarea
               v-model="formData.content"
               rows="5"
@@ -234,7 +301,9 @@ function handleConfirmDelete() {
 
         <!-- Sort Order Field -->
         <div v-if="modalType !== 'article'" class="space-y-1 font-sans">
-          <label class="text-xs font-bold text-(--color-text-primary)">Urutan Tampilan (Sort Order)</label>
+          <label class="text-xs font-bold text-(--color-text-primary)"
+            >Urutan Tampilan (Sort Order)</label
+          >
           <input
             v-model.number="formData.sort_order"
             type="number"
@@ -247,7 +316,7 @@ function handleConfirmDelete() {
 
       <template #footer>
         <button
-          @click="emit('closeModal')"
+          @click="handleRequestClose"
           class="btn-secondary btn-md cursor-pointer font-bold"
         >
           Batal
@@ -275,7 +344,8 @@ function handleConfirmDelete() {
             deleteItemTarget?.item?.title ||
             deleteItemTarget?.item?.instruction_preview ||
             deleteItemTarget?.item?.instruction
-          }}</strong>? Tindakan ini tidak dapat dibatalkan.
+          }}</strong
+          >? Tindakan ini tidak dapat dibatalkan.
         </p>
       </div>
 
@@ -291,6 +361,35 @@ function handleConfirmDelete() {
           class="btn-danger btn-md cursor-pointer font-bold font-sans"
         >
           Hapus Permanen
+        </button>
+      </template>
+    </UiModal>
+
+    <!-- Modal Konfirmasi Penutupan Form jika Ada Perubahan Belum Disimpan (H3 Guard) -->
+    <UiModal
+      :isOpen="showCancelGuardModal"
+      title="Konfirmasi Pembatalan Pengeditan"
+      size="md"
+      @close="showCancelGuardModal = false"
+    >
+      <div class="space-y-3 font-sans text-sm text-text-secondary">
+        <p>
+          Anda memiliki perubahan formulir yang belum disimpan. Apakah Anda
+          yakin ingin membatalkan dan mengabaikan seluruh perubahan?
+        </p>
+      </div>
+      <template #footer>
+        <button
+          @click="showCancelGuardModal = false"
+          class="btn-secondary btn-sm font-semibold cursor-pointer"
+        >
+          Lanjutkan Edit
+        </button>
+        <button
+          @click="confirmCloseForm"
+          class="px-4 py-2 bg-amber-600 hover:bg-amber-700 text-white text-xs font-bold rounded-lg transition-all cursor-pointer shadow-xs font-sans"
+        >
+          Ya, Batalkan & Tutup
         </button>
       </template>
     </UiModal>

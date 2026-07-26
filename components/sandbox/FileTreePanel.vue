@@ -26,7 +26,6 @@ const emit = defineEmits<{
   (e: "rename", oldName: string, newName: string): void;
 }>();
 
-// ─── State ──────────────────────────────────────────────────────────────────
 const showAddInput = ref(false);
 const newFileName = ref("");
 const addError = ref<string | null>(null);
@@ -35,7 +34,6 @@ const renameValue = ref("");
 const renameError = ref<string | null>(null);
 const addInputRef = ref<HTMLInputElement | null>(null);
 
-// ─── File icon helper ─────────────────────────────────────────────────────
 function getFileIcon(name: string) {
   if (name.endsWith(".bib")) return IconBook;
   if (name.endsWith(".sty") || name.endsWith(".cls") || name.endsWith(".bst"))
@@ -51,7 +49,6 @@ function getFileIconColor(name: string) {
   return "text-blue-400";
 }
 
-// ─── Add File ────────────────────────────────────────────────────────────
 function openAddInput() {
   showAddInput.value = true;
   newFileName.value = "";
@@ -77,15 +74,14 @@ function cancelAdd() {
   addError.value = null;
 }
 
-// ─── Rename File ──────────────────────────────────────────────────────────
 function startRename(name: string) {
-  if (name === props.entryFile) return; // main.tex tidak bisa rename
+  if (name === props.entryFile) return;
   renamingFile.value = name;
   renameValue.value = name;
   renameError.value = null;
   nextTick(() => {
     const input = document.querySelector<HTMLInputElement>(
-      `[data-rename="${name}"]`
+      `[data-rename="${name}"]`,
     );
     input?.focus();
     input?.select();
@@ -110,7 +106,7 @@ function cancelRename() {
 
 <template>
   <div
-    class="w-48 shrink-0 flex flex-col bg-(--color-surface-alt) border-r border-border h-full min-h-0 select-none"
+    class="w-48 shrink-0 flex flex-col bg-surface-alt border-r border-border h-full min-h-0 select-none"
   >
     <!-- Panel Header -->
     <div
@@ -118,7 +114,8 @@ function cancelRename() {
     >
       <div class="flex items-center gap-1.5">
         <IconChevronRight class="size-3 text-(--color-text-muted)" />
-        <span class="text-[11px] font-bold uppercase tracking-widest text-(--color-text-muted)"
+        <span
+          class="text-[11px] font-bold uppercase tracking-widest text-(--color-text-muted)"
           >Berkas</span
         >
       </div>
@@ -135,7 +132,9 @@ function cancelRename() {
     <div class="flex-1 overflow-y-auto py-1">
       <!-- Add File Input Row -->
       <div v-if="showAddInput" class="px-2 py-1">
-        <div class="flex items-center gap-1 bg-(--color-surface) rounded border border-primary/40 px-1.5 py-1">
+        <div
+          class="flex items-center gap-1 bg-(--color-surface) rounded border border-primary/40 px-1.5 py-1"
+        >
           <IconFileText class="size-3 text-primary shrink-0" />
           <input
             ref="addInputRef"
@@ -146,14 +145,22 @@ function cancelRename() {
             @keydown.enter="confirmAdd"
             @keydown.escape="cancelAdd"
           />
-          <button @click="confirmAdd" class="text-green-500 hover:text-green-400 cursor-pointer">
+          <button
+            @click="confirmAdd"
+            class="text-green-500 hover:text-green-400 cursor-pointer"
+          >
             <IconCheck class="size-3" />
           </button>
-          <button @click="cancelAdd" class="text-red-400 hover:text-red-300 cursor-pointer">
+          <button
+            @click="cancelAdd"
+            class="text-red-400 hover:text-red-300 cursor-pointer"
+          >
             <IconX class="size-3" />
           </button>
         </div>
-        <p v-if="addError" class="text-[10px] text-red-400 mt-0.5 px-1">{{ addError }}</p>
+        <p v-if="addError" class="text-[10px] text-red-400 mt-0.5 px-1">
+          {{ addError }}
+        </p>
       </div>
 
       <!-- File Items -->
@@ -164,17 +171,15 @@ function cancelRename() {
           'group flex items-center gap-1.5 px-2.5 py-1.5 cursor-pointer transition-colors',
           activeFileName === file.name
             ? 'bg-primary/10 text-primary border-r-2 border-primary'
-            : 'text-(--color-text-secondary) hover:bg-(--color-surface) hover:text-(--color-text-primary)',
+            : 'text-text-secondary hover:bg-(--color-surface) hover:text-(--color-text-primary)',
         ]"
         @click="emit('switch', file.name)"
       >
-        <!-- Icon -->
         <component
           :is="getFileIcon(file.name)"
           :class="['size-3.5 shrink-0', getFileIconColor(file.name)]"
         />
 
-        <!-- Rename Input -->
         <input
           v-if="renamingFile === file.name"
           :data-rename="file.name"
@@ -186,10 +191,10 @@ function cancelRename() {
           @click.stop
         />
 
-        <!-- File Name -->
-        <span v-else class="flex-1 text-xs truncate font-mono">{{ file.name }}</span>
+        <span v-else class="flex-1 text-xs truncate font-mono">{{
+          file.name
+        }}</span>
 
-        <!-- MAIN badge -->
         <span
           v-if="file.name === entryFile"
           class="text-[9px] px-1 py-0.5 rounded bg-green-500/15 text-green-500 font-bold uppercase shrink-0"
@@ -197,7 +202,6 @@ function cancelRename() {
           MAIN
         </span>
 
-        <!-- Action Buttons (visible on hover) -->
         <div
           v-if="file.name !== entryFile && renamingFile !== file.name"
           class="hidden group-hover:flex items-center gap-0.5 shrink-0"
@@ -220,10 +224,10 @@ function cancelRename() {
       </div>
     </div>
 
-    <!-- Footer hint -->
     <div class="px-3 py-2 border-t border-border shrink-0">
       <p class="text-[10px] text-(--color-text-muted) leading-relaxed">
-        Gunakan <code class="font-mono">\input{"{nama}"}</code> di <code class="font-mono">main.tex</code> untuk memuat berkas lain.
+        Gunakan <code class="font-mono">\input{"{nama}"}</code> di
+        <code class="font-mono">main.tex</code> untuk memuat berkas lain.
       </p>
     </div>
   </div>

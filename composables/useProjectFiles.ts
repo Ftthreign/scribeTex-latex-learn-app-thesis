@@ -71,8 +71,13 @@ export function useProjectFiles() {
 
   function updateContent(name: string, content: string) {
     const file = files.value.find((f) => f.name === name);
-    if (file) file.content = content;
+    if (file && file.content !== content) {
+      file.content = content;
+      file.isDirty = true;
+    }
   }
+
+  const hasUnsavedChanges = computed(() => files.value.some((f) => f.isDirty));
 
   function addFile(name: string, content: string = "") {
     const trimmedName = name.trim();
@@ -111,7 +116,6 @@ export function useProjectFiles() {
     return { error: null };
   }
 
-  /** Rename berkas (main.tex tidak bisa di-rename) */
   function renameFile(oldName: string, newName: string) {
     if (oldName === ENTRY_FILE)
       return { error: 'Berkas "main.tex" tidak dapat di-rename.' };
@@ -125,7 +129,6 @@ export function useProjectFiles() {
     return { error: null };
   }
 
-  /** Konversi state ke payload API: Record<string, string> */
   function toPayload(): Record<string, string> {
     return Object.fromEntries(files.value.map((f) => [f.name, f.content]));
   }
@@ -141,5 +144,6 @@ export function useProjectFiles() {
     deleteFile,
     renameFile,
     toPayload,
+    hasUnsavedChanges,
   };
 }
