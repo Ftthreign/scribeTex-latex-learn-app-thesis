@@ -4,18 +4,11 @@ interface ArticleItem {
   category: string
   readTime: string
   title: string
-  imageUrl: string
-  categoryColor?: string
+  imageUrl?: string
 }
 
 defineProps<{ articles: ArticleItem[] }>()
 const emit = defineEmits<{ (e: 'click-article', id: number): void; (e: 'view-all'): void }>()
-
-const categoryColorMap: Record<string, string> = {
-  'Tips Akademik': 'text-violet-600',
-  'LaTeX Guide':   'text-blue-600',
-  'AI Insights':   'text-emerald-600',
-}
 </script>
 
 <template>
@@ -27,24 +20,24 @@ const categoryColorMap: Record<string, string> = {
         <div
           v-for="article in articles" :key="article.id"
           @click="emit('click-article', article.id)"
-          class="border border-[var(--color-border)] rounded-xl p-4 bg-[var(--color-surface)] hover:shadow-sm hover:border-[var(--color-primary)]/30 transition-all cursor-pointer"
+          class="border border-[var(--color-border)] rounded-[var(--radius-lg)] p-4 bg-[var(--color-surface)] hover:-translate-y-0.5 hover:border-[var(--color-border-strong)] transition-all duration-200 cursor-pointer group shadow-xs hover:shadow-sm"
         >
           <!-- Category + read time -->
           <div class="flex items-center gap-1.5 mb-2">
-            <span :class="['text-[10px] font-bold uppercase tracking-wider', categoryColorMap[article.category] ?? 'text-[var(--color-primary)]']">
+            <span class="text-[10px] font-bold uppercase tracking-wider text-[var(--color-primary)]">
               {{ article.category }}
             </span>
             <span class="text-[var(--color-text-muted)] text-[10px]">•</span>
             <span class="text-[10px] text-[var(--color-text-muted)] font-semibold">{{ article.readTime }}</span>
           </div>
           <!-- Title -->
-          <p class="text-[13.5px] font-semibold text-[var(--color-text-primary)] leading-snug">
+          <p class="text-[13.5px] font-semibold text-[var(--color-text-primary)] leading-snug group-hover:text-[var(--color-primary)] transition-colors">
             {{ article.title }}
           </p>
         </div>
       </div>
 
-      <button @click="emit('view-all')" class="w-full mt-4 py-2.5 border border-[var(--color-border)] hover:bg-[var(--color-surface-alt)] text-[12px] font-semibold text-[var(--color-text-secondary)] rounded-[var(--radius-md)] transition-colors cursor-pointer">
+      <button @click="emit('view-all')" class="w-full mt-4 py-2.5 border border-[var(--color-border)] hover:bg-[var(--color-surface-alt)] hover:border-[var(--color-border-strong)] text-[12px] font-semibold text-[var(--color-text-secondary)] rounded-[var(--radius-md)] transition-all cursor-pointer">
         Lihat Semua Artikel
       </button>
     </div>

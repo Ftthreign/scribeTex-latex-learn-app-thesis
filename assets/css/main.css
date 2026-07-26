@@ -177,4 +177,25 @@
     font-size: 16px;
     border-radius: var(--radius-lg);
   }
+
+  /* Status Badges (DESIGN.md) */
+  .badge-success {
+    @apply bg-(--color-success-light) text-(--color-success) border border-(--color-success)/20 font-bold rounded-full text-xs px-2.5 py-0.5 inline-flex items-center gap-1;
+  }
+
+  .badge-warning {
+    @apply bg-(--color-warning-light) text-(--color-warning) border border-(--color-warning)/20 font-bold rounded-full text-xs px-2.5 py-0.5 inline-flex items-center gap-1;
+  }
+
+  .badge-error {
+    @apply bg-(--color-error-light) text-(--color-error) border border-(--color-error)/20 font-bold rounded-full text-xs px-2.5 py-0.5 inline-flex items-center gap-1;
+  }
+
+  .badge-ai {
+    @apply bg-(--color-ai-light) text-(--color-ai-primary) border border-(--color-ai-primary)/20 font-bold rounded-full text-xs px-2.5 py-0.5 inline-flex items-center gap-1;
+  }
+
+  .badge-neutral {
+    @apply bg-(--color-surface-alt) text-(--color-text-secondary) border border-border font-bold rounded-full text-xs px-2.5 py-0.5 inline-flex items-center gap-1;
+  }
 }

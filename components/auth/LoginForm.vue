@@ -74,11 +74,6 @@ const handleLogin = async () => {
         :disabled="isLoading"
         required
       >
-        <template #label-right>
-          <a href="#" class="text-xs font-bold text-primary hover:underline"
-            >Lupa Sandi?</a
-          >
-        </template>
         <template #icon>
           <IconLock class="size-5" />
         </template>

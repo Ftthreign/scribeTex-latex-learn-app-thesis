@@ -3,6 +3,7 @@ import { ref } from "vue";
 import {
   IconLayoutDashboard,
   IconBook,
+  IconCode,
   IconFileText,
   IconTrendingUp,
   IconLogout,
@@ -13,6 +14,7 @@ import {
   IconPlus,
   IconHelp,
   IconHome,
+  IconTerminal,
 } from "@tabler/icons-vue";
 import { ROUTES } from "~/constants/route";
 
@@ -26,8 +28,10 @@ const menuItems = [
     icon: IconLayoutDashboard,
     path: ROUTES.student.dashboard,
   },
-  { name: "Modules", icon: IconBook, path: ROUTES.student.modules },
-  { name: "Articles", icon: IconFileText, path: ROUTES.student.articles },
+  { name: "Modul LaTeX", icon: IconBook, path: ROUTES.student.modules },
+  { name: "Latihan Kode", icon: IconCode, path: ROUTES.student.exercises },
+  { name: "Project Sandbox", icon: IconTerminal, path: ROUTES.student.sandbox },
+  { name: "Panduan Unila", icon: IconFileText, path: ROUTES.student.articles },
   { name: "Progress", icon: IconTrendingUp, path: ROUTES.student.progress },
 ];
 
@@ -99,7 +103,7 @@ const confirmLogout = async () => {
           :to="item.path"
           :class="[
             'flex items-center gap-3 px-3 py-2.5 rounded-md text-[13.5px] transition-all duration-150',
-            route.path === item.path
+            route.path.startsWith(item.path)
               ? 'bg-primary-light text-primary font-semibold'
               : 'font-medium text-text-secondary hover:bg-surface-alt hover:text-(--color-text-primary)',
           ]"
@@ -180,7 +184,7 @@ const confirmLogout = async () => {
         </div>
       </header>
 
-      <main class="flex-1 overflow-y-auto p-5 lg:p-8 h-full">
+      <main class="flex-1 overflow-y-auto p-4 lg:p-6 h-full">
         <slot />
       </main>
     </div>

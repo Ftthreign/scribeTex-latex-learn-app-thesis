@@ -1,88 +1,64 @@
 <script setup lang="ts">
-import { useAdminDashboard } from "~/composables/useAdminDashboard";
+import { watch, onMounted } from "vue";
+import { useAdminAnimations } from "~/composables/admin/useAdminAnimations";
+import AdminDashboardSkeleton from "~/components/skeleton/AdminDashboardSkeleton.vue";
+import AdminDashboardHeader from "~/components/dashboard/admin/AdminDashboardHeader.vue";
+import AdminMetricCards from "~/components/dashboard/admin/AdminMetricCards.vue";
+import AdminActivityChart from "~/components/dashboard/admin/AdminActivityChart.vue";
+import AdminPlatformOverview from "~/components/dashboard/admin/AdminPlatformOverview.vue";
 
 definePageMeta({ layout: "admin", middleware: ["role-admin"] });
-useHead({ title: "CMS Dashboard | ScribeTex Admin" });
+useHead({ title: "Monitoring Dashboard | ScribeTex Admin" });
+
+const { animateAdminDashboardEntrance } = useAdminAnimations();
 
 const {
-  searchQuery,
-  currentPage,
-  paginatedModules,
-  totalPages,
-  startItemIndex,
-  endItemIndex,
-  filteredModules,
-  changePage,
-  deleteModule,
-  toggleStatus,
-  stats,
-  recentActivities,
-  isEmailing,
-  isBackingUp,
-  emailWeeklyReport,
-  backupDatabase,
-} = useAdminDashboard();
+  data: statsRes,
+  refresh: refreshStats,
+  pending: statsPending,
+} = await useFetch<any>("/api/admin/stats");
+const {
+  data: analyticsRes,
+  refresh: refreshAnalytics,
+  pending: analyticsPending,
+} = await useFetch<any>("/api/admin/analytics/daily");
 
-const router = useRouter();
-const handleEditModule = (id: number) =>
-  router.push(`/admin/modules?edit=${id}`);
+const stats = computed(() => statsRes.value?.data || null);
+const analytics = computed(() => analyticsRes.value?.data || null);
+const isPending = computed(() => statsPending.value || analyticsPending.value);
 
-const { user, userProfile } = useAuth();
+function refreshAll() {
+  refreshStats();
+  refreshAnalytics();
+}
 
-const displayName = computed(
-  () =>
-    userProfile.value?.name ||
-    user.value?.user_metadata?.full_name ||
-    user.value?.email?.split("@")[0] ||
-    "Administrator",
+watch(
+  isPending,
+  (pending) => {
+    if (!pending) {
+      animateAdminDashboardEntrance();
+    }
+  },
+  { immediate: true },
 );
+
+onMounted(() => {
+  if (!isPending.value) {
+    animateAdminDashboardEntrance();
+  }
+});
 </script>
 
 <template>
-  <div class="max-w-300 mx-auto w-full pb-10">
-    <DashboardAdminHeader
-      subtitle="Manage modules, students, and platform performance."
-      @add-module="() => router.push('/admin/modules')"
-    >
-      <template #title>
-        Welcome back, <span class="text-primary">{{ displayName }}</span>
-      </template>
-    </DashboardAdminHeader>
-
-    <!-- Stats -->
-    <DashboardAdminStats :stats="stats" />
-
-    <!-- Charts -->
-    <DashboardAdminCharts />
-
-    <!-- Module Table -->
-    <DashboardAdminModuleTable
-      v-model:searchQuery="searchQuery"
-      :modules="paginatedModules"
-      :currentPage="currentPage"
-      :totalPages="totalPages"
-      :startItemIndex="startItemIndex"
-      :endItemIndex="endItemIndex"
-      :totalCount="filteredModules.length"
-      @change-page="changePage"
-      @edit="handleEditModule"
-      @delete="deleteModule"
-      @toggle-status="toggleStatus"
-    />
-
-    <!-- Bottom Grid -->
-    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mt-8">
-      <div class="lg:col-span-2">
-        <DashboardAdminRecentActivity :activities="recentActivities" />
+  <div class="max-w-7xl mx-auto w-full pb-12 space-y-8 px-1 font-body">
+    <AdminDashboardSkeleton v-if="isPending" />
+    <div v-else class="w-full space-y-8">
+      <div class="gsap-admin-header">
+        <AdminDashboardHeader :pending="isPending" @refresh="refreshAll" />
       </div>
-      <div>
-        <DashboardAdminPlatformHealth
-          :isEmailing="isEmailing"
-          :isBackingUp="isBackingUp"
-          @email-report="emailWeeklyReport"
-          @backup-db="backupDatabase"
-        />
-      </div>
+      <AdminMetricCards :stats="stats" />
+      <AdminActivityChart :analytics="analytics" />
+      <AdminPlatformOverview :stats="stats" />
     </div>
   </div>
 </template>

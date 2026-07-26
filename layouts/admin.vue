@@ -13,6 +13,8 @@ import {
   IconPlus,
   IconHelp,
   IconHome,
+  IconDatabase,
+  IconChartBar,
 } from "@tabler/icons-vue";
 import { ROUTES } from "~/constants/route";
 
@@ -22,13 +24,20 @@ const route = useRoute();
 
 const menuItems = [
   {
-    name: "Dashboard",
-    icon: IconLayoutDashboard,
+    name: "Monitoring Dashboard",
+    icon: IconChartBar,
     path: ROUTES.admin.dashboard,
   },
-  { name: "Modules", icon: IconBook, path: ROUTES.admin.modules },
-  { name: "Articles", icon: IconFileText, path: ROUTES.admin.articles },
-  { name: "Progress", icon: IconTrendingUp, path: ROUTES.admin.users },
+  {
+    name: "Progress Siswa",
+    icon: IconTrendingUp,
+    path: ROUTES.admin.users,
+  },
+  {
+    name: "Manajemen Konten",
+    icon: IconDatabase,
+    path: ROUTES.admin.content,
+  },
 ];
 
 const showLogoutModal = ref(false);

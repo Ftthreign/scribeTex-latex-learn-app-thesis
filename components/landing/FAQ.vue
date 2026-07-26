@@ -87,11 +87,11 @@ const faqs = [
   },
   {
     q: "Apakah saya perlu menginstal TeXLive atau paket LaTeX di laptop?",
-    a: "Sama sekali tidak. ScribeTex mengoperasikan compiler berbasis Docker dan TeXLive murni di sisi server terisolasi. Anda cukup mengetik melalui browser dan langsung mendapatkan hasil PDF berstandar tinggi.",
+    a: "Sama sekali tidak. ScribeTex mengoperasikan mesin kompilator LaTeX otomatis di sisi server terisolasi. Anda cukup mengetik melalui browser dan langsung mendapatkan hasil PDF berstandar tinggi.",
   },
   {
-    q: "Bagaimana cara kerja AI Learning Buddy dalam mendeteksi error?",
-    a: "Asisten AI kami terintegrasi dengan Gemini API yang dilatih dengan konteks sintaksis LaTeX. Ketika terjadi kegagalan kompilasi, AI akan menganalisis log keluaran TeXLive dan memberikan penjelasan yang mudah dipahami beserta saran kode perbaikan.",
+    q: "Bagaimana cara kerja Pembimbing AI dalam mendeteksi error?",
+    a: "Asisten AI kami dilengkapi kecerdasan buatan terpercaya yang dilatih dengan konteks sintaksis LaTeX. Ketika terjadi kegagalan kompilasi, AI akan menganalisis log keluaran kompilasi dan memberikan penjelasan yang mudah dipahami beserta saran kode perbaikan.",
   },
   {
     q: "Apakah dokumen PDF akhir siap dikirimkan ke penerbit jurnal ilmiah?",
