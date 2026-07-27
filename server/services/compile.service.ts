@@ -40,6 +40,7 @@ export class CompileService {
     try {
       // 1. Buat direktori temporer
       await fs.ensureDir(tmpDir);
+      await fs.chmod(tmpDir, 0o777);
 
       // 2. Tulis SEMUA berkas workspace ke direktori temporer (dukung subfolder seperti bab/bab1.tex)
       for (const [fileName, content] of Object.entries(files)) {
@@ -66,7 +67,7 @@ export class CompileService {
       // --memory 512m: batasi alokasi RAM maksimal 512MB
       // -e ENTRY_FILE: beritahu entrypoint.sh berkas mana yang dikompilasi
       // -v: mount direktori temporer sebagai workspace
-      const dockerCmd = `docker run --rm --network none --memory 512m -e ENTRY_FILE="${entryFile}" -v "${tmpDir}:/workspace" scribetex-compiler`;
+      const dockerCmd = `docker run --rm --user root --network none --memory 512m -e ENTRY_FILE="${entryFile}" -v "${tmpDir}:/workspace" scribetex-compiler`;
 
       try {
         await execAsync(dockerCmd, { timeout: 60000 }); // timeout 60 detik

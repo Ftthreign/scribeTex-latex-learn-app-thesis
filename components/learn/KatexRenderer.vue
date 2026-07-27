@@ -14,177 +14,251 @@ const props = withDefaults(
   },
 );
 
-// Placeholder unik tanpa sintaks Markdown (tanpa __ atau **) agar tidak diubah oleh marked parser
-const KATEX_PREFIX = 'KATEXPH'
-const KATEX_SUFFIX = 'ENDPH'
+const KATEX_PREFIX = "KATEXPH";
+const KATEX_SUFFIX = "ENDPH";
 
 const renderedHtml = computed(() => {
   if (!props.content) return "";
 
-  const katexStore: string[] = []
+  const katexStore: string[] = [];
   const saveKatex = (rendered: string): string => {
-    const idx = katexStore.length
-    katexStore.push(rendered)
-    return `${KATEX_PREFIX}${idx}${KATEX_SUFFIX}`
-  }
+    const idx = katexStore.length;
+    katexStore.push(rendered);
+    return `${KATEX_PREFIX}${idx}${KATEX_SUFFIX}`;
+  };
 
   let text = props.content;
 
-  // ── 1. Strip YAML frontmatter & Komentar LaTeX (%)
-  text = text.replace(/^---[\s\S]*?---\n?/, '')
+  text = text.replace(/^---[\s\S]*?---\n?/, "");
   // Hapus komentar LaTeX (baris berawalan % yang tidak di-escape \%)
-  text = text.replace(/(^|[^\\])%[^\n]*/g, '$1')
+  text = text.replace(/(^|[^\\])%[^\n]*/g, "$1");
 
-  // ── 2. Render display math $$ ... $$ dan \[ ... \] → simpan sebagai placeholder
   text = text.replace(/\$\$\s*([\s\S]*?)\s*\$\$/g, (_, math) => {
     try {
-      const rendered = `<div class="katex-display-block my-4 overflow-x-auto text-center">${katex.renderToString(math, { displayMode: true, throwOnError: false })}</div>`
-      return saveKatex(rendered)
+      const rendered = `<div class="katex-display-block my-4 overflow-x-auto text-center">${katex.renderToString(math, { displayMode: true, throwOnError: false })}</div>`;
+      return saveKatex(rendered);
     } catch {
-      return saveKatex(`<code class="katex-error">$$${math}$$</code>`)
+      return saveKatex(`<code class="katex-error">$$${math}$$</code>`);
     }
   });
 
   text = text.replace(/\\\[\s*([\s\S]*?)\s*\\\]/g, (_, math) => {
     try {
-      const rendered = `<div class="katex-display-block my-4 overflow-x-auto text-center">${katex.renderToString(math, { displayMode: true, throwOnError: false })}</div>`
-      return saveKatex(rendered)
+      const rendered = `<div class="katex-display-block my-4 overflow-x-auto text-center">${katex.renderToString(math, { displayMode: true, throwOnError: false })}</div>`;
+      return saveKatex(rendered);
     } catch {
-      return saveKatex(`<code class="katex-error">\\[${math}\\]</code>`)
+      return saveKatex(`<code class="katex-error">\\[${math}\\]</code>`);
     }
   });
 
-  // ── 3. Render inline math $ ... $ → simpan sebagai placeholder (Regex standar tanpa lookbehind)
   text = text.replace(/(^|[^\\])\$([^\n$]+?)\$/g, (_, prefix, math) => {
     try {
-      return prefix + saveKatex(katex.renderToString(math, { displayMode: false, throwOnError: false }))
+      return (
+        prefix +
+        saveKatex(
+          katex.renderToString(math, {
+            displayMode: false,
+            throwOnError: false,
+          }),
+        )
+      );
     } catch {
-      return prefix + saveKatex(`<code class="katex-error">$${math}$</code>`)
+      return prefix + saveKatex(`<code class="katex-error">$${math}$</code>`);
     }
   });
-
-  // ── 3.5. Preprocessor Perintah Teks LaTeX → HTML
-  //    Mengubah perintah dokumen LaTeX ke ekuivalen HTML
-  //    agar tampilan preview panel kanan merender teks LaTeX dengan benar.
 
   // Utility rekursif untuk memproses argumen bersarang
   const processArg = (inner: string): string => {
-    // proses perintah bersarang pada argumen
     return inner
-      .replace(/\\textbf\{([^{}]*)\}/g, '<strong>$1</strong>')
-      .replace(/\\textit\{([^{}]*)\}/g, '<em>$1</em>')
-      .replace(/\\emph\{([^{}]*)\}/g, '<em>$1</em>')
-      .replace(/\\underline\{([^{}]*)\}/g, '<u>$1</u>')
-      .replace(/\\texttt\{([^{}]*)\}/g, '<code>$1</code>')
-      .replace(/\\textrm\{([^{}]*)\}/g, '<span style="font-family:serif">$1</span>')
-      .replace(/\\textsf\{([^{}]*)\}/g, '<span style="font-family:sans-serif">$1</span>')
-      .replace(/\\text\{([^{}]*)\}/g, '$1')
-  }
+      .replace(/\\textbf\{([^{}]*)\}/g, "<strong>$1</strong>")
+      .replace(/\\textit\{([^{}]*)\}/g, "<em>$1</em>")
+      .replace(/\\emph\{([^{}]*)\}/g, "<em>$1</em>")
+      .replace(/\\underline\{([^{}]*)\}/g, "<u>$1</u>")
+      .replace(/\\texttt\{([^{}]*)\}/g, "<code>$1</code>")
+      .replace(
+        /\\textrm\{([^{}]*)\}/g,
+        '<span style="font-family:serif">$1</span>',
+      )
+      .replace(
+        /\\textsf\{([^{}]*)\}/g,
+        '<span style="font-family:sans-serif">$1</span>',
+      )
+      .replace(/\\text\{([^{}]*)\}/g, "$1");
+  };
 
   // Format teks – paling umum
-  text = text.replace(/\\textbf\{([^{}]*)\}/g, (_, inner) => `<strong>${processArg(inner)}</strong>`)
-  text = text.replace(/\\textit\{([^{}]*)\}/g, (_, inner) => `<em>${processArg(inner)}</em>`)
-  text = text.replace(/\\emph\{([^{}]*)\}/g, (_, inner) => `<em>${processArg(inner)}</em>`)
-  text = text.replace(/\\underline\{([^{}]*)\}/g, (_, inner) => `<u>${processArg(inner)}</u>`)
-  text = text.replace(/\\texttt\{([^{}]*)\}/g, (_, inner) => `<code>${processArg(inner)}</code>`)
-  text = text.replace(/\\textrm\{([^{}]*)\}/g, (_, inner) => `<span style="font-family:serif">${processArg(inner)}</span>`)
-  text = text.replace(/\\textsf\{([^{}]*)\}/g, (_, inner) => `<span style="font-family:sans-serif">${processArg(inner)}</span>`)
-  text = text.replace(/\\text\{([^{}]*)\}/g, (_, inner) => processArg(inner))
+  text = text.replace(
+    /\\textbf\{([^{}]*)\}/g,
+    (_, inner) => `<strong>${processArg(inner)}</strong>`,
+  );
+  text = text.replace(
+    /\\textit\{([^{}]*)\}/g,
+    (_, inner) => `<em>${processArg(inner)}</em>`,
+  );
+  text = text.replace(
+    /\\emph\{([^{}]*)\}/g,
+    (_, inner) => `<em>${processArg(inner)}</em>`,
+  );
+  text = text.replace(
+    /\\underline\{([^{}]*)\}/g,
+    (_, inner) => `<u>${processArg(inner)}</u>`,
+  );
+  text = text.replace(
+    /\\texttt\{([^{}]*)\}/g,
+    (_, inner) => `<code>${processArg(inner)}</code>`,
+  );
+  text = text.replace(
+    /\\textrm\{([^{}]*)\}/g,
+    (_, inner) => `<span style="font-family:serif">${processArg(inner)}</span>`,
+  );
+  text = text.replace(
+    /\\textsf\{([^{}]*)\}/g,
+    (_, inner) =>
+      `<span style="font-family:sans-serif">${processArg(inner)}</span>`,
+  );
+  text = text.replace(/\\text\{([^{}]*)\}/g, (_, inner) => processArg(inner));
 
   // Ukuran font LaTeX
-  text = text.replace(/\\tiny\{([^{}]*)\}/g, '<span style="font-size:0.6em">$1</span>')
-  text = text.replace(/\\small\{([^{}]*)\}/g, '<span style="font-size:0.85em">$1</span>')
-  text = text.replace(/\\large\{([^{}]*)\}/g, '<span style="font-size:1.25em">$1</span>')
-  text = text.replace(/\\Large\{([^{}]*)\}/g, '<span style="font-size:1.5em">$1</span>')
-  text = text.replace(/\\LARGE\{([^{}]*)\}/g, '<span style="font-size:1.75em">$1</span>')
-  text = text.replace(/\\huge\{([^{}]*)\}/g, '<span style="font-size:2em">$1</span>')
+  text = text.replace(
+    /\\tiny\{([^{}]*)\}/g,
+    '<span style="font-size:0.6em">$1</span>',
+  );
+  text = text.replace(
+    /\\small\{([^{}]*)\}/g,
+    '<span style="font-size:0.85em">$1</span>',
+  );
+  text = text.replace(
+    /\\large\{([^{}]*)\}/g,
+    '<span style="font-size:1.25em">$1</span>',
+  );
+  text = text.replace(
+    /\\Large\{([^{}]*)\}/g,
+    '<span style="font-size:1.5em">$1</span>',
+  );
+  text = text.replace(
+    /\\LARGE\{([^{}]*)\}/g,
+    '<span style="font-size:1.75em">$1</span>',
+  );
+  text = text.replace(
+    /\\huge\{([^{}]*)\}/g,
+    '<span style="font-size:2em">$1</span>',
+  );
 
   // Warna teks: \textcolor{warna}{teks}
-  text = text.replace(/\\textcolor\{([^{}]*)\}\{([^{}]*)\}/g, (_, color, inner) =>
-    `<span style="color:${processArg(color)}">${processArg(inner)}</span>`
-  )
+  text = text.replace(
+    /\\textcolor\{([^{}]*)\}\{([^{}]*)\}/g,
+    (_, color, inner) =>
+      `<span style="color:${processArg(color)}">${processArg(inner)}</span>`,
+  );
 
   // Heading / struktur dokumen
-  text = text.replace(/\\chapter\*?\{([^{}]*)\}/g, (_, inner) => `\n# ${processArg(inner)}\n`)
-  text = text.replace(/\\section\*?\{([^{}]*)\}/g, (_, inner) => `\n## ${processArg(inner)}\n`)
-  text = text.replace(/\\subsection\*?\{([^{}]*)\}/g, (_, inner) => `\n### ${processArg(inner)}\n`)
-  text = text.replace(/\\subsubsection\*?\{([^{}]*)\}/g, (_, inner) => `\n#### ${processArg(inner)}\n`)
-  text = text.replace(/\\paragraph\*?\{([^{}]*)\}/g, (_, inner) => `\n**${processArg(inner)}**\n`)
+  text = text.replace(
+    /\\chapter\*?\{([^{}]*)\}/g,
+    (_, inner) => `\n# ${processArg(inner)}\n`,
+  );
+  text = text.replace(
+    /\\section\*?\{([^{}]*)\}/g,
+    (_, inner) => `\n## ${processArg(inner)}\n`,
+  );
+  text = text.replace(
+    /\\subsection\*?\{([^{}]*)\}/g,
+    (_, inner) => `\n### ${processArg(inner)}\n`,
+  );
+  text = text.replace(
+    /\\subsubsection\*?\{([^{}]*)\}/g,
+    (_, inner) => `\n#### ${processArg(inner)}\n`,
+  );
+  text = text.replace(
+    /\\paragraph\*?\{([^{}]*)\}/g,
+    (_, inner) => `\n**${processArg(inner)}**\n`,
+  );
 
   // Daftar item LaTeX: \begin{itemize}...\end{itemize} dan \begin{enumerate}...\end{enumerate}
-  text = text.replace(/\\begin\{itemize\}([\s\S]*?)\\end\{itemize\}/g, (_, content) => {
-    const items = content.replace(/\\item\s*/g, '- ').trim()
-    return `\n${items}\n`
-  })
-  text = text.replace(/\\begin\{enumerate\}([\s\S]*?)\\end\{enumerate\}/g, (_, content) => {
-    let i = 1
-    const items = content.replace(/\\item\s*/g, () => `${i++}. `).trim()
-    return `\n${items}\n`
-  })
+  text = text.replace(
+    /\\begin\{itemize\}([\s\S]*?)\\end\{itemize\}/g,
+    (_, content) => {
+      const items = content.replace(/\\item\s*/g, "- ").trim();
+      return `\n${items}\n`;
+    },
+  );
+  text = text.replace(
+    /\\begin\{enumerate\}([\s\S]*?)\\end\{enumerate\}/g,
+    (_, content) => {
+      let i = 1;
+      const items = content.replace(/\\item\s*/g, () => `${i++}. `).trim();
+      return `\n${items}\n`;
+    },
+  );
 
   // Blok verbatim / lstlisting
-  text = text.replace(/\\begin\{verbatim\}([\s\S]*?)\\end\{verbatim\}/g,
-    (_, code) => `\n\`\`\`\n${code.trim()}\n\`\`\`\n`
-  )
-  text = text.replace(/\\begin\{lstlisting\}([\s\S]*?)\\end\{lstlisting\}/g,
-    (_, code) => `\n\`\`\`latex\n${code.trim()}\n\`\`\`\n`
-  )
+  text = text.replace(
+    /\\begin\{verbatim\}([\s\S]*?)\\end\{verbatim\}/g,
+    (_, code) => `\n\`\`\`\n${code.trim()}\n\`\`\`\n`,
+  );
+  text = text.replace(
+    /\\begin\{lstlisting\}([\s\S]*?)\\end\{lstlisting\}/g,
+    (_, code) => `\n\`\`\`latex\n${code.trim()}\n\`\`\`\n`,
+  );
 
   // Link & footnote
-  text = text.replace(/\\href\{([^{}]*)\}\{([^{}]*)\}/g,
-    (_, url, label) => `<a href="${url}" target="_blank" rel="noopener">${processArg(label)}</a>`
-  )
-  text = text.replace(/\\footnote\{([^{}]*)\}/g,
-    (_, inner) => `<sup class="text-xs text-(--color-text-muted)" title="${inner}">[*]</sup>`
-  )
+  text = text.replace(
+    /\\href\{([^{}]*)\}\{([^{}]*)\}/g,
+    (_, url, label) =>
+      `<a href="${url}" target="_blank" rel="noopener">${processArg(label)}</a>`,
+  );
+  text = text.replace(
+    /\\footnote\{([^{}]*)\}/g,
+    (_, inner) =>
+      `<sup class="text-xs text-(--color-text-muted)" title="${inner}">[*]</sup>`,
+  );
 
   // Karakter spesial LaTeX → Unicode
-  text = text.replace(/\\&/g, '&amp;')
-  text = text.replace(/\\%/g, '%')
-  text = text.replace(/\\#/g, '#')
-  text = text.replace(/\\_/g, '_')
-  text = text.replace(/\\\$/g, '$')
-  text = text.replace(/\\ldots/g, '…')
-  text = text.replace(/\\dots/g, '…')
-  text = text.replace(/---/g, '—')
-  text = text.replace(/--/g, '–')
+  text = text.replace(/\\&/g, "&amp;");
+  text = text.replace(/\\%/g, "%");
+  text = text.replace(/\\#/g, "#");
+  text = text.replace(/\\_/g, "_");
+  text = text.replace(/\\\$/g, "$");
+  text = text.replace(/\\ldots/g, "…");
+  text = text.replace(/\\dots/g, "…");
+  text = text.replace(/---/g, "—");
+  text = text.replace(/--/g, "–");
 
   // Baris baru LaTeX
-  text = text.replace(/\\\\\s*\n?/g, '<br>\n')
+  text = text.replace(/\\\\\s*\n?/g, "<br>\n");
 
   // Hapus environment yang tidak dikenali agar tidak mengacau output
-  text = text.replace(/\\begin\{[a-z*]+\}|\\end\{[a-z*]+\}/g, '')
+  text = text.replace(/\\begin\{[a-z*]+\}|\\end\{[a-z*]+\}/g, "");
 
   // Hapus perintah preamble LaTeX
-  text = text.replace(/\\documentclass(\[.*?\])?\{[^{}]*\}\s*\n?/g, '')
-  text = text.replace(/\\usepackage(\[.*?\])?\{[^{}]*\}\s*\n?/g, '')
-  text = text.replace(/\\title\{([^{}]*)\}/g, '# $1\n')
-  text = text.replace(/\\author\{([^{}]*)\}/g, '**Penulis:** $1\n')
-  text = text.replace(/\\date\{([^{}]*)\}/g, '*Tanggal:* $1\n')
-  text = text.replace(/\\maketitle/g, '')
-  text = text.replace(/\\newpage/g, '\n---\n')
-  text = text.replace(/\\clearpage/g, '\n---\n')
+  text = text.replace(/\\documentclass(\[.*?\])?\{[^{}]*\}\s*\n?/g, "");
+  text = text.replace(/\\usepackage(\[.*?\])?\{[^{}]*\}\s*\n?/g, "");
+  text = text.replace(/\\title\{([^{}]*)\}/g, "# $1\n");
+  text = text.replace(/\\author\{([^{}]*)\}/g, "**Penulis:** $1\n");
+  text = text.replace(/\\date\{([^{}]*)\}/g, "*Tanggal:* $1\n");
+  text = text.replace(/\\maketitle/g, "");
+  text = text.replace(/\\newpage/g, "\n---\n");
+  text = text.replace(/\\clearpage/g, "\n---\n");
 
   // ── 4. Proses Markdown (marked mengubah teks → HTML; tabel dibungkus div scrollable)
   if (props.isMarkdown) {
     try {
-      const renderer = new marked.Renderer()
-      const originalTable = renderer.table.bind(renderer)
+      const renderer = new marked.Renderer();
+      const originalTable = renderer.table.bind(renderer);
       renderer.table = (token) => {
-        const html = originalTable(token)
-        return `<div class="table-scroll-wrapper">${html}</div>`
-      }
-      const parsed = marked.parse(text, { renderer, async: false }) as any
-      if (typeof parsed === 'string') {
-        text = parsed
-      } else if (parsed && typeof parsed.then === 'function') {
+        const html = originalTable(token);
+        return `<div class="table-scroll-wrapper">${html}</div>`;
+      };
+      const parsed = marked.parse(text, { renderer, async: false }) as any;
+      if (typeof parsed === "string") {
+        text = parsed;
+      } else if (parsed && typeof parsed.then === "function") {
         // jika marked mengembalikan Promise, konversi aman
-        text = text // fallback ke text mentah jika async promise
+        text = text; // fallback ke text mentah jika async promise
       }
     } catch {
       try {
-        const parsed = marked.parse(text, { async: false }) as any
-        if (typeof parsed === 'string') text = parsed
+        const parsed = marked.parse(text, { async: false }) as any;
+        if (typeof parsed === "string") text = parsed;
       } catch {
         /* noop */
       }
@@ -192,14 +266,14 @@ const renderedHtml = computed(() => {
   }
 
   // ── 5. Restore placeholder → KaTeX HTML yang sesungguhnya
-  if (typeof text === 'string') {
+  if (typeof text === "string") {
     text = text.replace(/KATEXPH(\d+)ENDPH/g, (_, idx) => {
-      return katexStore[Number(idx)] ?? ''
-    })
+      return katexStore[Number(idx)] ?? "";
+    });
   }
 
-  return typeof text === 'string' ? text : ''
-})
+  return typeof text === "string" ? text : "";
+});
 </script>
 
 <template>
@@ -212,7 +286,7 @@ const renderedHtml = computed(() => {
 <style>
 /* ── Tipografi Prose sesuai DESIGN.md ──────────────────────────── */
 .katex-rendered-content {
-  font-family: var(--font-body, 'DM Sans', sans-serif);
+  font-family: var(--font-body, "DM Sans", sans-serif);
   color: var(--color-text-primary);
   font-size: 0.9375rem; /* 15px */
   line-height: 1.75;
@@ -222,17 +296,27 @@ const renderedHtml = computed(() => {
 .katex-rendered-content h2,
 .katex-rendered-content h3,
 .katex-rendered-content h4 {
-  font-family: var(--font-body, 'DM Sans', sans-serif);
+  font-family: var(--font-body, "DM Sans", sans-serif);
   color: var(--color-text-primary);
   font-weight: 700;
   line-height: 1.3;
   margin-top: 2rem;
   margin-bottom: 0.75rem;
 }
-.katex-rendered-content h1 { font-size: 1.5rem; }
-.katex-rendered-content h2 { font-size: 1.25rem; border-bottom: 1px solid var(--color-border); padding-bottom: 0.35rem; }
-.katex-rendered-content h3 { font-size: 1.1rem; }
-.katex-rendered-content h4 { font-size: 1rem; }
+.katex-rendered-content h1 {
+  font-size: 1.5rem;
+}
+.katex-rendered-content h2 {
+  font-size: 1.25rem;
+  border-bottom: 1px solid var(--color-border);
+  padding-bottom: 0.35rem;
+}
+.katex-rendered-content h3 {
+  font-size: 1.1rem;
+}
+.katex-rendered-content h4 {
+  font-size: 1rem;
+}
 
 .katex-rendered-content p {
   margin-top: 0;
@@ -244,7 +328,9 @@ const renderedHtml = computed(() => {
   padding-left: 1.5rem;
   margin-bottom: 1rem;
 }
-.katex-rendered-content li { margin-bottom: 0.25rem; }
+.katex-rendered-content li {
+  margin-bottom: 0.25rem;
+}
 
 .katex-rendered-content blockquote {
   border-left: 3px solid var(--color-primary);
@@ -266,13 +352,26 @@ const renderedHtml = computed(() => {
   border: 1px solid var(--color-border);
   /* Gradient hint untuk mobile agar user tahu bisa di-scroll */
   background:
-    linear-gradient(to right, white 30%, rgba(255,255,255,0)),
-    linear-gradient(to right, rgba(255,255,255,0), white 70%) 0 100%,
-    radial-gradient(farthest-side at 0% 50%, rgba(0,0,0,.08), rgba(0,0,0,0)),
-    radial-gradient(farthest-side at 100% 50%, rgba(0,0,0,.08), rgba(0,0,0,0)) 0 100%;
+    linear-gradient(to right, white 30%, rgba(255, 255, 255, 0)),
+    linear-gradient(to right, rgba(255, 255, 255, 0), white 70%) 0 100%,
+    radial-gradient(
+      farthest-side at 0% 50%,
+      rgba(0, 0, 0, 0.08),
+      rgba(0, 0, 0, 0)
+    ),
+    radial-gradient(
+        farthest-side at 100% 50%,
+        rgba(0, 0, 0, 0.08),
+        rgba(0, 0, 0, 0)
+      )
+      0 100%;
   background-repeat: no-repeat;
   background-color: white;
-  background-size: 40px 100%, 40px 100%, 14px 100%, 14px 100%;
+  background-size:
+    40px 100%,
+    40px 100%,
+    14px 100%,
+    14px 100%;
   background-attachment: local, local, scroll, scroll;
 }
 
@@ -308,14 +407,14 @@ const renderedHtml = computed(() => {
   color: var(--color-code-text, #e6edf3);
   padding: 1rem 1.25rem;
   border-radius: 0.5rem;
-  font-family: var(--font-mono, 'JetBrains Mono', monospace);
+  font-family: var(--font-mono, "JetBrains Mono", monospace);
   font-size: 0.8125rem;
   overflow-x: auto;
   margin: 1rem 0;
   line-height: 1.65;
 }
 .katex-rendered-content code {
-  font-family: var(--font-mono, 'JetBrains Mono', monospace);
+  font-family: var(--font-mono, "JetBrains Mono", monospace);
   font-size: 0.875em;
   background: var(--color-surface-alt);
   border: 1px solid var(--color-border);
@@ -357,8 +456,14 @@ const renderedHtml = computed(() => {
 }
 
 /* ── Strong / Em ─────────────────────────────────────────────────── */
-.katex-rendered-content strong { color: var(--color-text-primary); font-weight: 700; }
-.katex-rendered-content em { font-style: italic; color: var(--color-text-secondary); }
+.katex-rendered-content strong {
+  color: var(--color-text-primary);
+  font-weight: 700;
+}
+.katex-rendered-content em {
+  font-style: italic;
+  color: var(--color-text-secondary);
+}
 
 /* ── Link ────────────────────────────────────────────────────────── */
 .katex-rendered-content a {
@@ -366,5 +471,7 @@ const renderedHtml = computed(() => {
   text-decoration: underline;
   text-underline-offset: 2px;
 }
-.katex-rendered-content a:hover { color: var(--color-primary-hover); }
+.katex-rendered-content a:hover {
+  color: var(--color-primary-hover);
+}
 </style>

@@ -9,6 +9,9 @@ export default defineNuxtConfig({
   css: ["~/assets/css/main.css", "katex/dist/katex.min.css"],
 
   vite: {
+    build: {
+      target: "es2022",
+    },
     plugins: [tailwindcss()],
     optimizeDeps: {
       exclude: ["pdfjs-dist"],
@@ -23,7 +26,12 @@ export default defineNuxtConfig({
     redirectOptions: {
       login: "/login",
       callback: "/confirm",
-      exclude: ["/", "/register", "/panduan-pengujian", "/panduan-pengujian/**"],
+      exclude: [
+        "/",
+        "/register",
+        "/panduan-pengujian",
+        "/panduan-pengujian/**",
+      ],
     },
   },
 
@@ -37,6 +45,11 @@ export default defineNuxtConfig({
   },
 
   nitro: {
+    esbuild: {
+      options: {
+        target: "es2022",
+      },
+    },
     experimental: {
       wasm: true,
     },
