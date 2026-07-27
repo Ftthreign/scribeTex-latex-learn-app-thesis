@@ -22,6 +22,8 @@ export default defineNuxtConfig({
   },
 
   supabase: {
+    url: process.env.SUPABASE_URL,
+    key: process.env.SUPABASE_KEY,
     redirect: true,
     redirectOptions: {
       login: "/login",
@@ -37,10 +39,10 @@ export default defineNuxtConfig({
 
   runtimeConfig: {
     geminiApiKey: process.env.GEMINI_API_KEY || "",
-    databaseUrl: "",
+    databaseUrl: process.env.DATABASE_URL || "",
     public: {
-      supabaseUrl: "",
-      supabaseAnonKey: "",
+      supabaseUrl: process.env.SUPABASE_URL || "",
+      supabaseAnonKey: process.env.SUPABASE_KEY || "",
     },
   },
 
