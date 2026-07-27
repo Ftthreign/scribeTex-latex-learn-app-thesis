@@ -56,6 +56,8 @@ jobs:
           password: ${{ secrets.VPS_PASSWORD }}
           port: 22
           script: |
+            export PATH=$PATH:/usr/local/bin:/usr/bin:~/.nvm/versions/node/$(ls ~/.nvm/versions/node 2>/dev/null | tail -n 1)/bin:~/.bun/bin
+            source ~/.bashrc 2>/dev/null || true
             cd ~/scribeTex-latex-learn-app-thesis
             pm2 restart scribetex-app || pm2 start .output/server/index.mjs --name "scribetex-app" --interpreter bun
             pm2 save
