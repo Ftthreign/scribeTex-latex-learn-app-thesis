@@ -54,7 +54,6 @@ const overallStats = computed(() => {
 
 <template>
   <div class="max-w-6xl mx-auto px-4 py-8 space-y-8 font-body">
-    <!-- ═══ SKELETON LOADING STATE ═══ -->
     <ModulesIndexSkeleton v-if="loading" />
 
     <div v-else class="space-y-8">
