@@ -1,10 +1,19 @@
 import { exec } from "child_process";
 import { promisify } from "util";
-import fs from "fs-extra";
+import fs from "fs/promises";
 import path from "path";
 import crypto from "crypto";
 
 const execAsync = promisify(exec);
+
+async function pathExists(p: string): Promise<boolean> {
+  try {
+    await fs.access(p);
+    return true;
+  } catch {
+    return false;
+  }
+}
 
 export interface CompileLogEntry {
   line?: number;
@@ -39,7 +48,7 @@ export class CompileService {
 
     try {
       // 1. Buat direktori temporer
-      await fs.ensureDir(tmpDir);
+      await fs.mkdir(tmpDir, { recursive: true });
       await fs.chmod(tmpDir, 0o777);
 
       // 2. Tulis SEMUA berkas workspace ke direktori temporer (dukung subfolder seperti bab/bab1.tex)
@@ -49,7 +58,7 @@ export class CompileService {
           .replace(/\\/g, "/")
           .replace(/\.\.\//g, "");
         const filePath = path.join(tmpDir, cleanFileName);
-        await fs.ensureDir(path.dirname(filePath));
+        await fs.mkdir(path.dirname(filePath), { recursive: true });
         await fs.writeFile(filePath, content, "utf-8");
       }
 
@@ -79,9 +88,9 @@ export class CompileService {
       }
 
       // 5. Periksa apakah berkas PDF berhasil dihasilkan
-      const pdfExists = await fs.pathExists(pdfPath);
+      const pdfFileExists = await pathExists(pdfPath);
 
-      if (pdfExists) {
+      if (pdfFileExists) {
         const pdfBuffer = await fs.readFile(pdfPath);
         const pdfBase64 = `data:application/pdf;base64,${pdfBuffer.toString("base64")}`;
 
@@ -121,7 +130,7 @@ export class CompileService {
     } finally {
       // 6. Selalu bersihkan direktori temporer
       try {
-        await fs.remove(tmpDir);
+        await fs.rm(tmpDir, { recursive: true, force: true });
       } catch {
         /* ignore cleanup error */
       }
@@ -162,7 +171,7 @@ export class CompileService {
         { timeout: 30000 },
       );
 
-      if (await fs.pathExists(pdfPath)) {
+      if (await pathExists(pdfPath)) {
         const pdfBuffer = await fs.readFile(pdfPath);
         return {
           isSuccess: true,
@@ -197,7 +206,7 @@ export class CompileService {
   ): Promise<CompileLogEntry[]> {
     const logs: CompileLogEntry[] = [];
     try {
-      if (!(await fs.pathExists(logPath))) return logs;
+      if (!(await pathExists(logPath))) return logs;
 
       const content = await fs.readFile(logPath, "utf-8");
       const lines = content.split("\n");
