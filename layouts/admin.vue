@@ -153,7 +153,7 @@ const confirmLogout = async () => {
       />
     </Transition>
 
-    <div class="flex-1 flex flex-col min-w-0">
+    <div class="flex-1 flex flex-col min-w-0 min-h-0 h-full">
       <header
         class="h-15 bg-(--color-surface) border-b border-border flex items-center justify-between px-5 lg:px-6 sticky top-0 z-30 shrink-0"
       >
@@ -186,7 +186,7 @@ const confirmLogout = async () => {
         </div>
       </header>
 
-      <main class="flex-1 overflow-y-auto p-5 lg:p-8 h-full">
+      <main class="flex-1 overflow-y-auto p-5 lg:p-8 min-h-0">
         <slot />
       </main>
     </div>
