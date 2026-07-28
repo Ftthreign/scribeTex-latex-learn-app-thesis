@@ -28,7 +28,7 @@ const emit = defineEmits<{
         <span class="text-xs text-(--color-text-muted)">/</span>
         <span class="text-xs font-bold text-(--color-text-primary) font-sans">Project Sandbox</span>
       </div>
-      <h1 class="text-xl font-bold text-(--color-text-primary) font-display tracking-tight">
+      <h1 class="text-base sm:text-xl font-bold text-(--color-text-primary) font-display tracking-tight">
         Project Sandbox Compiler <span class="text-primary">LaTeX</span>
       </h1>
     </div>

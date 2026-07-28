@@ -106,7 +106,7 @@ function cancelRename() {
 
 <template>
   <div
-    class="w-48 shrink-0 flex flex-col bg-surface-alt border-r border-border h-full min-h-0 select-none"
+    class="w-full h-full min-h-0 flex flex-col bg-surface-alt border border-border rounded-xl lg:rounded-none lg:border-none select-none overflow-hidden"
   >
     <!-- Panel Header -->
     <div

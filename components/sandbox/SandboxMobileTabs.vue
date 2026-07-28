@@ -1,12 +1,12 @@
 <script setup lang="ts">
-import { IconCode, IconEye } from "@tabler/icons-vue";
+import { IconFolder, IconCode, IconEye } from "@tabler/icons-vue";
 
 defineProps<{
-  activeTab: "editor" | "preview";
+  activeTab: "files" | "editor" | "preview";
 }>();
 
 const emit = defineEmits<{
-  (e: "update:activeTab", tab: "editor" | "preview"): void;
+  (e: "update:activeTab", tab: "files" | "editor" | "preview"): void;
 }>();
 </script>
 
@@ -14,6 +14,19 @@ const emit = defineEmits<{
   <div
     class="flex lg:hidden bg-surface-alt p-1 rounded-xl border border-border shrink-0 font-sans"
   >
+    <button
+      @click="emit('update:activeTab', 'files')"
+      :class="[
+        'flex-1 py-2 text-xs font-semibold rounded-lg transition-all flex items-center justify-center gap-1.5 cursor-pointer',
+        activeTab === 'files'
+          ? 'bg-(--color-surface) text-primary shadow-xs'
+          : 'text-(--color-text-muted)',
+      ]"
+    >
+      <IconFolder class="size-4 shrink-0" />
+      <span>Berkas</span>
+    </button>
+
     <button
       @click="emit('update:activeTab', 'editor')"
       :class="[
@@ -23,9 +36,10 @@ const emit = defineEmits<{
           : 'text-(--color-text-muted)',
       ]"
     >
-      <IconCode class="size-4" />
-      <span>Editor Kode</span>
+      <IconCode class="size-4 shrink-0" />
+      <span>Editor</span>
     </button>
+
     <button
       @click="emit('update:activeTab', 'preview')"
       :class="[
@@ -35,7 +49,7 @@ const emit = defineEmits<{
           : 'text-(--color-text-muted)',
       ]"
     >
-      <IconEye class="size-4" />
+      <IconEye class="size-4 shrink-0" />
       <span>Pratinjau & Log</span>
     </button>
   </div>
