@@ -32,16 +32,6 @@ const lastSignDate = computed(() => {
     </div>
 
     <div class="space-y-3.5 text-xs">
-      <div
-        class="flex items-center justify-between p-3 rounded-xl bg-surface-alt"
-      >
-        <span class="flex items-center gap-2 text-text-secondary font-medium">
-          <IconCircleCheck class="size-4 text-success" />
-          Status Akun
-        </span>
-        <span class="font-bold text-success">Terverifikasi</span>
-      </div>
-
       <!-- User Role -->
       <div
         class="flex items-center justify-between p-3 rounded-xl bg-surface-alt"
