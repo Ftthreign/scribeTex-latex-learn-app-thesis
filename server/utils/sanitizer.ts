@@ -22,7 +22,7 @@ export const sanitizeLatex = (code: string): SanitizeResult => {
       pattern: /\\include\s*\{?\s*(\/|\.\.)/i,
       name: "Path Traversal File Access (\\include)",
     },
-    { pattern: /\\read\b/i, name: "File Input Stream (\\read)" },
+    { pattern: /\\read/i, name: "File Input Stream (\\read)" },
     { pattern: /\\sys_shell_now:n/i, name: "LaTeX3 Shell Execution" },
   ];
 
