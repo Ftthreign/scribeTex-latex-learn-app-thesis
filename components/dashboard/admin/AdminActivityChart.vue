@@ -14,7 +14,7 @@ const chartOptions = computed(() => ({
     fontFamily: "DM Sans, sans-serif",
     zoom: { enabled: false },
   },
-  colors: ["#1a56db", "#3b82f6", "#0284c7"],
+  colors: ["#1a56db", "#7c3aed", "#0f9d58"],
   stroke: { curve: "smooth", width: 2.5 },
   fill: {
     type: "gradient",

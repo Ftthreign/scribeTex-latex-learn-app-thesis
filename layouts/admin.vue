@@ -15,6 +15,7 @@ import {
   IconHome,
   IconDatabase,
   IconChartBar,
+  IconEye,
 } from "@tabler/icons-vue";
 import { ROUTES } from "~/constants/route";
 
@@ -107,15 +108,15 @@ const confirmLogout = async () => {
       </nav>
 
       <div class="px-4 py-4 shrink-0">
-        <button
+        <NuxtLink
+          :to="ROUTES.student.sandbox"
           class="flex items-center justify-center gap-2 w-full bg-primary hover:bg-primary-hover text-white rounded-md py-2.5 text-[13px] font-semibold transition-colors cursor-pointer"
         >
           <IconPlus class="size-4 shrink-0" />
           New Project
-        </button>
+        </NuxtLink>
       </div>
 
-      <!-- Kembali ke Beranda -->
       <div class="px-3 pb-2 shrink-0">
         <NuxtLink
           :to="ROUTES.landing"
@@ -153,7 +154,7 @@ const confirmLogout = async () => {
       />
     </Transition>
 
-    <div class="flex-1 flex flex-col min-w-0">
+    <div class="flex-1 flex flex-col min-w-0 min-h-0 h-full">
       <header
         class="h-15 bg-(--color-surface) border-b border-border flex items-center justify-between px-5 lg:px-6 sticky top-0 z-30 shrink-0"
       >
@@ -171,7 +172,15 @@ const confirmLogout = async () => {
           >
         </div>
         <!-- Right -->
-        <div class="flex items-center gap-1">
+        <div class="flex items-center gap-1.5">
+          <NuxtLink
+            to="/student/modules"
+            class="px-3 py-1.5 rounded-lg bg-primary-light text-primary hover:bg-primary/10 border border-primary/25 text-xs font-bold flex items-center gap-1.5 transition-all cursor-pointer mr-1 shadow-2xs hover:-translate-y-0.5"
+            title="Pratinjau antarmuka & materi kurikulum dari kacamata siswa"
+          >
+            <IconEye class="size-4 stroke-[2.5]" />
+            <span class="hidden sm:inline">Pratinjau POV Siswa</span>
+          </NuxtLink>
           <button
             class="p-2 text-text-secondary hover:text-(--color-text-primary) hover:bg-surface-alt rounded-lg transition-colors"
           >
@@ -186,7 +195,7 @@ const confirmLogout = async () => {
         </div>
       </header>
 
-      <main class="flex-1 overflow-y-auto p-5 lg:p-8 h-full">
+      <main class="flex-1 overflow-y-auto p-5 lg:p-8 min-h-0">
         <slot />
       </main>
     </div>

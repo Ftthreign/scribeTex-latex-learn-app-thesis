@@ -14,7 +14,7 @@ export default defineEventHandler(async (event) => {
     })
   }
 
-  const supabaseUser = await serverSupabaseUser(event)
+  const supabaseUser = await serverSupabaseUser(event).catch(() => null)
   let userRole = 'STUDENT'
   let userId = ''
 

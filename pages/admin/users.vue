@@ -17,7 +17,7 @@ const { data: usersRes, refresh: refreshUsers, pending } = await useFetch<any>("
 const users = computed(() => usersRes.value?.data || []);
 
 const searchQuery = ref("");
-const roleFilter = ref<"ALL" | "STUDENT" | "ADMIN">("ALL");
+const roleFilter = ref<"ALL" | "STUDENT" | "ADMIN">("STUDENT");
 const progressFilter = ref<"ALL" | "ACTIVE" | "INACTIVE">("ALL");
 
 const filteredUsers = computed(() => {

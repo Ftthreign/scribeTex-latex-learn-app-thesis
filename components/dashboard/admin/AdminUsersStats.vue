@@ -18,7 +18,6 @@ const metricCards = computed(() => [
   {
     label: "Mahasiswa Terdaftar",
     value: props.totalStudents,
-    sub: `${props.totalAdmins} Administrator`,
     icon: IconUsers,
   },
   {
@@ -55,21 +54,36 @@ const metricCards = computed(() => [
 
       <div class="relative z-10 flex items-start justify-between gap-3">
         <div class="flex-1 min-w-0">
-          <p class="text-[11px] font-bold text-(--color-text-muted) uppercase tracking-wider truncate mb-2 font-sans">
+          <p
+            class="text-[11px] font-bold text-(--color-text-muted) uppercase tracking-wider truncate mb-2 font-sans"
+          >
             {{ card.label }}
           </p>
 
-          <p class="text-[28px] lg:text-[32px] font-bold text-(--color-text-primary) leading-none font-display tracking-tight group-hover:text-primary transition-colors mb-2 tabular-nums">
-            {{ typeof card.value === 'number' ? card.value.toLocaleString("id-ID") : card.value }}
+          <p
+            class="text-[28px] lg:text-[32px] font-bold text-(--color-text-primary) leading-none font-display tracking-tight group-hover:text-primary transition-colors mb-2 tabular-nums"
+          >
+            {{
+              typeof card.value === "number"
+                ? card.value.toLocaleString("id-ID")
+                : card.value
+            }}
           </p>
 
-          <span class="inline-block text-[9px] font-bold border px-2 py-0.5 rounded-full uppercase tracking-wider text-primary bg-primary-light border-primary/20 font-sans">
+          <span
+            class="inline-block text-[9px] font-bold border px-2 py-0.5 rounded-full uppercase tracking-wider text-primary bg-primary-light border-primary/20 font-sans"
+          >
             {{ card.sub }}
           </span>
         </div>
 
-        <div class="w-11 h-11 rounded-xl bg-primary flex items-center justify-center text-white shrink-0 shadow-xs rotate-6 transition-all duration-300 group-hover:rotate-0 group-hover:scale-105">
-          <component :is="card.icon" class="size-5.5 -rotate-6 group-hover:rotate-0 transition-transform duration-300" />
+        <div
+          class="w-11 h-11 rounded-xl bg-primary flex items-center justify-center text-white shrink-0 shadow-xs rotate-6 transition-all duration-300 group-hover:rotate-0 group-hover:scale-105"
+        >
+          <component
+            :is="card.icon"
+            class="size-5.5 -rotate-6 group-hover:rotate-0 transition-transform duration-300"
+          />
         </div>
       </div>
     </div>

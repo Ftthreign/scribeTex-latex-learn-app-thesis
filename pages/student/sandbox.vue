@@ -64,7 +64,14 @@ const {
 
 const isReferenceModalOpen = ref(false);
 const activeRightTab = ref<"preview" | "logs">("preview");
-const activeMobileTab = ref<"editor" | "preview">("editor");
+const activeMobileTab = ref<"files" | "editor" | "preview">("editor");
+
+const handleSwitchFile = (name: string) => {
+  switchFile(name);
+  if (typeof window !== "undefined" && window.innerWidth < 1024) {
+    activeMobileTab.value = "editor";
+  }
+};
 
 const showResetModal = ref(false);
 const showDeleteModal = ref(false);
@@ -89,6 +96,9 @@ const confirmLeave = () => {
 const handleCompile = async () => {
   const res = await compileLatex(toPayload(), ENTRY_FILE);
   activeRightTab.value = !res || !res.isSuccess ? "logs" : "preview";
+  if (typeof window !== "undefined" && window.innerWidth < 1024) {
+    activeMobileTab.value = "preview";
+  }
 };
 
 const handleConfirmReset = () => {
@@ -134,7 +144,7 @@ const handleRenameFile = (oldName: string, newName: string) => {
 
 <template>
   <div
-    class="w-full h-[calc(100vh-4.5rem)] overflow-hidden flex flex-col p-4 lg:p-5 gap-3 relative font-body"
+    class="w-full min-h-[calc(100vh-4rem)] lg:h-[calc(100vh-4.5rem)] overflow-hidden flex flex-col p-3 sm:p-4 lg:p-5 gap-3 relative font-body"
   >
     <SandboxHeader
       :compiling="compiling"
@@ -148,16 +158,23 @@ const handleRenameFile = (oldName: string, newName: string) => {
     <SandboxMobileTabs v-model:activeTab="activeMobileTab" />
 
     <div class="flex-1 flex gap-3 min-h-0 overflow-hidden relative">
-      <!-- File Tree Sidebar -->
-      <FileTreePanel
-        :files="files"
-        :activeFileName="activeFileName"
-        :entryFile="ENTRY_FILE"
-        @switch="switchFile"
-        @add="handleAddFile"
-        @delete="handleDeleteFile"
-        @rename="handleRenameFile"
-      />
+      <!-- File Tree Sidebar Container (Responsive) -->
+      <div
+        :class="[
+          'flex-col min-w-0 h-full',
+          activeMobileTab === 'files' ? 'flex w-full' : 'hidden lg:flex lg:w-52 shrink-0',
+        ]"
+      >
+        <FileTreePanel
+          :files="files"
+          :activeFileName="activeFileName"
+          :entryFile="ENTRY_FILE"
+          @switch="handleSwitchFile"
+          @add="handleAddFile"
+          @delete="handleDeleteFile"
+          @rename="handleRenameFile"
+        />
+      </div>
 
       <div
         :class="[
@@ -218,14 +235,14 @@ const handleRenameFile = (oldName: string, newName: string) => {
       </div>
     </div>
 
-    <div class="fixed bottom-6 right-6 z-40 flex items-center gap-3">
+    <div class="fixed bottom-4 right-4 sm:bottom-6 sm:right-6 z-40 flex items-center gap-2 sm:gap-3">
       <button
         @click="isReferenceModalOpen = true"
-        class="px-3.5 py-2.5 bg-(--color-surface) hover:bg-surface-alt text-(--color-text-primary) text-xs font-bold rounded-full shadow-lg hover:shadow-xl transition-all hover:scale-105 active:scale-95 flex items-center gap-2 cursor-pointer border border-border shrink-0 font-sans"
+        class="px-3 sm:px-3.5 py-2 sm:py-2.5 bg-(--color-surface) hover:bg-surface-alt text-(--color-text-primary) text-xs font-bold rounded-full shadow-lg hover:shadow-xl transition-all hover:scale-105 active:scale-95 flex items-center gap-1.5 sm:gap-2 cursor-pointer border border-border shrink-0 font-sans"
         title="Buka / Unggah Artikel Referensi PDF"
       >
-        <IconFileText class="size-4.5 text-primary" />
-        <span class="hidden sm:inline">Artikel Referensi</span>
+        <IconFileText class="size-4 sm:size-4.5 text-primary" />
+        <span class="hidden md:inline">Artikel Referensi</span>
       </button>
 
       <ExerciseFabAi @openDrawer="toggleAiDrawer(true)" />

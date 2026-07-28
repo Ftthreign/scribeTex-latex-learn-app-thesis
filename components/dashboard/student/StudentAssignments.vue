@@ -46,7 +46,7 @@ const handleClick = (item: AssignmentItem) => {
 <template>
   <div class="font-body mt-8">
     <h3 class="text-[15px] font-bold text-(--color-text-primary) mb-4">
-      Upcoming Assignments
+      Tugas yang mendatang
     </h3>
 
     <div
@@ -76,7 +76,7 @@ const handleClick = (item: AssignmentItem) => {
           </p>
         </div>
 
-        <div class="text-right shrink-0">
+        <!-- <div class="text-right shrink-0">
           <div
             :class="[
               'text-[12px] font-bold uppercase tracking-wider',
@@ -90,7 +90,7 @@ const handleClick = (item: AssignmentItem) => {
           >
             {{ item.deadlineLabel }}
           </div>
-        </div>
+        </div> -->
       </div>
     </div>
 

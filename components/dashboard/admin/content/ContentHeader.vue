@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { IconRefresh } from "@tabler/icons-vue";
+import { IconRefresh, IconEye } from "@tabler/icons-vue";
 
 defineProps<{
   pending: boolean;
@@ -21,14 +21,25 @@ const emit = defineEmits<{
       </p>
     </div>
 
-    <button
-      @click="emit('refresh')"
-      :disabled="pending"
-      class="btn-secondary btn-md gap-2 rounded-xl cursor-pointer font-bold font-sans shadow-xs shrink-0"
-      title="Muat Ulang Seluruh Data Konten Kurikulum"
-    >
-      <IconRefresh :class="['size-4 text-primary', pending && 'animate-spin']" />
-      <span>{{ pending ? 'Memuat Data...' : 'Muat Ulang Data' }}</span>
-    </button>
+    <div class="flex items-center gap-2.5 shrink-0 font-sans">
+      <NuxtLink
+        to="/student/modules"
+        class="btn-primary btn-md gap-2 rounded-xl cursor-pointer font-bold shadow-xs hover:scale-[1.02] active:scale-95 transition-all flex items-center"
+        title="Pratinjau tampilan kurikulum siswa"
+      >
+        <IconEye class="size-4 stroke-[2.5]" />
+        <span>Pratinjau Kurikulum Siswa</span>
+      </NuxtLink>
+
+      <button
+        @click="emit('refresh')"
+        :disabled="pending"
+        class="btn-secondary btn-md gap-2 rounded-xl cursor-pointer font-bold shadow-xs flex items-center"
+        title="Muat Ulang Seluruh Data Konten Kurikulum"
+      >
+        <IconRefresh :class="['size-4 text-primary', pending && 'animate-spin']" />
+        <span>{{ pending ? 'Memuat...' : 'Muat Ulang' }}</span>
+      </button>
+    </div>
   </div>
 </template>

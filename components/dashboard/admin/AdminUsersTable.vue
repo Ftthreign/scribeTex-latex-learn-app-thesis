@@ -25,9 +25,9 @@ function formatDate(dateStr: string) {
 
 <template>
   <div
-    class="gsap-admin-users-table bg-(--color-surface) rounded-2xl border border-border shadow-xs overflow-hidden font-body"
+    class="gsap-admin-users-table bg-(--color-surface) rounded-2xl border border-border shadow-xs overflow-x-auto font-body"
   >
-    <table class="w-full text-sm">
+    <table class="w-full text-sm min-w-175">
       <thead class="bg-surface-alt/70 border-b border-border font-sans">
         <tr>
           <th
