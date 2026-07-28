@@ -16,10 +16,13 @@ function normalizeLatexCode(code: string): string {
 }
 
 export default defineEventHandler(async (event) => {
-  const supabaseUser = await serverSupabaseUser(event);
+  const supabaseUser = await serverSupabaseUser(event).catch(() => null);
 
   if (!supabaseUser) {
-    throw createError({ statusCode: 401, statusMessage: "Unauthorized" });
+    throw createError({
+      statusCode: 401,
+      statusMessage: "Unauthorized: Sesi Anda telah berakhir. Silakan login kembali.",
+    });
   }
 
   const userId = supabaseUser.id;

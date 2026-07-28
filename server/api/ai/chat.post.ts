@@ -1,8 +1,20 @@
 import { defineEventHandler, readBody, createError } from "h3";
+import { serverSupabaseUser } from "#supabase/server";
 import { AiService } from "~~/server/services/ai.service";
 import { prisma } from "~~/server/utils/prisma";
 
 export default defineEventHandler(async (event) => {
+  const supabaseUser = await serverSupabaseUser(event).catch(() => null);
+
+  if (!supabaseUser) {
+    throw createError({
+      statusCode: 401,
+      statusMessage: "Unauthorized: Silakan login terlebih dahulu.",
+    });
+  }
+
+  const userId = supabaseUser.id;
+
   const body = await readBody<{
     message?: string;
     codeContext?: Record<string, string> | string;
@@ -24,8 +36,12 @@ export default defineEventHandler(async (event) => {
 
   let history: Array<{ message: string; response: string }> = [];
   try {
+    // Ambil percakapan sebelumnya khusus milik user ini pada sesi ini
     const pastChats = await prisma.aiChatHistory.findMany({
-      where: { session_id: sessionId },
+      where: {
+        user_id: userId,
+        session_id: sessionId,
+      },
       orderBy: { created_at: "asc" },
       take: 6,
     });
@@ -45,13 +61,7 @@ export default defineEventHandler(async (event) => {
   });
 
   try {
-    // Cari user aktif dari sesi, atau gunakan user pertama di database sebagai penampung riwayat
-    let userId = event.context.user?.id;
-    if (!userId) {
-      const firstUser = await prisma.user.findFirst();
-      userId = firstUser?.id || "00000000-0000-0000-0000-000000000001";
-    }
-
+    // Simpan percakapan baru dengan user_id pengguna terautentikasi
     const savedRecord = await prisma.aiChatHistory.create({
       data: {
         user_id: userId,
@@ -62,7 +72,7 @@ export default defineEventHandler(async (event) => {
       },
     });
     console.log(
-      `[AiChatAPI] Chat history saved successfully! Record ID: ${savedRecord.id}`,
+      `[AiChatAPI] Chat history saved successfully! Record ID: ${savedRecord.id} for User: ${userId}`,
     );
   } catch (err) {
     console.warn("[AiChatAPI] Save chat history to DB failed:", err);

@@ -4,7 +4,7 @@ import { prisma } from "~~/server/utils/prisma";
 import { checkExerciseAccess } from "~~/server/utils/accessControl";
 
 export default defineEventHandler(async (event) => {
-  const supabaseUser = await serverSupabaseUser(event);
+  const supabaseUser = await serverSupabaseUser(event).catch(() => null);
   let userRole = "STUDENT";
   let userId = "";
 

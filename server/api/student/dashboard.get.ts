@@ -3,10 +3,10 @@ import { serverSupabaseUser } from "#supabase/server";
 import { prisma } from "~~/server/utils/prisma";
 
 export default defineEventHandler(async (event) => {
-  const supabaseUser = await serverSupabaseUser(event);
+  const supabaseUser = await serverSupabaseUser(event).catch(() => null);
 
   if (!supabaseUser) {
-    throw createError({ statusCode: 401, statusMessage: "Unauthorized" });
+    throw createError({ statusCode: 401, statusMessage: "Unauthorized: Session expired" });
   }
 
   const userId = supabaseUser.id;

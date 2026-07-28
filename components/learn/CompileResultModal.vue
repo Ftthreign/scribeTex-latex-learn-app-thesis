@@ -25,7 +25,6 @@ const emit = defineEmits<{
   (e: "askAiError", errorLogs: string): void;
 }>();
 
-// Formatter otomatis Data URL Base64 PDF agar mencegah duplikasi "data:application/pdf;base64,"
 const formattedPdfUrl = computed(() => {
   if (!props.pdfBase64) return "";
   if (props.pdfBase64.startsWith("data:")) return props.pdfBase64;
@@ -118,7 +117,7 @@ function handleDownloadPdf() {
                 class="px-2.5 py-1 bg-purple-500/10 hover:bg-purple-500/20 text-purple-600 border border-purple-200 rounded-lg text-xs font-bold transition-all cursor-pointer flex items-center gap-1"
               >
                 <IconSparkles class="size-3.5" />
-                <span>Tanya AI 🤖</span>
+                <span>Tanya AI</span>
               </button>
             </div>
 
@@ -221,7 +220,6 @@ function handleDownloadPdf() {
           </div>
         </div>
 
-        <!-- Modal Footer -->
         <div
           class="flex items-center justify-between px-6 py-3.5 border-t border-border bg-surface-alt/50 shrink-0 text-xs"
         >
