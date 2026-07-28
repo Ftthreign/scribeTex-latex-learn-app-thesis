@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { ref, watch } from "vue";
+import { IconLoader2 } from "@tabler/icons-vue";
 import LessonContentEditor from "./LessonContentEditor.vue";
 import ExerciseCodeEditor from "./ExerciseCodeEditor.vue";
 
@@ -11,6 +12,7 @@ const props = defineProps<{
   lessonsList: any[];
   showDeleteModal: boolean;
   deleteItemTarget: any;
+  isSubmitting?: boolean;
 }>();
 
 const emit = defineEmits<{
@@ -317,15 +319,18 @@ function handleConfirmDelete() {
       <template #footer>
         <button
           @click="handleRequestClose"
-          class="btn-secondary btn-md cursor-pointer font-bold"
+          :disabled="isSubmitting"
+          class="btn-secondary btn-md cursor-pointer font-bold disabled:opacity-50 disabled:cursor-not-allowed"
         >
           Batal
         </button>
         <button
           @click="handleSave"
-          class="btn-primary btn-md cursor-pointer font-bold"
+          :disabled="isSubmitting"
+          class="btn-primary btn-md cursor-pointer font-bold flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
         >
-          Simpan Perubahan
+          <IconLoader2 v-if="isSubmitting" class="size-4 animate-spin" />
+          <span>{{ isSubmitting ? "Menyimpan..." : "Simpan Perubahan" }}</span>
         </button>
       </template>
     </UiModal>
@@ -352,20 +357,22 @@ function handleConfirmDelete() {
       <template #footer>
         <button
           @click="emit('closeDeleteModal')"
-          class="btn-secondary btn-md cursor-pointer font-bold"
+          :disabled="isSubmitting"
+          class="btn-secondary btn-md cursor-pointer font-bold disabled:opacity-50 disabled:cursor-not-allowed"
         >
           Batal
         </button>
         <button
           @click="handleConfirmDelete"
-          class="btn-danger btn-md cursor-pointer font-bold font-sans"
+          :disabled="isSubmitting"
+          class="btn-danger btn-md cursor-pointer font-bold font-sans flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
         >
-          Hapus Permanen
+          <IconLoader2 v-if="isSubmitting" class="size-4 animate-spin" />
+          <span>{{ isSubmitting ? "Menghapus..." : "Hapus Permanen" }}</span>
         </button>
       </template>
     </UiModal>
 
-    <!-- Modal Konfirmasi Penutupan Form jika Ada Perubahan Belum Disimpan (H3 Guard) -->
     <UiModal
       :isOpen="showCancelGuardModal"
       title="Konfirmasi Pembatalan Pengeditan"

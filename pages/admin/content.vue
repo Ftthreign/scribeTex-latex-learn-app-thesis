@@ -14,6 +14,7 @@ definePageMeta({ layout: "admin", middleware: ["role-admin"] });
 useHead({ title: "Manajemen Konten Kurikulum | ScribeTex Admin" });
 
 const { animateAdminContentEntrance } = useAdminAnimations();
+const toast = useToast();
 
 type TabKey = "modules" | "lessons" | "exercises" | "articles";
 const activeTab = ref<TabKey>("modules");
@@ -43,6 +44,22 @@ const editingItem = ref<any>(null);
 
 const showDeleteModal = ref(false);
 const deleteItemTarget = ref<{ type: string; item: any } | null>(null);
+const isSubmitting = ref(false);
+
+function getTypeLabel(type: string) {
+  switch (type) {
+    case "module":
+      return "Modul";
+    case "lesson":
+      return "Lesson Materi";
+    case "exercise":
+      return "Latihan Praktik";
+    case "article":
+      return "Artikel Panduan";
+    default:
+      return "Konten";
+  }
+}
 
 function openCreateModal(type: "module" | "lesson" | "exercise" | "article") {
   modalType.value = type;
@@ -62,19 +79,52 @@ function openDeleteModal(type: string, item: any) {
 }
 
 async function handleSaveItem({ type, data, id }: { type: string; data: any; id?: string }) {
-  showModal.value = false;
+  isSubmitting.value = true;
+  const typeLabel = getTypeLabel(type);
+  const actionLabel = id ? "memperbarui" : "menambahkan";
   const endpoint = `/api/admin/${type}s`;
   const method = id ? "PUT" : "POST";
   const url = id ? `${endpoint}/${id}` : endpoint;
 
-  await $fetch(url, { method, body: data });
-  refreshAll();
+  try {
+    await $fetch(url, { method, body: data });
+    showModal.value = false;
+    toast.success(
+      `Data ${typeLabel} Berhasil Disimpan`,
+      `Proses ${actionLabel} ${typeLabel.toLowerCase()} telah sukses dilakukan.`
+    );
+    refreshAll();
+  } catch (err: any) {
+    const errMsg =
+      err?.data?.message ||
+      err?.message ||
+      "Terjadi kesalahan saat menghubungi server.";
+    toast.error(`Gagal ${id ? "Memperbarui" : "Menambahkan"} ${typeLabel}`, errMsg);
+  } finally {
+    isSubmitting.value = false;
+  }
 }
 
 async function handleConfirmDelete({ type, id }: { type: string; id: string }) {
-  showDeleteModal.value = false;
-  await $fetch(`/api/admin/${type}s/${id}`, { method: "DELETE" });
-  refreshAll();
+  isSubmitting.value = true;
+  const typeLabel = getTypeLabel(type);
+  try {
+    await $fetch(`/api/admin/${type}s/${id}`, { method: "DELETE" });
+    showDeleteModal.value = false;
+    toast.success(
+      `Data ${typeLabel} Berhasil Dihapus`,
+      `Data ${typeLabel.toLowerCase()} telah berhasil dihapus secara permanen.`
+    );
+    refreshAll();
+  } catch (err: any) {
+    const errMsg =
+      err?.data?.message ||
+      err?.message ||
+      "Terjadi kesalahan saat menghapus data.";
+    toast.error(`Gagal Menghapus ${typeLabel}`, errMsg);
+  } finally {
+    isSubmitting.value = false;
+  }
 }
 
 watch(
@@ -145,6 +195,7 @@ onMounted(() => {
         :lessonsList="lessons"
         :showDeleteModal="showDeleteModal"
         :deleteItemTarget="deleteItemTarget"
+        :isSubmitting="isSubmitting"
         @closeModal="showModal = false"
         @closeDeleteModal="showDeleteModal = false"
         @saveItem="handleSaveItem"
