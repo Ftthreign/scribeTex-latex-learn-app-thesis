@@ -18,6 +18,8 @@ import {
 } from "@tabler/icons-vue";
 import { ROUTES } from "~/constants/route";
 
+import AdminPreviewBanner from "~/components/common/AdminPreviewBanner.vue";
+
 const isSidebarOpen = ref(false);
 const { logout } = useAuth();
 const route = useRoute();
@@ -153,6 +155,7 @@ const confirmLogout = async () => {
     </Transition>
 
     <div class="flex-1 flex flex-col min-w-0">
+      <AdminPreviewBanner />
       <header
         class="h-15 bg-(--color-surface) border-b border-border flex items-center justify-between px-5 lg:px-6 sticky top-0 z-30 shrink-0"
       >

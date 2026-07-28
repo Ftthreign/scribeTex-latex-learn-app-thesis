@@ -20,7 +20,21 @@ export default defineEventHandler(async (event) => {
     })
   }
 
-  // Upsert progress belajar di tabel user_progress
+  const dbUser = await prisma.user.findUnique({
+    where: { id: userId },
+    select: { role: true },
+  })
+
+  // Mode Pratinjau Admin: Jangan catat tracking progres untuk akun Admin
+  if (dbUser?.role === 'ADMIN') {
+    return {
+      statusCode: 200,
+      message: 'Mode Pratinjau Admin: Tracking progres belajar dilewati.',
+      data: null,
+    }
+  }
+
+  // Upsert progress belajar di tabel user_progress untuk siswa
   const progress = await prisma.userProgress.upsert({
     where: {
       user_id_lesson_id: {

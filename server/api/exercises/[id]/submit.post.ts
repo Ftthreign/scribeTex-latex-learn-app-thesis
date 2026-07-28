@@ -66,23 +66,31 @@ export default defineEventHandler(async (event) => {
     isMatch = Boolean(is_success);
   }
 
+  const dbUser = await prisma.user.findUnique({
+    where: { id: userId },
+    select: { role: true },
+  });
+  const isAdmin = dbUser?.role === "ADMIN";
+
   let nextLessonId: number | null = null;
 
   if (isMatch && exercise.lesson_id) {
-    await prisma.userProgress.upsert({
-      where: {
-        user_id_lesson_id: {
+    if (!isAdmin) {
+      await prisma.userProgress.upsert({
+        where: {
+          user_id_lesson_id: {
+            user_id: userId,
+            lesson_id: exercise.lesson_id,
+          },
+        },
+        update: { is_completed: true },
+        create: {
           user_id: userId,
           lesson_id: exercise.lesson_id,
+          is_completed: true,
         },
-      },
-      update: { is_completed: true },
-      create: {
-        user_id: userId,
-        lesson_id: exercise.lesson_id,
-        is_completed: true,
-      },
-    });
+      });
+    }
 
     // Cari lesson berikutnya dalam modul yang sama
     const nextLesson = await prisma.lesson.findFirst({
@@ -95,9 +103,9 @@ export default defineEventHandler(async (event) => {
     nextLessonId = nextLesson?.id || null;
   }
 
-  // 4. Unggah PDF ke Supabase Object Storage jika jawaban tepat & pdf_base64 tersedia
+  // 4. Unggah PDF ke Supabase Object Storage jika jawaban tepat & pdf_base64 tersedia (skip untuk Admin)
   let pdfUrl: string | null = null;
-  if (isMatch) {
+  if (isMatch && !isAdmin) {
     if (
       pdf_base64 &&
       typeof pdf_base64 === "string" &&
@@ -122,26 +130,35 @@ export default defineEventHandler(async (event) => {
           uploadErr,
         );
       }
-    } else {
-      console.warn(
-        "[SubmitExercise] Jawaban tepat tetapi pdf_base64 tidak dikirim dari client.",
-      );
     }
   }
 
-  // 5. Simpan hasil pengerjaan koding mahasiswa ke tabel exercise_results
-  const result = await prisma.exerciseResult.create({
-    data: {
+  // 5. Simpan hasil pengerjaan koding ke tabel exercise_results (hanya untuk siswa, skip untuk Admin)
+  let result: any = null;
+  if (!isAdmin) {
+    result = await prisma.exerciseResult.create({
+      data: {
+        user_id: userId,
+        exercise_id: exerciseId,
+        submitted_code: submitted_code,
+        is_success: isMatch,
+        pdf_url: pdfUrl,
+        error_log: isMatch
+          ? null
+          : error_log || "Kode jawaban belum sesuai dengan kode solusi.",
+      },
+    });
+  } else {
+    result = {
+      id: 0,
       user_id: userId,
       exercise_id: exerciseId,
       submitted_code: submitted_code,
       is_success: isMatch,
-      pdf_url: pdfUrl,
-      error_log: isMatch
-        ? null
-        : error_log || "Kode jawaban belum sesuai dengan kode solusi.",
-    },
-  });
+      pdf_url: null,
+      error_log: isMatch ? null : error_log || "Mode Pratinjau Admin",
+    };
+  }
 
   return {
     statusCode: 200,

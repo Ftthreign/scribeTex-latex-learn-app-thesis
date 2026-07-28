@@ -15,6 +15,7 @@ import {
   IconHome,
   IconDatabase,
   IconChartBar,
+  IconEye,
 } from "@tabler/icons-vue";
 import { ROUTES } from "~/constants/route";
 
@@ -171,7 +172,15 @@ const confirmLogout = async () => {
           >
         </div>
         <!-- Right -->
-        <div class="flex items-center gap-1">
+        <div class="flex items-center gap-1.5">
+          <NuxtLink
+            to="/student/modules"
+            class="px-3 py-1.5 rounded-lg bg-primary-light text-primary hover:bg-primary/10 border border-primary/25 text-xs font-bold flex items-center gap-1.5 transition-all cursor-pointer mr-1 shadow-2xs hover:-translate-y-0.5"
+            title="Pratinjau antarmuka & materi kurikulum dari kacamata siswa"
+          >
+            <IconEye class="size-4 stroke-[2.5]" />
+            <span class="hidden sm:inline">Pratinjau POV Siswa</span>
+          </NuxtLink>
           <button
             class="p-2 text-text-secondary hover:text-(--color-text-primary) hover:bg-surface-alt rounded-lg transition-colors"
           >

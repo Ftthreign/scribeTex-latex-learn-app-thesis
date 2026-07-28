@@ -1,8 +1,6 @@
 <script setup lang="ts">
 import { ref, watch } from "vue";
 import {
-  IconShield,
-  IconChartBar,
   IconCalendar,
   IconCheck,
   IconAlertCircle,
@@ -11,6 +9,7 @@ import {
   IconCode,
   IconLoader2,
   IconTerminal2,
+  IconExternalLink,
 } from "@tabler/icons-vue";
 
 const props = defineProps<{
@@ -108,7 +107,9 @@ watch(
                 {{ user.role }}
               </span>
             </div>
-            <p class="text-xs text-(--color-text-muted) font-mono truncate mt-0.5">
+            <p
+              class="text-xs text-(--color-text-muted) font-mono truncate mt-0.5"
+            >
               {{ user.email }}
             </p>
           </div>
@@ -131,11 +132,16 @@ watch(
             Progres Belajar
           </div>
           <div class="flex items-baseline justify-between">
-            <span class="text-lg font-bold text-primary font-display tabular-nums">
+            <span
+              class="text-lg font-bold text-primary font-display tabular-nums"
+            >
               {{ user.progress?.percentage || 0 }}%
             </span>
             <span class="text-[10px] text-text-secondary font-mono">
-              {{ user.progress?.completed_lessons || 0 }}/{{ user.progress?.total_lessons || 0 }} Materi
+              {{ user.progress?.completed_lessons || 0 }}/{{
+                user.progress?.total_lessons || 0
+              }}
+              Materi
             </span>
           </div>
           <div class="w-full h-1.5 bg-surface-alt rounded-full overflow-hidden">
@@ -150,7 +156,9 @@ watch(
           <div class="text-[11px] font-semibold text-(--color-text-muted)">
             Total Submit Latihan
           </div>
-          <div class="text-lg font-bold text-(--color-text-primary) font-display tabular-nums">
+          <div
+            class="text-lg font-bold text-(--color-text-primary) font-display tabular-nums"
+          >
             {{ user.activity?.total_compilations || 0 }} Kali
           </div>
           <div class="text-[10px] text-text-secondary">Eksekusi Docker</div>
@@ -160,7 +168,9 @@ watch(
           <div class="text-[11px] font-semibold text-(--color-text-muted)">
             Konsultasi AI
           </div>
-          <div class="text-lg font-bold text-(--color-text-primary) font-display tabular-nums">
+          <div
+            class="text-lg font-bold text-(--color-text-primary) font-display tabular-nums"
+          >
             {{ user.activity?.total_ai_chats || 0 }} Sesi
           </div>
           <div class="text-[10px] text-text-secondary">Gemini AI Chat</div>
@@ -170,7 +180,9 @@ watch(
           <div class="text-[11px] font-semibold text-(--color-text-muted)">
             Peran Akun
           </div>
-          <div class="text-lg font-bold text-(--color-text-primary) font-display">
+          <div
+            class="text-lg font-bold text-(--color-text-primary) font-display"
+          >
             {{ user.role }}
           </div>
           <div class="text-[10px] text-text-secondary">Hak Akses Sistem</div>
@@ -216,7 +228,8 @@ watch(
           v-else-if="submissions.length === 0"
           class="py-12 text-center text-xs text-(--color-text-muted) bg-surface border border-border rounded-2xl font-sans"
         >
-          Siswa ini belum pernah mengirimkan (*submit*) pengerjaan latihan praktik LaTeX.
+          Siswa ini belum pernah mengirimkan (*submit*) pengerjaan latihan
+          praktik LaTeX.
         </div>
 
         <!-- Submissions List Table -->
@@ -225,7 +238,7 @@ watch(
           class="bg-surface rounded-2xl border border-border overflow-hidden shadow-xs"
         >
           <div class="overflow-x-auto">
-            <table class="w-full text-xs font-sans min-w-[650px]">
+            <table class="w-full text-xs font-sans min-w-162.5">
               <thead class="bg-surface-alt/70 border-b border-border">
                 <tr>
                   <th
@@ -289,11 +302,14 @@ watch(
                         :class="[
                           'inline-flex items-center gap-1 text-[10px] font-bold border px-2.5 py-0.5 rounded-full uppercase tracking-wider',
                           sub.is_success
-                            ? 'bg-(--color-success-light) text-(--color-success) border-(--color-success)/30'
-                            : 'bg-(--color-error-light) text-(--color-error) border-(--color-error)/30',
+                            ? 'bg-success-light text-success border-success/30'
+                            : 'bg-error-light text-(--color-error) border-(--color-error)/30',
                         ]"
                       >
-                        <IconCheck v-if="sub.is_success" class="size-3 stroke-[3]" />
+                        <IconCheck
+                          v-if="sub.is_success"
+                          class="size-3 stroke-3"
+                        />
                         <IconAlertCircle v-else class="size-3 stroke-[2.5]" />
                         <span>{{ sub.is_success ? "BERHASIL" : "GAGAL" }}</span>
                       </span>
@@ -306,22 +322,39 @@ watch(
                     </td>
 
                     <td class="px-4 py-3.5 text-center">
-                      <button
-                        @click.stop="toggleExpandSubmission(sub.id)"
-                        class="p-1.5 rounded-lg text-primary hover:bg-surface-alt border border-transparent hover:border-border transition-all cursor-pointer inline-flex items-center gap-1 font-semibold text-[11px]"
-                      >
-                        <IconCode class="size-3.5" />
-                        <IconChevronUp
-                          v-if="expandedSubmissionId === sub.id"
-                          class="size-3.5"
-                        />
-                        <IconChevronDown v-else class="size-3.5" />
-                      </button>
+                      <div class="flex items-center justify-center gap-1">
+                        <NuxtLink
+                          v-if="sub.exercise_id"
+                          :to="`/student/exercises/${sub.exercise_id}`"
+                          target="_blank"
+                          @click.stop
+                          class="p-1.5 rounded-lg text-primary hover:bg-primary-light border border-transparent hover:border-primary/20 transition-all cursor-pointer inline-flex items-center font-semibold text-[11px]"
+                          title="Buka Soal Latihan di POV Siswa"
+                        >
+                          <IconExternalLink class="size-3.5" />
+                        </NuxtLink>
+
+                        <button
+                          @click.stop="toggleExpandSubmission(sub.id)"
+                          class="p-1.5 rounded-lg text-primary hover:bg-surface-alt border border-transparent hover:border-border transition-all cursor-pointer inline-flex items-center gap-1 font-semibold text-[11px]"
+                          title="Lihat Kode LaTeX & Error Log"
+                        >
+                          <IconCode class="size-3.5" />
+                          <IconChevronUp
+                            v-if="expandedSubmissionId === sub.id"
+                            class="size-3.5"
+                          />
+                          <IconChevronDown v-else class="size-3.5" />
+                        </button>
+                      </div>
                     </td>
                   </tr>
 
                   <!-- Expandable Detail Row (Submitted Code & Error Log) -->
-                  <tr v-if="expandedSubmissionId === sub.id" class="bg-surface-alt/20">
+                  <tr
+                    v-if="expandedSubmissionId === sub.id"
+                    class="bg-surface-alt/20"
+                  >
                     <td colspan="5" class="p-4 space-y-3">
                       <!-- Submitted LaTeX Code Section -->
                       <div class="space-y-1.5">
@@ -335,7 +368,7 @@ watch(
                         </div>
 
                         <pre
-                          class="p-3.5 bg-(--color-code-bg) text-(--color-code-text) rounded-xl text-xs font-mono overflow-x-auto max-h-48 leading-relaxed border border-border shadow-inner"
+                          class="p-3.5 bg-code-bg text-code-text rounded-xl text-xs font-mono overflow-x-auto max-h-48 leading-relaxed border border-border shadow-inner"
                         ><code>{{ sub.submitted_code }}</code></pre>
                       </div>
 
@@ -351,7 +384,7 @@ watch(
                           <span>Pesan Error Kompilasi Docker:</span>
                         </div>
                         <pre
-                          class="p-3.5 bg-(--color-error-light)/50 text-(--color-error) rounded-xl text-xs font-mono overflow-x-auto max-h-36 leading-relaxed border border-(--color-error)/30"
+                          class="p-3.5 bg-error-light/50 text-(--color-error) rounded-xl text-xs font-mono overflow-x-auto max-h-36 leading-relaxed border border-(--color-error)/30"
                         ><code>{{ sub.error_log }}</code></pre>
                       </div>
                     </td>
