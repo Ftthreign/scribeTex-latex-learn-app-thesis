@@ -108,15 +108,15 @@ const confirmLogout = async () => {
       </nav>
 
       <div class="px-4 py-4 shrink-0">
-        <button
+        <NuxtLink
+          :to="ROUTES.student.sandbox"
           class="flex items-center justify-center gap-2 w-full bg-primary hover:bg-primary-hover text-white rounded-md py-2.5 text-[13px] font-semibold transition-colors cursor-pointer"
         >
           <IconPlus class="size-4 shrink-0" />
           New Project
-        </button>
+        </NuxtLink>
       </div>
 
-      <!-- Kembali ke Beranda -->
       <div class="px-3 pb-2 shrink-0">
         <NuxtLink
           :to="ROUTES.landing"
