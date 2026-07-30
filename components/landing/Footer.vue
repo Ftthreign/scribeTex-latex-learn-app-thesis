@@ -1,5 +1,7 @@
 <template>
-  <footer class="landing-footer bg-surface border-t border-border pt-20 pb-12 relative z-20 rounded-t-[2.5rem] shadow-[0_-8px_40px_rgba(15,27,45,0.12)]">
+  <footer
+    class="landing-footer bg-surface border-t border-border pt-20 pb-12 relative z-20 rounded-t-[2.5rem] shadow-[0_-8px_40px_rgba(15,27,45,0.12)]"
+  >
     <div class="container mx-auto px-6">
       <div
         class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-12 lg:gap-8 mb-16"
@@ -122,7 +124,11 @@
         <div class="flex items-center gap-1.5 font-medium">
           <span>Dirancang dengan</span>
           <IconHeartFilled class="size-3.5 text-error animate-pulse" />
-          <span>menggunakan Nuxt 3 & Gemini AI</span>
+          <span
+            >oleh
+            <strong class="text-text-primary font-bold">Ftthreign</strong> with
+            <span class="text-[#00DC82] font-bold">Nuxt.js</span></span
+          >
         </div>
       </div>
     </div>
