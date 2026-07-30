@@ -6,35 +6,71 @@ export interface ProjectFile {
   content: string;
 }
 
-const DEFAULT_PREAMBLE = `% preamble.tex — Pengaturan dokumen global
-\\usepackage[utf8]{inputenc}
-\\usepackage[english]{babel}
+const DEFAULT_PREAMBLE = `% preamble.tex — Pengaturan Baku Skripsi Unila 2020
+\\usepackage{iftex}
+\\ifPDFTeX
+  \\usepackage[T1]{fontenc}
+  \\usepackage{mathptmx}
+\\else
+  \\usepackage{fontspec}
+  \\setmainfont{Times New Roman}
+\\fi
+\\usepackage[a4paper,left=4cm,right=3cm,top=3cm,bottom=3cm]{geometry}
+\\usepackage[english,indonesian]{babel}
+\\selectlanguage{indonesian}
+
+\\usepackage{setspace}
+\\setstretch{1.5}
+\\setlength{\parindent}{0pt}
+\\setlength{\parskip}{0.5\\baselineskip plus 2pt}
+
 \\usepackage{amsmath, amssymb}
 \\usepackage{graphicx}
-\\usepackage{geometry}
-\\geometry{margin=2.5cm}
+\\usepackage{caption}
+\\usepackage{float}
+\\usepackage{booktabs}
+\\usepackage{fancyhdr}
+
+\\pagestyle{fancy}
+\\fancyhf{}
+\\fancyhead[R]{\\textcolor{gray}{\\textbf{\\thepage}}}
+\\renewcommand{\\headrulewidth}{0pt}
+\\renewcommand{\\footrulewidth}{0pt}
+
+\\renewcommand{\\figurename}{Gambar}
+\\renewcommand{\\tablename}{Tabel}
+\\counterwithout{figure}{chapter}
+\\counterwithout{table}{chapter}
+
+\\usepackage{csquotes}
+\\usepackage[backend=biber,style=ieee,sorting=none]{biblatex}
+\\addbibresource{references.bib}
+\\usepackage{hyperref}
 `;
 
-const DEFAULT_MAIN = `% main.tex — Berkas utama kompilasi (jangan hapus)
-\\documentclass[12pt]{report}
+const DEFAULT_MAIN = `% main.tex — Berkas utama kompilasi Skripsi ScribeTex
+\\documentclass[12pt,a4paper]{report}
 \\input{preamble}
-
-\\title{Dokumen Eksperimen ScribeTex Sandbox}
-\\author{Mahasiswa Pembelajaran \\LaTeX{}}
-\\date{\\today}
 
 \\begin{document}
 
+\\pagenumbering{roman}
+\\setcounter{page}{1}
+
+\\title{PENGEMBANGAN APLIKASI WEB PEMBELAJARAN LATEX}
+\\author{Fadhil Abdul Fattah \\\\ NPM: 2215061019}
+\\date{2026}
+
 \\maketitle
 
-\\chapter{Pendahuluan}
+\\cleardoublepage
+\\pagenumbering{arabic}
+\\setcounter{page}{1}
 
-Tulis konten Bab 1 di sini. Anda dapat membagi konten ke berkas terpisah
-seperti \\texttt{bab1.tex} lalu memuatnya dengan perintah:
+\\chapter{PENDAHULUAN}
 
-\\begin{verbatim}
-\\input{bab1}
-\\end{verbatim}
+\\section{Latar Belakang}
+Penulisan naskah skripsi Universitas Lampung menggunakan standar penataan letak berbasis \\LaTeX{} untuk menjamin konsistensi format dan stabilitas dokumen.
 
 \\end{document}
 `;

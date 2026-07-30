@@ -4,6 +4,9 @@ export interface LessonSummary {
   id: number;
   title: string;
   sort_order: number;
+  is_completed?: boolean;
+  is_locked?: boolean;
+  lock_reason?: string;
 }
 
 export interface ModuleData {
@@ -17,6 +20,7 @@ export interface ModuleData {
   progress_percent?: number;
   lessons: LessonSummary[];
   is_locked?: boolean;
+  lock_reason?: string;
 }
 
 export interface ExerciseData {
