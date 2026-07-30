@@ -7,6 +7,9 @@ try {
 
 export default defineConfig({
   schema: "prisma/schema.prisma",
+  migrations: {
+    seed: "bun run ./prisma/seed.ts",
+  },
   datasource: {
     url: process.env.DIRECT_URL || process.env.DATABASE_URL,
   },

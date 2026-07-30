@@ -16,21 +16,35 @@ const props = withDefaults(
 
 const KATEX_PREFIX = "KATEXPH";
 const KATEX_SUFFIX = "ENDPH";
+const CODE_PREFIX = "CODEPH";
+const CODE_SUFFIX = "ENDCODEPH";
+
+const katexStore: string[] = [];
+const saveKatex = (rendered: string): string => {
+  const idx = katexStore.length;
+  katexStore.push(rendered);
+  return `${KATEX_PREFIX}${idx}${KATEX_SUFFIX}`;
+};
+
+const codeStore: string[] = [];
+const saveCode = (codeStr: string): string => {
+  const idx = codeStore.length;
+  codeStore.push(codeStr);
+  return `${CODE_PREFIX}${idx}${CODE_SUFFIX}`;
+};
 
 const renderedHtml = computed(() => {
   if (!props.content) return "";
 
-  const katexStore: string[] = [];
-  const saveKatex = (rendered: string): string => {
-    const idx = katexStore.length;
-    katexStore.push(rendered);
-    return `${KATEX_PREFIX}${idx}${KATEX_SUFFIX}`;
-  };
-
   let text = props.content;
 
   text = text.replace(/^---[\s\S]*?---\n?/, "");
-  // Hapus komentar LaTeX (baris berawalan % yang tidak di-escape \%)
+
+  text = text.replace(/(```[\s\S]*?```)/g, (_, codeBlock) =>
+    saveCode(codeBlock),
+  );
+  text = text.replace(/(`[^`\n]+`)/g, (_, inlineCode) => saveCode(inlineCode));
+
   text = text.replace(/(^|[^\\])%[^\n]*/g, "$1");
 
   text = text.replace(/\$\$\s*([\s\S]*?)\s*\$\$/g, (_, math) => {
@@ -273,7 +287,14 @@ const renderedHtml = computed(() => {
   text = text.replace(/\\newpage/g, "\n---\n");
   text = text.replace(/\\clearpage/g, "\n---\n");
 
-  // ── 4. Proses Markdown (marked mengubah teks → HTML; tabel dibungkus div scrollable)
+  // 4. Kembalikan blok kode sebelum diproses oleh marked.parse
+  if (typeof text === "string") {
+    text = text.replace(/CODEPH(\d+)ENDCODEPH/g, (_, idx) => {
+      return codeStore[Number(idx)] ?? "";
+    });
+  }
+
+  // ── 5. Proses Markdown (marked mengubah teks → HTML; tabel dibungkus div scrollable)
   if (props.isMarkdown) {
     try {
       const renderer = new marked.Renderer();
@@ -299,7 +320,7 @@ const renderedHtml = computed(() => {
     }
   }
 
-  // ── 5. Restore placeholder → KaTeX HTML yang sesungguhnya
+  // ── 6. Restore placeholder → KaTeX HTML yang sesungguhnya
   if (typeof text === "string") {
     text = text.replace(/KATEXPH(\d+)ENDPH/g, (_, idx) => {
       return katexStore[Number(idx)] ?? "";

@@ -71,7 +71,7 @@ const MODULES_DATA = [
   },
 ]
 
-// Mapping of 16 Lessons to Modules
+// Mapping of 27 Lessons to Modules
 const LESSONS_META = [
   { id: 1, lesson_file: 'lesson-01.md', module_id: 1, sort_order: 1 },
   { id: 2, lesson_file: 'lesson-02.md', module_id: 1, sort_order: 2 },
@@ -89,6 +89,17 @@ const LESSONS_META = [
   { id: 14, lesson_file: 'lesson-14.md', module_id: 7, sort_order: 2 },
   { id: 15, lesson_file: 'lesson-15.md', module_id: 8, sort_order: 1 },
   { id: 16, lesson_file: 'lesson-16.md', module_id: 8, sort_order: 2 },
+  { id: 17, lesson_file: 'lesson-17.md', module_id: 3, sort_order: 3 },
+  { id: 18, lesson_file: 'lesson-18.md', module_id: 4, sort_order: 4 },
+  { id: 19, lesson_file: 'lesson-19.md', module_id: 4, sort_order: 5 },
+  { id: 20, lesson_file: 'lesson-20.md', module_id: 4, sort_order: 6 },
+  { id: 21, lesson_file: 'lesson-21.md', module_id: 5, sort_order: 2 },
+  { id: 22, lesson_file: 'lesson-22.md', module_id: 5, sort_order: 3 },
+  { id: 23, lesson_file: 'lesson-23.md', module_id: 6, sort_order: 2 },
+  { id: 24, lesson_file: 'lesson-24.md', module_id: 7, sort_order: 3 },
+  { id: 25, lesson_file: 'lesson-25.md', module_id: 7, sort_order: 4 },
+  { id: 26, lesson_file: 'lesson-26.md', module_id: 7, sort_order: 5 },
+  { id: 27, lesson_file: 'lesson-27.md', module_id: 4, sort_order: 7 },
 ]
 
 // Data Master 16 Latihan Praktik Interaktif Spesifik per Lesson
@@ -153,67 +164,125 @@ const EXERCISES_DATA: Record<number, { instruction: string; starter_code: string
     starter_code: '\\documentclass{article}\n\\usepackage{amsmath}\n\n\\begin{document}\n  % TODO: Tulis pecahan 1/2 dan akar kuadrat \\sqrt{x + 1} dalam mode matematika\n\n\\end{document}',
     solution_code: '\\documentclass{article}\n\\usepackage{amsmath}\n\n\\begin{document}\n  Hasil kalkulasi nilai $\\frac{1}{2}$ dan akar $\\sqrt{x + 1}$.\n\\end{document}',
   },
-  13: {
-    instruction: 'Praktikkan pembuatan matriks menggunakan lingkungan bmatrix dari paket amsmath.',
-    starter_code: '\\documentclass{article}\n\\usepackage{amsmath}\n\n\\begin{document}\n  % TODO: Buat matriks 2x2 dengan bmatrix: [1 0; 0 1]\n\n\\end{document}',
-    solution_code: '\\documentclass{article}\n\\usepackage{amsmath}\n\n\\begin{document}\n  Matriks Identitas $I$:\n  \\begin{equation}\n    I = \\begin{bmatrix}\n      1 & 0 \\\\\n      0 & 1\n    \\end{bmatrix}\n  \\end{equation}\n\\end{document}',
+  17: {
+    instruction: 'Praktikkan penggunaan kontrol jarak spasi vertikal \\vspace{} dan perintah pemutusan halaman \\clearpage sebelum bab baru.',
+    starter_code: '\\documentclass{report}\n\\begin{document}\n  \\chapter{Bab Pertama}\n  Paragraf pertama.\n  % TODO: Tambahkan vspace{1cm} dan \\clearpage di sini\n  \n  \\chapter{Bab Kedua}\n  Paragraf di bab baru.\n\\end{document}',
+    solution_code: '\\documentclass{report}\n\\begin{document}\n  \\chapter{Bab Pertama}\n  Paragraf pertama.\n  \\vspace{1cm}\n  \\clearpage\n  \n  \\chapter{Bab Kedua}\n  Paragraf di bab baru.\n\\end{document}',
   },
-  14: {
-    instruction: 'Praktikkan pengutipan otomatis dengan perintah \\cite{key} untuk merujuk entitas pustaka di naskah akademik.',
-    starter_code: '\\documentclass{article}\n\\begin{document}\n  % TODO: Tambahkan kutipan sitasi \\cite{Lamport1994} pada kalimat berikut\n  Menurut penelitian Lamport ..., LaTeX sangat efisien untuk naskah ilmiah.\n\\end{document}',
-    solution_code: '\\documentclass{article}\n\\begin{document}\n  Menurut penelitian Lamport~\\cite{Lamport1994}, LaTeX sangat efisien untuk naskah ilmiah.\n\\end{document}',
+  18: {
+    instruction: 'Praktikkan penggabungan sel horizontal menggunakan \\multicolumn{2}{c}{\\textbf{Header Gabungan}} pada tabel.',
+    starter_code: '\\documentclass{article}\n\\begin{document}\n  \\begin{tabular}{|c|c|c|}\n    \\hline\n    % TODO: Gunakan \\multicolumn{2}{c}{Metrik} pada 2 kolom pertama\n    No & Nilai A & Nilai B \\\\\n    \\hline\n    1 & 85 & 90 \\\\\n    \\hline\n  \\end{tabular}\n\\end{document}',
+    solution_code: '\\documentclass{article}\n\\begin{document}\n  \\begin{tabular}{|c|c|c|}\n    \\hline\n    \\multicolumn{2}{|c|}{\\textbf{Metrik}} & Status \\\\\n    \\hline\n    1 & 85 & Valid \\\\\n    \\hline\n  \\end{tabular}\n\\end{document}',
   },
-  15: {
-    instruction: 'Praktikkan pengorganisasian naskah panjang dengan membagi berkas menggunakan perintah \\input{}.',
-    starter_code: '\\documentclass{article}\n\\begin{document}\n  % TODO: Panggil file terpisah bab1.tex dengan perintah \\input{bab1}\n\n\\end{document}',
-    solution_code: '\\documentclass{article}\n\\begin{document}\n  \\input{bab1}\n\\end{document}',
+  19: {
+    instruction: 'Praktikkan pembuatan gambar berdampingan (sub-figure) menggunakan paket subcaption.',
+    starter_code: '\\documentclass{article}\n\\usepackage{graphicx}\n\\usepackage{caption}\n\\usepackage{subcaption}\n\n\\begin{document}\n  % TODO: Buat lingkungan figure yang memuat 2 subfigure 0.45\\textwidth dengan \\hfill\n\n\\end{document}',
+    solution_code: '\\documentclass{article}\n\\usepackage{graphicx}\n\\usepackage{caption}\n\\usepackage{subcaption}\n\n\\begin{document}\n  \\begin{figure}[h]\n    \\centering\n    \\begin{subfigure}[b]{0.45\\textwidth}\n      \\includegraphics[width=\\textwidth]{example-image-a}\n      \\caption{Gambar A}\n    \\end{subfigure}\n    \\hfill\n    \\begin{subfigure}[b]{0.45\\textwidth}\n      \\includegraphics[width=\\textwidth]{example-image-b}\n      \\caption{Gambar B}\n    \\end{subfigure}\n    \\caption{Perbandingan Dua Gambar}\n  \\end{figure}\n\\end{document}',
   },
-  16: {
-    instruction: 'Praktikkan debugging sintaks LaTeX. Perbaiki kesalahan tag penutup lingkungan yang saling bertabrakan (LIFO error).',
-    starter_code: '\\documentclass{article}\n\\begin{document}\n  % TODO: Perbaiki urutan penutupan lingkungan center dan quote di bawah ini\n  \\begin{center}\n    \\begin{quote}\n      Teks Kutipan\n    \\end{center}\n    \\end{quote}\n\\end{document}',
-    solution_code: '\\documentclass{article}\n\\begin{document}\n  \\begin{center}\n    \\begin{quote}\n      Teks Kutipan\n    \\end{quote}\n  \\end{center}\n\\end{document}',
+  20: {
+    instruction: 'Praktikkan penyajian cuplikan kode program menggunakan paket listings dengan opsi numbers=left dan frame=single.',
+    starter_code: '\\documentclass{article}\n\\usepackage{listings}\n\n\\begin{document}\n  % TODO: Buat lingkungan lstlisting ber-bahasa Python\n\n\\end{document}',
+    solution_code: '\\documentclass{article}\n\\usepackage{listings}\n\n\\begin{document}\n  \\begin{lstlisting}[language=Python, numbers=left, frame=single]\n  def hello():\n      print("Hello dari ScribeTex Unila")\n  \\end{lstlisting}\n\\end{document}',
+  },
+  21: {
+    instruction: 'Praktikkan penulisan alfabet Yunani \\alpha, \\beta, \\sigma, dan operator relasional \\leq, \\geq di mode matematika.',
+    starter_code: '\\documentclass{article}\n\\begin{document}\n  % TODO: Sisipkan alfabet Yunani alpha, beta, sigma dan operator <= di dalam kalimat\n\n\\end{document}',
+    solution_code: '\\documentclass{article}\n\\begin{document}\n  Fungsi aktivasi $\\sigma(z)$ dengan parameter $\\alpha \\le \\beta$.\n\\end{document}',
+  },
+  22: {
+    instruction: 'Praktikkan penulisan persamaan multi-baris sejajar menggunakan lingkungan align dari amsmath.',
+    starter_code: '\\documentclass{article}\n\\usepackage{amsmath}\n\n\\begin{document}\n  % TODO: Buat lingkungan align multi-baris yang sejajar pada tanda sama dengan =\n\n\\end{document}',
+    solution_code: '\\documentclass{article}\n\\usepackage{amsmath}\n\n\\begin{document}\n  \\begin{align}\n    f(x) &= (x + 2)^2 \\\\\n         &= x^2 + 4x + 4\n  \\end{align}\n\\end{document}',
+  },
+  23: {
+    instruction: 'Praktikkan pemanggilan sitasi naratif \\textcite{key} dan sitasi dalam kurung \\parencite{key} via paket biblatex.',
+    starter_code: '\\documentclass{article}\n\\usepackage[style=ieee]{biblatex}\n\\addbibresource{references.bib}\n\n\\begin{document}\n  % TODO: Gunakan \\textcite{Knuth1974} dan \\parencite{Lamport1994} di kalimat\n\n\\end{document}',
+    solution_code: '\\documentclass{article}\n\\usepackage[style=ieee]{biblatex}\n\\addbibresource{references.bib}\n\n\\begin{document}\n  Menurut \\textcite{Knuth1974}, sistem ini sangat efisien \\parencite{Lamport1994}.\n\\end{document}',
+  },
+  24: {
+    instruction: 'Praktikkan penambahan perintah \\tableofcontents dan entri manual \\addcontentsline{toc}{chapter}{ABSTRAK}.',
+    starter_code: '\\documentclass{report}\n\\begin{document}\n  % TODO: Tambahkan \\tableofcontents dan \\addcontentsline untuk ABSTRAK\n  \\chapter*{ABSTRAK}\n  Teks abstrak.\n\n  \\chapter{PENDAHULUAN}\n\\end{document}',
+    solution_code: '\\documentclass{report}\n\\begin{document}\n  \\tableofcontents\n  \\chapter*{ABSTRAK}\n  \\addcontentsline{toc}{chapter}{ABSTRAK}\n  Teks abstrak.\n\n  \\chapter{PENDAHULUAN}\n\\end{document}',
+  },
+  25: {
+    instruction: 'Praktikkan pengaturan penomoran halaman Romawi \\pagenumbering{roman} untuk halaman awal dan Arab \\pagenumbering{arabic} untuk Bab I.',
+    starter_code: '\\documentclass{report}\n\\begin{document}\n  % TODO: Set pagenumbering roman di awal, lalu set pagenumbering arabic dan reset counter page ke 1 di Bab I\n  \\chapter*{Kata Pengantar}\n\n  \\chapter{Pendahuluan}\n\\end{document}',
+    solution_code: '\\documentclass{report}\n\\begin{document}\n  \\pagenumbering{roman}\n  \\setcounter{page}{1}\n  \\chapter*{Kata Pengantar}\n\n  \\cleardoublepage\n  \\pagenumbering{arabic}\n  \\setcounter{page}{1}\n  \\chapter{Pendahuluan}\n\\end{document}',
+  },
+  26: {
+    instruction: 'Praktikkan penggunaan sakelar \\appendix untuk mengubah penomoran bab menjadi Lampiran A dan Lampiran B.',
+    starter_code: '\\documentclass{report}\n\\begin{document}\n  \\chapter{Kesimpulan}\n  % TODO: Tambahkan sakelar \\appendix di sini\n  \\chapter{Kode Program}\n\\end{document}',
+    solution_code: '\\documentclass{report}\n\\begin{document}\n  \\chapter{Kesimpulan}\n  \\appendix\n  \\chapter{Kode Program}\n\\end{document}',
+  },
+  27: {
+    instruction: 'Praktikkan pembuatan diagram TikZ sederhana dengan meletakkan satu node berbingkai dan ber-latar warna.',
+    starter_code: '\\documentclass{article}\n\\usepackage{tikz}\n\n\\begin{document}\n  % TODO: Buat tikzpicture dengan node[draw, fill=blue!10] {Mulai Penelitian}\n\n\\end{document}',
+    solution_code: '\\documentclass{article}\n\\usepackage{tikz}\n\n\\begin{document}\n  \\begin{tikzpicture}\n    \\node[draw, rectangle, fill=blue!10] {Mulai Penelitian};\n  \\end{tikzpicture}\n\\end{document}',
   },
 }
 
-// 5 Unila Academic Guide Articles
+// 7 Unila Academic Guide Articles (Strictly Conforming to Unila 2020 preamble.tex)
 const ARTICLES_DATA = [
   {
     id: 1,
     title: 'Panduan Format Halaman & Margin Skripsi Unila',
     content: `# Panduan Format Halaman & Margin Skripsi Unila
 
-Berdasarkan **Buku Pedoman Penulisan Karya Ilmiah Universitas Lampung**, format halaman fisik naskah skripsi diatur sebagai berikut:
+Berdasarkan **Buku Pedoman Penulisan Karya Ilmiah Universitas Lampung 2020**, format fisik naskah skripsi diatur sebagai berikut:
 
 - **Ukuran Kertas:** A4 (210 mm x 297 mm), 80 gram.
 - **Margin Halaman:**
-  - **Kiri (*Left*):** 4 cm (untuk batas jilid).
+  - **Kiri (*Left*):** 4 cm (untuk batas jilid baku).
   - **Atas (*Top*):** 3 cm.
   - **Kanan (*Right*):** 3 cm.
   - **Bawah (*Bottom*):** 3 cm.
-- **Jenis & Ukuran Font:** *Times New Roman* 12 pt untuk narasi utama.
-- **Spasi Antarbaris:** 1.5 baris (*\onehalfspacing*).
+- **Jenis & Ukuran Font:** *Times New Roman* 12 pt untuk narasi utama. Pada mesin \`pdfLaTeX\`, gunakan paket \`mathptmx\`. Pada mesin \`XeLaTeX\`, gunakan paket \`fontspec\` dengan \`\\setmainfont{Times New Roman}\`.
+- **Spasi Antarbaris:** 1.5 baris (\`\\setstretch{1.5}\`).
+- **Paragraf:** Tanpa indentasi awal (\`\\setlength{\\parindent}{0pt}\`) dan jarak spasi antar-paragraf (\`\\setlength{\\parskip}{0.5\\baselineskip plus 2pt}\`).
 
 \`\`\`latex
-% Penerapan Preamble LaTeX Standar Unila:
-\\documentclass[12pt, a4paper, oneside]{report}
-\\usepackage[left=4cm, right=3cm, top=3cm, bottom=3cm]{geometry}
+% Konfigurasi Preamble Standar Unila 2020:
+\\documentclass[12pt,a4paper]{report}
+
+\\usepackage{iftex}
+\\ifPDFTeX
+  \\usepackage[T1]{fontenc}
+  \\usepackage{mathptmx}  % Font Times New Roman untuk pdfLaTeX
+\\else
+  \\usepackage{fontspec}
+  \\setmainfont{Times New Roman} % Font Times New Roman untuk XeLaTeX
+\\fi
+
+\\usepackage[a4paper,left=4cm,right=3cm,top=3cm,bottom=3cm]{geometry}
+\\usepackage[english,indonesian]{babel}
+\\selectlanguage{indonesian}
+
 \\usepackage{setspace}
-\\onehalfspacing
+\\setstretch{1.5}
+\\setlength{\\parindent}{0pt}
+\\setlength{\\parskip}{0.5\\baselineskip plus 2pt}
 \`\`\``,
     is_published: true,
   },
   {
     id: 2,
-    title: 'Panduan Struktur Bab & Penomoran Seksi',
-    content: `# Panduan Struktur Bab & Penomoran Seksi
+    title: 'Panduan Struktur Bab & Penomoran Seksi Unila',
+    content: `# Panduan Struktur Bab & Penomoran Seksi Unila
 
-Format penulisan struktur bab dan seksi karya ilmiah Universitas Lampung:
+Format penulisan struktur bab dan penomoran seksi karya ilmiah Universitas Lampung 2020:
 
-- **Judul Bab (\`\\chapter\`):** Ditulis dengan huruf kapital tegak, cetak tebal, di tengah halaman, menggunakan angka Romawi (\`BAB I\`, \`BAB II\`, dst.).
-- **Sub-seksi (\`\\section\`):** Ditulis dengan penomoran berurut (\`1.1 Latar Belakang\`, \`1.2 Rumus Masalah\`).
-- **Sub-sub-seksi (\`\\subsection\`):** Ditulis dengan penomoran tiga tingkat (\`1.2.1 Identifikasi Masalah\`).
+- **Penomoran Bab (\`\\thechapter\`):** Menggunakan angka **Romawi Kapital** (\`BAB I\`, \`BAB II\`, dst.).
+- **Penomoran Seksi (\`\\thesection\`):** Menggunakan angka Arab bertingkat (\`1.1 Latar Belakang\`, \`1.2 Rumusan Masalah\`).
+- **Penomoran Sub-seksi (\`\\thesubsection\`):** Tiga tingkat (\`1.2.1 Identifikasi Masalah\`).
+- **Judul Bab:** Rata tengah, cetak tebal, huruf kapital tegak.
 
 \`\`\`latex
+% Konfigurasi Penomoran Bab & Seksi Unila di Preamble:
+\\renewcommand{\\thechapter}{\\Roman{chapter}}
+\\renewcommand{\\thesection}{\\arabic{chapter}.\\arabic{section}}
+\\renewcommand{\\thesubsection}{\\thesection.\\arabic{subsection}}
+
+% Penerapan di area Body:
 \\chapter{PENDAHULUAN}
 \\section{Latar Belakang}
 \\subsection{Identifikasi Masalah}
@@ -222,25 +291,38 @@ Format penulisan struktur bab dan seksi karya ilmiah Universitas Lampung:
   },
   {
     id: 3,
-    title: 'Panduan Standar Pembuatan Tabel & Gambar Akademik',
-    content: `# Panduan Standar Pembuatan Tabel & Gambar Akademik
+    title: 'Panduan Standar Pembuatan Tabel & Gambar Akademik Unila',
+    content: `# Panduan Standar Pembuatan Tabel & Gambar Akademik Unila
 
-Ketentuan penyajian elemen visual di lingkungan Universitas Lampung:
+Ketentuan penyajian elemen visual di Universitas Lampung 2020:
 
-- **Judul Tabel:** Ditempatkan di **bagian atas tabel**, rata tengah, cetak tebal.
-- **Estetika Tabel:** Sangat disarankan **tidak menggunakan garis vertikal** dan menggunakan paket \`booktabs\` (\`\\toprule\`, \`\\midrule\`, \`\\bottomrule\`).
-- **Judul Gambar:** Ditempatkan di **bagian bawah gambar**, rata tengah.
+- **Judul Gambar:** Ditempatkan di **bagian bawah gambar**, penomoran menggunakan kata \`Gambar\` (bukan *Figure*) yang berjalan secara kontinu (\`Gambar 1\`, \`Gambar 2\`, dst.) via \`\\counterwithout{figure}{chapter}\`.
+- **Judul Tabel:** Ditempatkan di **bagian atas tabel**, rata kiri/tengah, penomoran menggunakan kata \`Tabel\` (\`Tabel 1\`, \`Tabel 2\`, dst.) via \`\\counterwithout{table}{chapter}\`.
+- **Estetika Tabel:** Sangat disarankan **tanpa garis vertikal** menggunakan paket \`booktabs\` (\`\\toprule\`, \`\\midrule\`, \`\\bottomrule\`).
 
 \`\`\`latex
+% Preamble Konfigurasi Gambar & Tabel Unila:
+\\usepackage{graphicx}
+\\usepackage{caption}
+\\usepackage{booktabs}
+\\usepackage{float}
+
+\\renewcommand{\\figurename}{Gambar}
+\\renewcommand{\\tablename}{Tabel}
+\\counterwithout{figure}{chapter}
+\\counterwithout{table}{chapter}
+
 % Contoh Tabel Akademik Clean:
 \\begin{table}[H]
   \\centering
-  \\caption{Matriks Hasil Pengujian Black Box}
+  \\caption{Matriks Hasil Pengujian Black Box System}
+  \\label{tab:blackbox}
   \\begin{tabular}{clc}
     \\toprule
-    \\textbf{ID} & \\textbf{Fitur} & \\textbf{Status} \\\\
+    \\textbf{ID Uji} & \\textbf{Fitur Utama} & \\textbf{Hasil Evaluasi} \\\\
     \\midrule
-    TC-01 & Autentikasi Sesi & Lulus \\\\
+    TC-01 & Autentikasi Supabase & Valid \\\\
+    TC-02 & Kompilator Docker Sandbox & Valid \\\\
     \\bottomrule
   \\end{tabular}
 \\end{table}
@@ -249,41 +331,119 @@ Ketentuan penyajian elemen visual di lingkungan Universitas Lampung:
   },
   {
     id: 4,
-    title: 'Panduan Penulisan Rumus Matematika & Persamaan',
-    content: `# Panduan Penulisan Rumus Matematika & Persamaan
+    title: 'Panduan Penulisan Rumus Matematika & Persamaan Unila',
+    content: `# Panduan Penulisan Rumus Matematika & Persamaan Unila
 
 Pedoman penulisan formula matematika dan persamaan komputasi:
 
-- **Inline Math (\`$...$\`):** Digunakan untuk simbol matematika di tengah kalimat narasi (misal: $E=mc^2$).
-- **Display Math (\`equation\`):** Digunakan untuk persamaan utama, ditempatkan di baris terpisah di tengah halaman dengan nomor persamaan rata kanan otomatis \`(3.1)\`.
+- **Paket Wajib:** Menggunakan pustaka \`amsmath\` dan \`amssymb\`.
+- **Inline Math (\`$...$\`):** Digunakan untuk variabel atau rumus pendek di tengah kalimat narasi (misal: $E = mc^2$).
+- **Display Math (\`equation\`):** Digunakan untuk persamaan utama, ditempatkan di baris terpisah terpusat dengan nomor persamaan otomatis di kanan.
+- **Persamaan Multi-baris (\`align\`):** Digunakan untuk penjabaran fungsi bertingkat yang sejajar pada simbol \`&=\`.
 
 \`\`\`latex
+\\usepackage{amsmath,amssymb}
+
+% Persamaan Tunggal Bernomor:
 \\begin{equation}
   x_{1,2} = \\frac{-b \\pm \\sqrt{b^2 - 4ac}}{2a}
   \\label{eq:rumus_abc}
 \\end{equation}
+
+% Penjabaran Multi-baris Sejajar:
+\\begin{align}
+  f(x) &= (x + 3)^2 - 5 \\\\
+       &= x^2 + 6x + 4
+\\end{align}
 \`\`\``,
     is_published: true,
   },
   {
     id: 5,
-    title: 'Panduan Sitasi & Daftar Pustaka Unila',
-    content: `# Panduan Sitasi & Daftar Pustaka Unila
+    title: 'Panduan Sitasi & Daftar Pustaka Unila (BibLaTeX)',
+    content: `# Panduan Sitasi & Daftar Pustaka Unila (BibLaTeX)
 
-Ketentuan pengutipan dan penyusunan Bab DAFTAR PUSTAKA:
+Ketentuan pengutipan dan penyusunan Bab **DAFTAR PUSTAKA** Universitas Lampung:
 
-- **Format Sitasi:** Menggunakan gaya penulisan *IEEE* atau *APA*.
-- **Otomatisasi BibTeX:** Seluruh referensi wajib disimpan dalam berkas \`pustaka.bib\` dan dipanggil via \`\\cite{key}\`.
-- **Hanya Yang Dikutip:** Hanya referensi yang benar-benar dirujuk di narasi yang boleh muncul di Bab Daftar Pustaka.
+- **Mesin & Gaya Sitasi:** Menggunakan \`biblatex\` dengan \`backend=biber\` dan gaya penulisan \`style=ieee\` (\`sorting=none\`).
+- **Otomatisasi:** Seluruh referensi disimpan di berkas \`references.bib\` dan dipanggil di narasi via \`\\cite{key}\` atau \`\\textcite{key}\`.
+- **Format Judul Pustaka:** Bab Daftar Pustaka dicetak otomatis menggunakan \`\\printbibliography[heading=bibintoc, title={\\textbf{DAFTAR PUSTAKA}}]\`.
 
 \`\`\`latex
-\\usepackage[style=ieee, backend=biber]{biblatex}
-\\addbibresource{pustaka.bib}
+% Preamble Bibliografi Unila:
+\\usepackage{csquotes}
+\\usepackage[backend=biber,style=ieee,sorting=none]{biblatex}
+\\addbibresource{references.bib}
 
-% Di narasi:
-Menurut Lamport~\\cite{Lamport1994}, \\LaTeX{} sangat stabil...
+% Di dalam Body:
+Menurut penelitian \\textcite{Knuth1974}, pemrograman terstruktur menjamin kualitas sistem. Penggunaan \\LaTeX{} terbukti menjaga konsistensi naskah skripsi~\\cite{Lamport1994}.
 
-\\printbibliography[title={DAFTAR PUSTAKA}]
+% Render Bab Daftar Pustaka:
+\\cleardoublepage
+\\printbibliography[heading=bibintoc, title={\\textbf{DAFTAR PUSTAKA}}]
+\`\`\``,
+    is_published: true,
+  },
+  {
+    id: 6,
+    title: 'Panduan Header, Footer & Penomoran Halaman Unila',
+    content: `# Panduan Header, Footer & Penomoran Halaman Unila
+
+Ketentuan penomoran halaman naskah skripsi berdasarkan Panduan Unila 2020:
+
+- **Bagian Awal (Halaman Sampul s.d. Daftar Tabel):** Menggunakan **angka Romawi kecil (i, ii, iii)** di bagian bawah tengah (\`\\pagenumbering{roman}\`).
+- **Bagian Utama (Bab I s.d. Daftar Pustaka):** Menggunakan **angka Arab (1, 2, 3)** yang diletakkan di **pojok kanan atas** (\`\\pagenumbering{arabic}\` + reset \`\\setcounter{page}{1}\`).
+- **Header Kustom (\`fancyhdr\`):** Menggunakan nomor halaman abu-abu tebal (\`\\textcolor{gray}{\\textbf{\\thepage}}\`) tanpa garis header.
+
+\`\`\`latex
+% Preamble Fancyhdr Unila:
+\\usepackage{fancyhdr}
+\\usepackage{xcolor}
+
+\\pagestyle{fancy}
+\\fancyhf{}
+\\fancyhead[R]{\\textcolor{gray}{\\textbf{\\thepage}}}
+\\renewcommand{\\headrulewidth}{0pt}
+\\renewcommand{\\footrulewidth}{0pt}
+
+\\fancypagestyle{plain}{
+  \\fancyhf{}
+  \\renewcommand{\\headrulewidth}{0pt}
+  \\renewcommand{\\footrulewidth}{0pt}
+}
+\`\`\``,
+    is_published: true,
+  },
+  {
+    id: 7,
+    title: 'Panduan Daftar Isi, Gambar & Tabel Otomatis (tocloft)',
+    content: `# Panduan Daftar Isi, Gambar & Tabel Otomatis (tocloft)
+
+Ketentuan penyusunan halaman navigasi otomatis naskah skripsi Unila:
+
+- **Format Titik Penghubung (*Leader Dots*):** Seluruh entri Bab di Daftar Isi wajib dihubungkan dengan titik-titik sampai nomor halaman via paket \`tocloft\`.
+- **Prefiks Gambar & Tabel:** Daftar Gambar dan Daftar Tabel wajib memiliki kata prefiks \`Gambar X.\` dan \`Tabel X.\`.
+- **Entri Non-Bab ke TOC:** Halaman khusus seperti ABSTRAK dan KATA PENGANTAR dimasukkan ke Daftar Isi via \`\\addcontentsline{toc}{chapter}{...}\`.
+
+\`\`\`latex
+% Konfigurasi tocloft Preamble Unila:
+\\usepackage{tocloft}
+
+\\renewcommand{\\cftchapdotsep}{\\cftdotsep}
+\\renewcommand{\\cftchapleader}{\\cftdotfill{\\cftdotsep}}
+
+\\renewcommand{\\cftfigpresnum}{Gambar\\ }
+\\renewcommand{\\cftfigaftersnum}{.\\hspace{0.5em}}
+\\setlength{\\cftfignumwidth}{5em}
+
+\\renewcommand{\\cfttabpresnum}{Tabel\\ }
+\\renewcommand{\\cfttabaftersnum}{.\\hspace{0.5em}}
+\\setlength{\\cfttabnumwidth}{5em}
+
+% Di area Body:
+\\tableofcontents
+\\listoffigures
+\\listoftables
 \`\`\``,
     is_published: true,
   },
