@@ -288,17 +288,7 @@ function handleConfirmDelete() {
             />
           </div>
 
-          <div class="space-y-1 font-sans">
-            <label class="text-xs font-bold text-(--color-text-primary)"
-              >Isi Artikel Complete (Markdown Content)</label
-            >
-            <textarea
-              v-model="formData.content"
-              rows="5"
-              placeholder="Isikan konten artikel dalam format Markdown..."
-              class="w-full px-3.5 py-2 bg-surface border border-border rounded-xl text-xs font-mono text-(--color-text-primary) outline-none focus:border-primary transition-all"
-            />
-          </div>
+          <LessonContentEditor v-model="formData.content" />
         </template>
 
         <!-- Sort Order Field -->

@@ -30,11 +30,6 @@ export interface CompileOutput {
 }
 
 export class CompileService {
-  /**
-   * Mengeksekusi kompilasi multi-file LaTeX di dalam lingkungan terisolasi Docker.
-   * @param files  - Kamus nama_berkas => konten (mis. { "main.tex": "...", "preamble.tex": "..." })
-   * @param entryFile - Berkas root yang dikompilasi (default: "main.tex")
-   */
   static async compileDocument(
     files: Record<string, string>,
     entryFile: string = "main.tex",
@@ -47,11 +42,9 @@ export class CompileService {
     const logPath = path.join(tmpDir, `${entryBasename}.log`);
 
     try {
-      // 1. Buat direktori temporer
       await fs.mkdir(tmpDir, { recursive: true });
       await fs.chmod(tmpDir, 0o777);
 
-      // 2. Tulis SEMUA berkas workspace ke direktori temporer (dukung subfolder seperti bab/bab1.tex)
       for (const [fileName, content] of Object.entries(files)) {
         // Normalisasi nama berkas dan cegah path traversal berbahaya (..)
         const cleanFileName = fileName
@@ -62,7 +55,6 @@ export class CompileService {
         await fs.writeFile(filePath, content, "utf-8");
       }
 
-      // 3. Cek apakah Docker daemon dapat diakses di mesin server / host
       const isDockerAvailable = await this.checkDockerAvailability();
 
       if (!isDockerAvailable) {
@@ -70,7 +62,6 @@ export class CompileService {
         return await this.handleLocalFallbackCompile(files, entryFile, tmpDir);
       }
 
-      // 4. Eksekusi Docker container terisolasi:
       // --rm: hapus kontainer setelah selesai
       // --network none: isolasi total dari internet
       // --memory 512m: batasi alokasi RAM maksimal 512MB
@@ -87,7 +78,6 @@ export class CompileService {
         );
       }
 
-      // 5. Periksa apakah berkas PDF berhasil dihasilkan
       const pdfFileExists = await pathExists(pdfPath);
 
       if (pdfFileExists) {
@@ -102,7 +92,6 @@ export class CompileService {
           logs,
         };
       } else {
-        // Kompilasi gagal, ekstrak log kesalahan
         const logs = await this.parseLogFile(logPath);
         const firstError = logs.find((l) => l.message);
         const errorText = firstError
@@ -128,7 +117,6 @@ export class CompileService {
         errorText: err?.message || "Gagal memproses kompilasi dokumen.",
       };
     } finally {
-      // 6. Selalu bersihkan direktori temporer
       try {
         await fs.rm(tmpDir, { recursive: true, force: true });
       } catch {
@@ -137,9 +125,6 @@ export class CompileService {
     }
   }
 
-  /**
-   * Memeriksa ketersediaan perintah `docker` di sistem operasi host.
-   */
   private static async checkDockerAvailability(): Promise<boolean> {
     try {
       await execAsync("docker --version", { timeout: 3000 });
@@ -149,9 +134,6 @@ export class CompileService {
     }
   }
 
-  /**
-   * Handler kompilasi fallback apabila Docker daemon tidak tersedia di mesin lokal.
-   */
   private static async handleLocalFallbackCompile(
     files: Record<string, string>,
     entryFile: string,
