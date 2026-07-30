@@ -212,7 +212,43 @@ const renderedHtml = computed(() => {
       `<sup class="text-xs text-(--color-text-muted)" title="${inner}">[*]</sup>`,
   );
 
-  // Karakter spesial LaTeX → Unicode
+  // Parse LaTeX tabular environment: \begin{tabular}[spec]{cols} ... \end{tabular}
+  text = text.replace(
+    /\\begin\{tabular\}(?:\[.*?\])?\{[^{}]*\}[\s\S]*?\\end\{tabular\}/g,
+    (tabularMatch) => {
+      const inner = tabularMatch
+        .replace(/^\\begin\{tabular\}(?:\[.*?\])?\{[^{}]*\}/, "")
+        .replace(/\\end\{tabular\}$/, "")
+        .trim();
+      const rawRows = inner
+        .split(/\\\\\s*/)
+        .map((r) => r.replace(/\\hline/g, "").trim())
+        .filter((r) => r.length > 0);
+      if (rawRows.length === 0) return "";
+      let html = '<div class="table-scroll-wrapper"><table>';
+      rawRows.forEach((rowStr, idx) => {
+        const cells = rowStr.split("&").map((c) => c.trim());
+        if (idx === 0) {
+          html +=
+            "<thead><tr>" +
+            cells.map((c) => `<th>${processArg(c)}</th>`).join("") +
+            "</tr></thead><tbody>";
+        } else {
+          html +=
+            "<tr>" +
+            cells.map((c) => `<td>${processArg(c)}</td>`).join("") +
+            "</tr>";
+        }
+      });
+      html += "</tbody></table></div>";
+      return html;
+    },
+  );
+
+  text = text.replace(/\\begin\{table\}(?:\[.*?\])?/g, '<div class="my-4">');
+  text = text.replace(/\\end\{table\}/g, "</div>");
+
+  // Karakter spesial LaTeX → Unicode (Hapus '---' -> '—' agar tidak merusak tabel Markdown | --- |)
   text = text.replace(/\\&/g, "&amp;");
   text = text.replace(/\\%/g, "%");
   text = text.replace(/\\#/g, "#");
@@ -220,14 +256,12 @@ const renderedHtml = computed(() => {
   text = text.replace(/\\\$/g, "$");
   text = text.replace(/\\ldots/g, "…");
   text = text.replace(/\\dots/g, "…");
-  text = text.replace(/---/g, "—");
-  text = text.replace(/--/g, "–");
 
-  // Baris baru LaTeX
-  text = text.replace(/\\\\\s*\n?/g, "<br>\n");
-
-  // Hapus environment yang tidak dikenali agar tidak mengacau output
-  text = text.replace(/\\begin\{[a-z*]+\}|\\end\{[a-z*]+\}/g, "");
+  // Hapus environment LaTeX yang tersisa/tidak dikenali agar tidak mengacaukan output
+  text = text.replace(
+    /\\begin\{(?!tabular|table|equation|align|array|matrix|pmatrix|bmatrix|vmatrix|Vmatrix)[a-zA-Z*]+\}|\\end\{(?!tabular|table|equation|align|array|matrix|pmatrix|bmatrix|vmatrix|Vmatrix)[a-zA-Z*]+\}/g,
+    "",
+  );
 
   // Hapus perintah preamble LaTeX
   text = text.replace(/\\documentclass(\[.*?\])?\{[^{}]*\}\s*\n?/g, "");
@@ -244,7 +278,7 @@ const renderedHtml = computed(() => {
     try {
       const renderer = new marked.Renderer();
       const originalTable = renderer.table.bind(renderer);
-      renderer.table = (token) => {
+      renderer.table = function (token: any) {
         const html = originalTable(token);
         return `<div class="table-scroll-wrapper">${html}</div>`;
       };
