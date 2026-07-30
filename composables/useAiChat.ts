@@ -224,6 +224,7 @@ export function useAiChat() {
     fetchHistory,
     loadHistoryIntoChat,
     loadSingleHistoryItem,
+    selectHistoryItem: loadSingleHistoryItem,
     sendMessage,
     explainError,
     clearChat,

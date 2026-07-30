@@ -1,9 +1,11 @@
 <script setup lang="ts">
-import { watch, onMounted } from "vue";
+import { ref, watch, onMounted } from "vue";
 import { useStudentDashboard } from "~/composables/useStudentDashboard";
+import { useAiChat } from "~/composables/useAiChat";
 import { IconMessages } from "@tabler/icons-vue";
 import { useStudentAnimations } from "~/composables/student/useStudentAnimations";
 import DashboardSkeleton from "~/components/skeleton/DashboardSkeleton.vue";
+import AiChatDrawer from "~/components/sandbox/AiChatDrawer.vue";
 
 definePageMeta({ layout: "default" });
 useHead({ title: "Dashboard | ScribeTex" });
@@ -20,6 +22,19 @@ const {
 
 const { animateDashboardEntrance } = useStudentAnimations();
 
+const isAiChatOpen = ref(false);
+const {
+  messages: aiMessages,
+  savedHistory: aiSavedHistory,
+  loading: aiLoading,
+  historyLoading: aiHistoryLoading,
+  sendMessage: sendAiMessage,
+  fetchHistory: fetchAiHistory,
+  loadHistoryIntoChat: loadAiHistoryIntoChat,
+  selectHistoryItem: selectAiHistoryItem,
+  clearChat: clearAiChat,
+} = useAiChat();
+
 const router = useRouter();
 const handleViewAllModules = () => router.push("/student/modules");
 const handleReadArticles = () => router.push("/student/panduan");
@@ -32,7 +47,9 @@ const handleSelectAssignment = (item: any) => {
     router.push(`/student/modules/lesson/${item.lesson_id}`);
   }
 };
-const handleOpenChat = () => router.push("/chat");
+const handleOpenChat = () => {
+  isAiChatOpen.value = true;
+};
 
 watch(
   isLoading,
@@ -123,5 +140,19 @@ onMounted(() => {
     >
       <IconMessages class="size-6" />
     </button>
+
+    <AiChatDrawer
+      :isOpen="isAiChatOpen"
+      :messages="aiMessages"
+      :savedHistory="aiSavedHistory"
+      :loading="aiLoading"
+      :historyLoading="aiHistoryLoading"
+      @close="isAiChatOpen = false"
+      @send="sendAiMessage"
+      @fetchHistory="fetchAiHistory"
+      @clear="clearAiChat"
+      @loadHistory="loadAiHistoryIntoChat"
+      @selectHistory="selectAiHistoryItem"
+    />
   </div>
 </template>
