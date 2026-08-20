@@ -1,35 +1,35 @@
-import { defineEventHandler, createError } from 'h3'
-import { serverSupabaseUser } from '#supabase/server'
-import { prisma } from '~~/server/utils/prisma'
-import { checkModuleAccess } from '~~/server/utils/accessControl'
+import { defineEventHandler, createError } from "h3";
+import { serverSupabaseUser } from "#supabase/server";
+import { prisma } from "~~/server/utils/prisma";
+import { checkModuleAccess } from "~~/server/utils/accessControl";
 
 export default defineEventHandler(async (event) => {
-  const idParam = event.context.params?.id
-  const id = Number(idParam)
+  const idParam = event.context.params?.id;
+  const id = Number(idParam);
 
   if (isNaN(id)) {
     throw createError({
       statusCode: 400,
-      statusMessage: 'ID Modul tidak valid',
-    })
+      statusMessage: "ID Modul tidak valid",
+    });
   }
 
-  const supabaseUser = await serverSupabaseUser(event).catch(() => null)
-  let completedLessonIds = new Set<number>()
-  let userRole = 'STUDENT'
+  const supabaseUser = await serverSupabaseUser(event).catch(() => null);
+  let completedLessonIds = new Set<number>();
+  let userRole = "STUDENT";
 
   if (supabaseUser) {
     const dbUser = await prisma.user.findUnique({
       where: { id: supabaseUser.id },
       select: { role: true },
-    })
-    if (dbUser) userRole = dbUser.role
+    });
+    if (dbUser) userRole = dbUser.role;
 
     const userProgress = await prisma.userProgress.findMany({
       where: { user_id: supabaseUser.id, is_completed: true },
       select: { lesson_id: true },
-    })
-    completedLessonIds = new Set(userProgress.map((p) => p.lesson_id))
+    });
+    completedLessonIds = new Set(userProgress.map((p) => p.lesson_id));
   }
 
   const moduleData = await prisma.module.findUnique({
@@ -37,7 +37,7 @@ export default defineEventHandler(async (event) => {
     include: {
       lessons: {
         where: { is_published: true },
-        orderBy: { sort_order: 'asc' },
+        orderBy: { sort_order: "asc" },
         select: {
           id: true,
           title: true,
@@ -45,39 +45,42 @@ export default defineEventHandler(async (event) => {
         },
       },
     },
-  })
+  });
 
   if (!moduleData || !moduleData.is_published) {
     throw createError({
       statusCode: 404,
-      statusMessage: 'Modul tidak ditemukan',
-    })
+      statusMessage: "Modul tidak ditemukan",
+    });
   }
 
   // Cek apakah modul ini terkunci bagi user
-  let isModuleLocked = false
-  let moduleLockReason = ''
+  let isModuleLocked = false;
+  let moduleLockReason = "";
   if (supabaseUser) {
-    const moduleCheck = await checkModuleAccess(supabaseUser.id, userRole, id)
-    isModuleLocked = !moduleCheck.canAccess
-    moduleLockReason = moduleCheck.reason || ''
+    const moduleCheck = await checkModuleAccess(supabaseUser.id, userRole, id);
+    isModuleLocked = !moduleCheck.canAccess;
+    moduleLockReason = moduleCheck.reason || "";
   }
 
-  // Format lessons dengan status completion & locking per-lesson
   const formattedLessons = moduleData.lessons.map((lesson, idx) => {
-    const isCompleted = completedLessonIds.has(lesson.id)
-    const prevLesson = moduleData.lessons[idx - 1]
+    const isCompleted = completedLessonIds.has(lesson.id);
+    const prevLesson = moduleData.lessons[idx - 1];
 
-    let isLocked = false
-    let lockReason = ''
+    let isLocked = false;
+    let lockReason = "";
 
-    if (userRole !== 'ADMIN') {
+    if (userRole !== "ADMIN") {
       if (isModuleLocked) {
-        isLocked = true
-        lockReason = moduleLockReason || 'Modul ini masih terkunci.'
-      } else if (idx > 0 && prevLesson && !completedLessonIds.has(prevLesson.id)) {
-        isLocked = true
-        lockReason = `Selesaikan Bab ${prevLesson.sort_order} ("${prevLesson.title}") terlebih dahulu.`
+        isLocked = true;
+        lockReason = moduleLockReason || "Modul ini masih terkunci.";
+      } else if (
+        idx > 0 &&
+        prevLesson &&
+        !completedLessonIds.has(prevLesson.id)
+      ) {
+        isLocked = true;
+        lockReason = `Selesaikan Bab ${prevLesson.sort_order} ("${prevLesson.title}") terlebih dahulu.`;
       }
     }
 
@@ -88,12 +91,13 @@ export default defineEventHandler(async (event) => {
       is_completed: isCompleted,
       is_locked: isLocked,
       lock_reason: lockReason,
-    }
-  })
+    };
+  });
 
-  const totalLessons = moduleData.lessons.length
-  const completedCount = formattedLessons.filter((l) => l.is_completed).length
-  const progressPercent = totalLessons > 0 ? Math.round((completedCount / totalLessons) * 100) : 0
+  const totalLessons = moduleData.lessons.length;
+  const completedCount = formattedLessons.filter((l) => l.is_completed).length;
+  const progressPercent =
+    totalLessons > 0 ? Math.round((completedCount / totalLessons) * 100) : 0;
 
   return {
     statusCode: 200,
@@ -110,5 +114,5 @@ export default defineEventHandler(async (event) => {
       lock_reason: moduleLockReason,
       lessons: formattedLessons,
     },
-  }
-})
+  };
+});

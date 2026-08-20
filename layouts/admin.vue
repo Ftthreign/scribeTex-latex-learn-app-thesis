@@ -19,7 +19,12 @@ import {
 } from "@tabler/icons-vue";
 import { ROUTES } from "~/constants/route";
 
+import NotificationDropdown from "~/components/ui/NotificationDropdown.vue";
+import { useNotifications } from "~/composables/useNotifications";
+
 const isSidebarOpen = ref(false);
+const isNotificationOpen = ref(false);
+const { unreadCount } = useNotifications();
 const { logout } = useAuth();
 const route = useRoute();
 
@@ -181,11 +186,24 @@ const confirmLogout = async () => {
             <IconEye class="size-4 stroke-[2.5]" />
             <span class="hidden sm:inline">Pratinjau POV Siswa</span>
           </NuxtLink>
-          <button
-            class="p-2 text-text-secondary hover:text-(--color-text-primary) hover:bg-surface-alt rounded-lg transition-colors"
-          >
-            <IconBell class="size-5" />
-          </button>
+          <div class="relative">
+            <button
+              @click="isNotificationOpen = !isNotificationOpen"
+              class="p-2 text-text-secondary hover:text-(--color-text-primary) hover:bg-surface-alt rounded-lg transition-colors cursor-pointer relative"
+              title="Pemberitahuan"
+            >
+              <IconBell class="size-5" />
+              <span
+                v-if="unreadCount > 0"
+                class="absolute top-1.5 right-1.5 size-2 rounded-full bg-primary ring-2 ring-white animate-pulse"
+              ></span>
+            </button>
+
+            <NotificationDropdown
+              :isOpen="isNotificationOpen"
+              @close="isNotificationOpen = false"
+            />
+          </div>
           <button
             class="p-2 text-text-secondary hover:text-(--color-text-primary) hover:bg-surface-alt rounded-lg transition-colors"
           >

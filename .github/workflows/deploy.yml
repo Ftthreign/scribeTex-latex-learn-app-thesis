@@ -5,50 +5,14 @@ on:
     branches:
       - main
       - master
+      - develop-sprint-6
 
 jobs:
-  build-and-deploy:
+  deploy-to-vps:
     runs-on: ubuntu-latest
 
     steps:
-      - name: 1. Checkout Repository
-        uses: actions/checkout@v4
-
-      - name: 2. Setup Bun Environment
-        uses: oven-sh/setup-bun@v1
-        with:
-          bun-version: latest
-
-      - name: 3. Install Dependencies
-        run: bun install
-
-      - name: 4. Generate Prisma Client
-        run: bunx prisma generate
-
-      - name: 5. Build Nuxt 3 Application
-        run: NODE_OPTIONS="--max-old-space-size=4096" bun run build
-
-      - name: 6. Clean Old .output Folder on VPS
-        uses: appleboy/ssh-action@master
-        with:
-          host: ${{ secrets.VPS_HOST }}
-          username: ${{ secrets.VPS_USERNAME }}
-          password: ${{ secrets.VPS_PASSWORD }}
-          port: 22
-          script: |
-            rm -rf ~/scribeTex-latex-learn-app-thesis/.output
-
-      - name: 7. Sync .output Folder to VPS via SCP
-        uses: appleboy/scp-action@master
-        with:
-          host: ${{ secrets.VPS_HOST }}
-          username: ${{ secrets.VPS_USERNAME }}
-          password: ${{ secrets.VPS_PASSWORD }}
-          port: 22
-          source: ".output"
-          target: "~/scribeTex-latex-learn-app-thesis/"
-
-      - name: 8. Restart Application via PM2 on VPS
+      - name: SSH to VPS, Git Pull, Build on VPS, & Restart PM2
         uses: appleboy/ssh-action@master
         with:
           host: ${{ secrets.VPS_HOST }}
@@ -59,5 +23,11 @@ jobs:
             export PATH=$PATH:/usr/local/bin:/usr/bin:~/.nvm/versions/node/$(ls ~/.nvm/versions/node 2>/dev/null | tail -n 1)/bin:~/.bun/bin
             source ~/.bashrc 2>/dev/null || true
             cd ~/scribeTex-latex-learn-app-thesis
+            git fetch --all
+            git checkout develop-sprint-6 || git checkout main || true
+            git pull
+            bun install
+            bunx prisma generate
+            NODE_OPTIONS="--max-old-space-size=4096" bun run build
             pm2 restart scribetex-app || pm2 start .output/server/index.mjs --name "scribetex-app" --interpreter bun
             pm2 save
