@@ -35,8 +35,9 @@ export class CompileService {
     entryFile: string = "main.tex",
   ): Promise<CompileOutput> {
     const uniqueId = crypto.randomBytes(8).toString("hex");
-    const projectRoot = process.cwd();
-    const tmpDir = path.join(projectRoot, "tmp", `scribetex-${uniqueId}`);
+    const baseTmpDir =
+      process.env.LATEX_TMP_DIR || path.join(process.cwd(), "tmp");
+    const tmpDir = path.join(baseTmpDir, `scribetex-${uniqueId}`);
     const entryBasename = entryFile.replace(/\.tex$/, "");
     const pdfPath = path.join(tmpDir, `${entryBasename}.pdf`);
     const logPath = path.join(tmpDir, `${entryBasename}.log`);
@@ -58,7 +59,6 @@ export class CompileService {
       const isDockerAvailable = await this.checkDockerAvailability();
 
       if (!isDockerAvailable) {
-        // Fallback jika Docker daemon belum/tidak aktif di mesin dev lokal
         return await this.handleLocalFallbackCompile(files, entryFile, tmpDir);
       }
 
@@ -165,7 +165,6 @@ export class CompileService {
       /* ignore */
     }
 
-    // Jika Docker dan pdflatex lokal tidak ada, kembalikan respon pemberitahuan setup
     return {
       isSuccess: false,
       logs: [
@@ -179,10 +178,6 @@ export class CompileService {
     };
   }
 
-  /**
-   * Membaca dan mengekstrak berkas .log hasil dari pdflatex
-   * menjadi daftar pesan kesalahan terstruktur dengan nomor baris.
-   */
   private static async parseLogFile(
     logPath: string,
   ): Promise<CompileLogEntry[]> {
@@ -201,7 +196,6 @@ export class CompileService {
           const message = line.substring(1).trim();
           let lineNumber: number | undefined;
 
-          // Cari nomor baris pada baris-baris berikutnya (mis. "l.24 \begin{document}")
           for (let j = i + 1; j < Math.min(i + 6, lines.length); j++) {
             const lineMatch = lines[j].match(/^l\.(\d+)/);
             if (lineMatch) {
