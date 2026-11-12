@@ -1,0 +1,13 @@
+node_modules
+.nuxt
+.output
+.git
+.github
+.vscode
+tmp
+scratch
+tests
+docs
+.env
+.env.*
+*.md

@@ -1,4 +1,4 @@
-name: Deploy ScribetEx to VPS IDCloudHost
+name: Production CD - Build & Deploy
 
 on:
   push:
@@ -6,28 +6,155 @@ on:
       - main
       - master
       - develop-sprint-6
+    paths-ignore:
+      - '**.md'
+      - 'docs/**'
+      - '.gitignore'
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+  packages: write
 
 jobs:
-  deploy-to-vps:
+  build-and-push-docker:
+    name: Docker Build & Push GHCR
     runs-on: ubuntu-latest
 
     steps:
-      - name: SSH to VPS, Git Pull, Build on VPS, & Restart PM2
-        uses: appleboy/ssh-action@master
+      - name: Checkout Source Code
+        uses: actions/checkout@v4
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Log in to GitHub Container Registry (GHCR)
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Extract Docker Metadata
+        id: meta
+        uses: docker/metadata-action@v5
+        with:
+          images: ghcr.io/${{ github.repository }}
+          tags: |
+            type=raw,value=latest
+            type=sha,format=short,prefix=sha-
+            type=ref,event=branch
+
+      - name: Build and Push Image with BuildKit Cache
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          file: ./Dockerfile
+          push: true
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=min,ignore-error=true
+
+  deploy-vps:
+    name: Production VPS Deployment
+    needs: [build-and-push-docker]
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Source Code
+        uses: actions/checkout@v4
+
+      - name: Prepare VPS Directories
+        uses: appleboy/ssh-action@v1.0.3
         with:
           host: ${{ secrets.VPS_HOST }}
           username: ${{ secrets.VPS_USERNAME }}
           password: ${{ secrets.VPS_PASSWORD }}
           port: 22
           script: |
-            export PATH=$PATH:/usr/local/bin:/usr/bin:~/.nvm/versions/node/$(ls ~/.nvm/versions/node 2>/dev/null | tail -n 1)/bin:~/.bun/bin
-            source ~/.bashrc 2>/dev/null || true
-            cd ~/scribeTex-latex-learn-app-thesis
-            git fetch --all
-            git checkout develop-sprint-6 || git checkout main || true
-            git pull
-            bun install
-            bunx prisma generate
-            NODE_OPTIONS="--max-old-space-size=4096" bun run build
-            pm2 restart scribetex-app || pm2 start .output/server/index.mjs --name "scribetex-app" --interpreter bun
-            pm2 save
+            set -e
+            mkdir -p "$HOME/scribeTex-latex-learn-app-thesis"
+            mkdir -p /tmp/scribetex-jobs
+            chmod 777 /tmp/scribetex-jobs
+
+      - name: Transfer docker-compose.yml to VPS via SCP
+        uses: appleboy/scp-action@v0.1.7
+        with:
+          host: ${{ secrets.VPS_HOST }}
+          username: ${{ secrets.VPS_USERNAME }}
+          password: ${{ secrets.VPS_PASSWORD }}
+          port: 22
+          source: 'docker-compose.yml'
+          target: 'scribeTex-latex-learn-app-thesis'
+
+      - name: Pull GHCR Image & Restart Docker Compose
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.VPS_HOST }}
+          username: ${{ secrets.VPS_USERNAME }}
+          password: ${{ secrets.VPS_PASSWORD }}
+          port: 22
+          script: |
+            set -euo pipefail
+            TARGET_DIR="$HOME/scribeTex-latex-learn-app-thesis"
+            cd "$TARGET_DIR"
+
+            if [ ! -f ".env" ]; then
+              echo "ERROR: File .env belum ditemukan di $TARGET_DIR/.env!"
+              exit 1
+            fi
+
+            # Pastikan PM2 lama tidak menahan port 3000 saat transisi ke Docker
+            if command -v pm2 >/dev/null 2>&1 && pm2 describe scribetex-app >/dev/null 2>&1; then
+              pm2 stop scribetex-app || true
+              pm2 delete scribetex-app || true
+              pm2 save || true
+            fi
+
+            echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u "${{ github.actor }}" --password-stdin
+
+            export APP_IMAGE="ghcr.io/$(echo '${{ github.repository }}' | tr '[:upper:]' '[:lower:]'):latest"
+
+            echo "Pulling pre-built image: $APP_IMAGE"
+            docker compose pull app
+            docker compose up -d --remove-orphans
+
+            echo "Verifying ScribeTex container health..."
+            MAX_RETRIES=30
+            COUNTER=0
+            until docker exec scribetex_app wget -qO- http://127.0.0.1:3000/api/health > /dev/null 2>&1; do
+              COUNTER=$((COUNTER+1))
+              if [ $COUNTER -eq $MAX_RETRIES ]; then
+                echo "Container failed to reach healthy status after ${MAX_RETRIES} retries!"
+                docker logs scribetex_app --tail 80
+                exit 1
+              fi
+              echo "Waiting for ScribeTex app to be ready... (${COUNTER}/${MAX_RETRIES})"
+              sleep 3
+            done
+            echo "ScribeTex app is healthy and ready."
+
+            echo "Cleaning up dangling docker images..."
+            docker image prune -f
+
+  deployment-summary:
+    name: CI/CD Summary Report
+    needs: [build-and-push-docker, deploy-vps]
+    if: always()
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Generate GitHub Step Summary Markdown
+        run: |
+          echo "# ScribeTex - CI/CD Pipeline Summary" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "| Stage | Status |" >> $GITHUB_STEP_SUMMARY
+          echo "| :--- | :---: |" >> $GITHUB_STEP_SUMMARY
+          echo "| **1. GHCR Docker Build & Push** | ${{ needs.build-and-push-docker.result }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| **2. VPS Docker Compose Deploy** | ${{ needs.deploy-vps.result }} |" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "**Branch:** \`${{ github.ref_name }}\` | **Commit SHA:** \`${{ github.sha }}\`" >> $GITHUB_STEP_SUMMARY
