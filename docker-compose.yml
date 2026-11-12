@@ -1,0 +1,27 @@
+services:
+  app:
+    image: ${APP_IMAGE:-ghcr.io/ftthreign/scribetex-latex-learn-app-thesis:latest}
+    container_name: scribetex_app
+    restart: always
+    ports:
+      - "127.0.0.1:${PORT:-3000}:3000"
+    env_file:
+      - .env
+    environment:
+      - NODE_ENV=${NODE_ENV:-production}
+      - PORT=3000
+      - HOST=0.0.0.0
+      - LATEX_TMP_DIR=/tmp/scribetex-jobs
+    security_opt:
+      - no-new-privileges:true
+    mem_limit: 512m
+    memswap_limit: 512m
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      - /tmp/scribetex-jobs:/tmp/scribetex-jobs
+    healthcheck:
+      test: ["CMD-SHELL", "wget -qO- http://127.0.0.1:3000/api/health > /dev/null 2>&1 || exit 1"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 15s
